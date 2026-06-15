@@ -10,6 +10,7 @@
 /.gitattributes
 /.editorconfig
 /README.md
+/TODO.md
 
 # WordPress.org assets live here and are deployed separately (banner/icon/screenshots)
 /.wordpress-org
