@@ -103,9 +103,24 @@ A callback returns `array( 'status' => 'pass'|'warn'|'fail', 'detail' => '…' )
   `ohsa_fatal_lookback_hours`, `ohsa_fatal_scan_max_bytes` — tune environment probes.
 * `ohsa_ssl_warn_days`, `ohsa_ssl_fail_days` — TLS expiry thresholds.
 * `ohsa_backup_warn_days`, `ohsa_backup_fail_days` — backup-recency thresholds.
+* `ohsa_last_backup_timestamp` — report your last successful backup time (UNIX) so
+  the backup probe works with *any* backup plugin, host, or off-site service.
+* `ohsa_backup_plugins` — list of backup-plugin basenames recognised by presence.
 * `ohsa_max_expired_transients`, `ohsa_max_revisions`, `ohsa_max_spam_comments` —
   database-bloat thresholds.
 * `ohsa_sending_domain` — domain used for the SPF/DMARC lookup.
+
+= Compatibility =
+
+OmniHealth has **no plugin dependencies** and runs on virtually any WordPress
+install — single-site or multisite, **with or without** WooCommerce, page builders,
+or a backup plugin. It calls only core WordPress APIs and guards every optional PHP
+function (`disk_free_space`, `stream_socket_client`/OpenSSL, `dns_get_record`,
+`WP_Filesystem`), degrading a probe to a neutral *pass/skip* when something isn't
+available rather than erroring. The backup probe is backup-agnostic: it reads
+UpdraftPlus directly, recognises other common backup plugins, and lets any other
+backup solution (including host-level backups) report in via
+`ohsa_last_backup_timestamp`.
 
 == Installation ==
 

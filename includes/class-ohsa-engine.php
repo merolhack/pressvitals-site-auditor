@@ -1099,14 +1099,33 @@ class OHSA_Engine {
 	}
 
 	/**
-	 * A recent backup exists (UpdraftPlus detected directly; others by presence).
+	 * A recent backup exists. Backup-agnostic: UpdraftPlus is read directly, but
+	 * ANY backup plugin or host integration can report its last successful backup
+	 * via the `ohsa_last_backup_timestamp` filter, so this works the same with or
+	 * without UpdraftPlus (or with host-level / off-site backups).
 	 *
 	 * @return array
 	 */
 	public function check_backup_recency() {
-		$last = get_option( 'updraft_last_backup' );
-		if ( is_array( $last ) && ! empty( $last['backup_time'] ) ) {
-			$age_days = (int) floor( ( time() - (int) $last['backup_time'] ) / DAY_IN_SECONDS );
+		$last_ts = 0;
+
+		// Built-in provider: UpdraftPlus stores its own last-backup option.
+		$ud = get_option( 'updraft_last_backup' );
+		if ( is_array( $ud ) && ! empty( $ud['backup_time'] ) ) {
+			$last_ts = (int) $ud['backup_time'];
+		}
+
+		/**
+		 * Filter the UNIX timestamp of the last successful backup. Return 0/false
+		 * if unknown. Lets any backup plugin, host, or off-site service report in
+		 * so OmniHealth stays backup-agnostic.
+		 *
+		 * @param int $last_ts Last-backup UNIX timestamp (0 if none detected yet).
+		 */
+		$last_ts = (int) apply_filters( 'ohsa_last_backup_timestamp', $last_ts );
+
+		if ( $last_ts > 0 ) {
+			$age_days = (int) floor( ( time() - $last_ts ) / DAY_IN_SECONDS );
 			$warn     = (int) apply_filters( 'ohsa_backup_warn_days', 7 );
 			$fail     = (int) apply_filters( 'ohsa_backup_fail_days', 14 );
 			if ( $age_days > $fail ) {
@@ -1129,18 +1148,47 @@ class OHSA_Engine {
 				'detail' => sprintf( __( 'Last backup was %d days ago.', 'omnihealth-site-auditor' ), $age_days ),
 			);
 		}
-		$active = (array) get_option( 'active_plugins', array() );
-		foreach ( array( 'updraftplus/updraftplus.php', 'backwpup/backwpup.php', 'duplicator/duplicator.php' ) as $plugin ) {
+
+		// No timestamp known — is a recognised backup plugin at least active?
+		/**
+		 * Filter the list of backup-plugin basenames recognised by presence
+		 * (plugin_file path relative to the plugins dir).
+		 *
+		 * @param string[] $plugins Known backup-plugin basenames.
+		 */
+		$known = (array) apply_filters(
+			'ohsa_backup_plugins',
+			array(
+				'updraftplus/updraftplus.php',
+				'backwpup/backwpup.php',
+				'backwpup-pro/backwpup.php',
+				'duplicator/duplicator.php',
+				'duplicator-pro/duplicator-pro.php',
+				'backupbuddy/backupbuddy.php',
+				'wp-time-capsule/wp-time-capsule.php',
+				'blogvault-real-time-backup/blogvault.php',
+				'backupwordpress/backupwordpress.php',
+				'wpvivid-backuprestore/wpvivid-backuprestore.php',
+				'jetpack/jetpack.php',
+			)
+		);
+
+		// Cover both single-site and network-activated plugins (multisite-safe).
+		$active  = (array) get_option( 'active_plugins', array() );
+		$network = array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) );
+		$active  = array_merge( $active, $network );
+
+		foreach ( $known as $plugin ) {
 			if ( in_array( $plugin, $active, true ) ) {
 				return array(
 					'status' => 'warn',
-					'detail' => __( 'A backup plugin is active but no recent backup was recorded — verify the schedule.', 'omnihealth-site-auditor' ),
+					'detail' => __( 'A backup plugin is active but no recent backup time could be read — verify its schedule, or report it via the ohsa_last_backup_timestamp filter.', 'omnihealth-site-auditor' ),
 				);
 			}
 		}
 		return array(
 			'status' => 'warn',
-			'detail' => __( 'No backup plugin detected — automated backups are not configured.', 'omnihealth-site-auditor' ),
+			'detail' => __( 'No backup plugin detected — automated backups may not be configured (host-level backups can be reported via the ohsa_last_backup_timestamp filter).', 'omnihealth-site-auditor' ),
 		);
 	}
 

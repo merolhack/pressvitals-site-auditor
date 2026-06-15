@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-06-15 00:48+0000\n"
+"POT-Creation-Date: 2026-06-15 03:59+0000\n"
 "X-Generator: ohsa-makepot 1.0\n"
 "X-Domain: omnihealth-site-auditor\n"
 
@@ -78,8 +78,8 @@ msgstr ""
 msgid ".env returns HTTP 200 — verify it is not exposing secrets."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1137
-msgid "A backup plugin is active but no recent backup was recorded — verify the schedule."
+#: includes/class-ohsa-engine.php:1185
+msgid "A backup plugin is active but no recent backup time could be read — verify its schedule, or report it via the ohsa_last_backup_timestamp filter."
 msgstr ""
 
 #: includes/class-ohsa-engine.php:1051
@@ -146,7 +146,7 @@ msgstr ""
 msgid "Could not fetch the homepage for the header check."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1228
+#: includes/class-ohsa-engine.php:1276
 msgid "Could not fetch the homepage to verify indexability."
 msgstr ""
 
@@ -170,7 +170,7 @@ msgstr ""
 msgid "Could not read free disk space; skipped."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1156
+#: includes/class-ohsa-engine.php:1204
 msgid "DNS lookups unavailable; skipped."
 msgstr ""
 
@@ -278,7 +278,7 @@ msgstr ""
 msgid "Homepage is indexable"
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1247
+#: includes/class-ohsa-engine.php:1295
 msgid "Homepage is indexable."
 msgstr ""
 
@@ -298,7 +298,7 @@ msgstr ""
 msgid "Homepage returns HTTP 200 over HTTPS."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1116 includes/class-ohsa-engine.php:1123 includes/class-ohsa-engine.php:1129
+#: includes/class-ohsa-engine.php:1135 includes/class-ohsa-engine.php:1142 includes/class-ohsa-engine.php:1148
 msgid "Last backup was %d days ago."
 msgstr ""
 
@@ -306,7 +306,7 @@ msgstr ""
 msgid "Malformed check result."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1207
+#: includes/class-ohsa-engine.php:1255
 msgid "Missing %1$s for %2$s — email may be marked as spam."
 msgstr ""
 
@@ -326,8 +326,8 @@ msgstr ""
 msgid "No PHP fatal/parse errors in the last %d h."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1143
-msgid "No backup plugin detected — automated backups are not configured."
+#: includes/class-ohsa-engine.php:1191
+msgid "No backup plugin detected — automated backups may not be configured (host-level backups can be reported via the ohsa_last_backup_timestamp filter)."
 msgstr ""
 
 #: includes/class-ohsa-engine.php:304
@@ -350,7 +350,7 @@ msgstr ""
 msgid "No report yet. Click \"Run now\"."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1166
+#: includes/class-ohsa-engine.php:1214
 msgid "No sending domain to check."
 msgstr ""
 
@@ -442,11 +442,11 @@ msgstr ""
 msgid "SEO"
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1201
+#: includes/class-ohsa-engine.php:1249
 msgid "SPF and DMARC present for %s."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1220
+#: includes/class-ohsa-engine.php:1268
 msgid "Search engine visibility is OFF — the whole site is set to noindex."
 msgstr ""
 
@@ -498,11 +498,11 @@ msgstr ""
 msgid "TLS inspection unavailable; skipped."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1235
+#: includes/class-ohsa-engine.php:1283
 msgid "The homepage emits a noindex robots meta tag."
 msgstr ""
 
-#: includes/class-ohsa-engine.php:1242
+#: includes/class-ohsa-engine.php:1290
 msgid "The homepage sends a noindex X-Robots-Tag header."
 msgstr ""
 
