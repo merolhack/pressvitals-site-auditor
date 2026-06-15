@@ -1,0 +1,584 @@
+# Copyright (C) 2026 OmniHealth Contributors
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: OmniHealth: Deep Site Auditor 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/omnihealth-site-auditor\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-15 00:48+0000\n"
+"X-Generator: ohsa-makepot 1.0\n"
+"X-Domain: omnihealth-site-auditor\n"
+
+#: includes/class-ohsa-engine.php:526
+msgid "%1$d PHP fatal/parse error in the last %2$d h."
+msgid_plural "%1$d PHP fatal/parse errors in the last %2$d h."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-ohsa-admin.php:262
+msgid "%1$d pass, %2$d warn, %3$d fail"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:831
+msgid "%1$d stray file(s) in the web root: %2$s"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:825
+msgid "%1$d stray file(s) including secret-bearing backups: %2$s"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:447
+msgid "%1$s is %2$s — growing."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:440
+msgid "%1$s is %2$s — rotate or truncate it."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:453
+msgid "%1$s is %2$s."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1078
+msgid "%d expired transients"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1082
+msgid "%d post revisions"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1086
+msgid "%d spam/trash comments"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:605
+msgid "%s free on the WordPress volume."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:745
+msgid ".env appears publicly readable and may expose secrets — block it now."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:268
+msgid ".env file not web-accessible"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:737
+msgid ".env is not served (HTTP %d)."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:756
+msgid ".env returns HTTP %d."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:750
+msgid ".env returns HTTP 200 — verify it is not exposing secrets."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1137
+msgid "A backup plugin is active but no recent backup was recorded — verify the schedule."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1051
+msgid "A user named \"admin\" exists — a top brute-force target; rename it."
+msgstr ""
+
+#: includes/class-ohsa-rest.php:115
+msgid "A valid token is required."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:96
+msgid "Alert email"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:942
+msgid "All baseline security headers are present."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:81
+msgid "Autoload fail (MB)"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:80
+msgid "Autoload warn (MB)"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:228
+msgid "Autoloaded options size"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:558
+msgid "Autoloaded options total %s — trim them."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:565 includes/class-ohsa-engine.php:571
+msgid "Autoloaded options total %s."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:77 includes/class-ohsa-engine.php:199 includes/class-ohsa-engine.php:205
+msgid "Availability"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:286
+msgid "Baseline security headers"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:326
+msgid "Check"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:175
+msgid "Check threw an exception."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1097
+msgid "Cleanup recommended: %s."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:873
+msgid "Could not capture the TLS certificate."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:924
+msgid "Could not fetch the homepage for the header check."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1228
+msgid "Could not fetch the homepage to verify indexability."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:865
+msgid "Could not open a TLS connection to read the certificate."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:880
+msgid "Could not parse the certificate expiry."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:729
+msgid "Could not probe .env; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:499
+msgid "Could not read error log; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:591
+msgid "Could not read free disk space; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1156
+msgid "DNS lookups unavailable; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:80 includes/class-ohsa-engine.php:229 includes/class-ohsa-engine.php:311
+msgid "Database"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:310
+msgid "Database bloat"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:198
+msgid "Database connection"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1091
+msgid "Database is tidy."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:327
+msgid "Detail"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:82 includes/class-ohsa-engine.php:323
+msgid "Email"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:322
+msgid "Email DNS (SPF + DMARC)"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:85 includes/class-ohsa-engine.php:259
+msgid "Environment"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:412
+msgid "Error display is off for visitors."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:210
+msgid "Error display off in production"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:79
+msgid "Error log fail (MB)"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:216
+msgid "Error log size"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:480
+msgid "Error log too large to scan (%s); inspect it manually."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:78
+msgid "Error log warn (MB)"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:79 includes/class-ohsa-engine.php:217 includes/class-ohsa-engine.php:223
+msgid "Errors"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:231
+msgid "External probe token"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:81 includes/class-ohsa-engine.php:235 includes/class-ohsa-engine.php:241 includes/class-ohsa-engine.php:317
+msgid "Files"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:491
+msgid "Filesystem API unavailable; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:234
+msgid "Free disk space"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:984
+msgid "HTTP requests redirect to HTTPS."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:996
+msgid "HTTP returns %d (no plain-HTTP content)."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:990
+msgid "HTTP serves 200 without redirecting to HTTPS."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:292
+msgid "HTTPS is forced"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:200
+msgid "Headless-first, scheduled monitoring: severity-tiered probes, email alerts, and a token-gated REST report. It complements WordPress core’s built-in Site Health by adding automation, alerting, and security/ops audit probes core does not run."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:205
+msgid "Health check executed."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:328
+msgid "Homepage is indexable"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1247
+msgid "Homepage is indexable."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:204
+msgid "Homepage over HTTPS"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:379
+msgid "Homepage request failed: "
+msgstr ""
+
+#: includes/class-ohsa-engine.php:392
+msgid "Homepage returned HTTP %d."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:387
+msgid "Homepage returns HTTP 200 over HTTPS."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1116 includes/class-ohsa-engine.php:1123 includes/class-ohsa-engine.php:1129
+msgid "Last backup was %d days ago."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:166
+msgid "Malformed check result."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1207
+msgid "Missing %1$s for %2$s — email may be marked as spam."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:948
+msgid "Missing security headers: %s"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:356
+msgid "MySQL did not return a row for SELECT 1."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:352
+msgid "MySQL responds to SELECT 1."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:535
+msgid "No PHP fatal/parse errors in the last %d h."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1143
+msgid "No backup plugin detected — automated backups are not configured."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:304
+msgid "No default \"admin\" username"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:962
+msgid "No host to check."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:666
+msgid "No persistent object cache is in use."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:426 includes/class-ohsa-engine.php:470
+msgid "No readable error log found."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:252
+msgid "No report yet. Click \"Run now\"."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1166
+msgid "No sending domain to check."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:811
+msgid "No stray backup/diagnostic files in the web root."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:274
+msgid "No stray backup/diagnostic files in web root"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1046
+msgid "No user with the login \"admin\"."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:682
+msgid "Object cache enabled but the round-trip failed."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:48 includes/class-ohsa-admin.php:49 includes/class-ohsa-admin.php:198
+msgid "OmniHealth: Deep Site Auditor"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:599
+msgid "Only %s free on the WordPress volume."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:201
+msgid "Open the built-in Site Health screen"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:273 includes/class-ohsa-engine.php:140
+msgid "Other"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:697
+msgid "PHP %s is end-of-life — upgrade."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:704
+msgid "PHP %s is near end-of-life — plan an upgrade."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:710
+msgid "PHP %s is supported."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:246
+msgid "PHP memory limit"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:647 includes/class-ohsa-engine.php:653
+msgid "PHP memory_limit is %s."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:84 includes/class-ohsa-engine.php:247 includes/class-ohsa-engine.php:253
+msgid "Performance"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:252
+msgid "Persistent object cache"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:678
+msgid "Persistent object cache round-trip OK."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:222
+msgid "Recent PHP fatal errors"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:316
+msgid "Recent backup"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:237
+msgid "Rotate the token? External probes using the old one will stop working."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:238
+msgid "Rotate token"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:214
+msgid "Run now"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:83 includes/class-ohsa-engine.php:329
+msgid "SEO"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1201
+msgid "SPF and DMARC present for %s."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1220
+msgid "Search engine visibility is OFF — the whole site is set to noindex."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:78 includes/class-ohsa-engine.php:211 includes/class-ohsa-engine.php:269 includes/class-ohsa-engine.php:275 includes/class-ohsa-engine.php:281 includes/class-ohsa-engine.php:287 includes/class-ohsa-engine.php:293 includes/class-ohsa-engine.php:299 includes/class-ohsa-engine.php:305
+msgid "Security"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:221
+msgid "Settings"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:370 includes/class-ohsa-engine.php:968
+msgid "Site address is not HTTPS."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:976
+msgid "Site is HTTPS; the HTTP probe was inconclusive."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:325
+msgid "Status"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:258
+msgid "Supported PHP version"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:896
+msgid "TLS certificate expires in %d days — renew now."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:903
+msgid "TLS certificate expires in %d days."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:280
+msgid "TLS certificate expiry"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:889
+msgid "TLS certificate has expired."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:909
+msgid "TLS certificate valid for %d more days."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:845
+msgid "TLS inspection unavailable; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1235
+msgid "The homepage emits a noindex robots meta tag."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1242
+msgid "The homepage sends a noindex X-Robots-Tag header."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:72
+msgid "Thresholds & alerts"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:207
+msgid "Token rotated. Update any external probe that uses it."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:629
+msgid "Uploads directory is not writable."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:625
+msgid "Uploads directory is writable."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:240
+msgid "Uploads directory writable"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:232
+msgid "Used by external/CI monitors to call the report endpoint:"
+msgstr ""
+
+#: omnihealth-site-auditor.php:86
+msgid "Verdict: FAIL (pass: %1$d, warn: %2$d, fail: %3$d)"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:772
+msgid "Web root not readable for scan; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:779
+msgid "Web-root scan unavailable; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:298
+msgid "XML-RPC exposure"
+msgstr ""
+
+#: includes/class-ohsa-admin.php:158 includes/class-ohsa-admin.php:174
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: includes/class-ohsa-admin.php:189
+msgid "You are not allowed to view this page."
+msgstr ""
+
+#: omnihealth-site-auditor.php:81
+msgid "[OmniHealth: Deep Site Auditor] Health check FAILED on %s"
+msgstr ""
+
+#: includes/class-ohsa-engine.php:584
+msgid "disk_free_space() unavailable; skipped."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:408
+msgid "display_errors is on — PHP errors may leak to visitors."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1020
+msgid "xmlrpc.php is blocked (HTTP %d)."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1026
+msgid "xmlrpc.php is enabled — an attack surface for brute-force amplification; disable if unused."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1011
+msgid "xmlrpc.php probe inconclusive."
+msgstr ""
+
+#: includes/class-ohsa-engine.php:1032
+msgid "xmlrpc.php returns HTTP %d."
+msgstr ""
+

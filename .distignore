@@ -1,0 +1,33 @@
+# Files and directories that should NOT ship in the WordPress.org package.
+# Honored by 10up/action-wordpress-plugin-deploy when building the SVN trunk.
+# (Translations under /languages DO ship and are intentionally not listed.)
+
+# Version control / CI
+/.git
+/.github
+/.distignore
+/.gitignore
+/.gitattributes
+/.editorconfig
+
+# WordPress.org assets live here and are deployed separately (banner/icon/screenshots)
+/.wordpress-org
+
+# Dependency + build tooling
+/node_modules
+/vendor
+/tests
+/bin
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/phpcs.xml
+/phpcs.xml.dist
+/phpunit.xml
+/phpunit.xml.dist
+
+# Archives / editor cruft
+/*.zip
+*.map
+*.bak

@@ -1,0 +1,67 @@
+# Deploy OmniHealth: Deep Site Auditor to the WordPress.org plugin SVN on each release.
+#
+# NOTE: this workflow is intended to run from the plugin's OWN GitHub repo,
+# where the plugin files (omnihealth-site-auditor.php, includes/, readme.txt, …)
+# sit at the repository root. While the plugin lives inside the freelancemexico
+# monorepo it is DORMANT — GitHub only runs workflows found at the repository
+# root `.github/workflows/`, so this file does nothing here. When you split the
+# `omnihealth-site-auditor/` folder into its own repository, this workflow is already
+# in the right place.
+#
+# One-time setup in the plugin's repo (Settings → Secrets and variables → Actions):
+#   - SVN_USERNAME : your WordPress.org username (must be a plugin committer)
+#   - SVN_PASSWORD : your WordPress.org account password
+#
+# Release flow:
+#   1. Bump the version in BOTH omnihealth-site-auditor.php (header + OHSA_VERSION)
+#      and readme.txt (Stable tag), and add a Changelog entry.
+#   2. Commit, then create a GitHub Release whose tag equals the version
+#      (e.g. tag `1.0.1`). Publishing the release triggers this workflow.
+#   3. The action pushes /trunk + /tags/<version> to WordPress.org SVN and
+#      updates the readme + assets (from /.wordpress-org).
+#
+# Assets (icon-256x256.png, banner-772x250.png, screenshot-1.png, …) should live
+# in a /.wordpress-org directory; the action deploys them automatically.
+
+name: Deploy to WordPress.org
+
+on:
+  release:
+    types: [published]
+  # Manual re-deploy of the version currently in readme.txt (Stable tag).
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Push to WordPress.org SVN
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: WordPress Plugin Deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: omnihealth-site-auditor
+          # If you keep the plugin in a subdirectory of the repo instead of the
+          # root, set BUILD_DIR to that path, e.g.:
+          # BUILD_DIR: ./omnihealth-site-auditor
+
+  # OPTIONAL: update only the readme + /.wordpress-org assets WITHOUT cutting a
+  # new release (handy for fixing a typo or swapping the banner). Uncomment to use.
+  #
+  # assets:
+  #   name: Update readme & assets
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: 10up/action-wordpress-plugin-asset-update@stable
+  #       env:
+  #         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+  #         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+  #         SLUG: omnihealth-site-auditor
