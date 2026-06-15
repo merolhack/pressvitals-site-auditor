@@ -25,12 +25,11 @@ SEO / Performance / Environment, including: `db_connection`, `https_home`,
 
 ## New probes — Security
 
-- [ ] **P1 `env_file_on_disk`** — complement the existing HTTP probe: detect a `.env`
-  in `ABSPATH` (and one level up) on the filesystem; warn if present and **fail** if it
-  is also world-readable or served over HTTP. Covers CLI/headless contexts where the
-  HTTP probe can't reach. (group: Security, tier 1)
-- [ ] **P1 `wp_config_permissions`** — `wp-config.php` should not be world-readable
-  (warn on `0644`+, recommend `0640`/`0600`). Use `WP_Filesystem`/`fileperms()`. (tier 1)
+- [x] **P1 `env_file_on_disk`** — *(done in v1.1.0)* detect a `.env` in `ABSPATH`
+  (and one level up) on the filesystem; warn if present, **fail** if world-readable.
+  Covers CLI/headless contexts where the HTTP probe can't reach. (group: Security, tier 1)
+- [x] **P1 `wp_config_permissions`** — *(done in v1.1.0)* `wp-config.php` must not be
+  world-readable (**fail** on the others-read bit). Checks `ABSPATH` and one dir above. (tier 1)
 - [ ] **P1 `secret_keys_defined`** — `AUTH_KEY`/`SECURE_AUTH_KEY`/… are defined and not
   the literal `put your unique phrase here` placeholders. (tier 2)
 - [ ] **P2 `file_editing_disabled`** — recommend `DISALLOW_FILE_EDIT` (and flag
@@ -48,9 +47,9 @@ SEO / Performance / Environment, including: `db_connection`, `https_home`,
 
 ## New probes — Database (base + extra tables)
 
-- [ ] **P1 `core_tables_present`** — every base `$wpdb` table exists
+- [x] **P1 `core_tables_present`** — *(done in v1.1.0)* every base `$wpdb` table exists
   (`posts`, `postmeta`, `options`, `users`, `usermeta`, `terms`, `term_taxonomy`,
-  `term_relationships`, `comments`, `commentmeta`, plus multisite `blogs`/`site` when
+  `term_relationships`, `termmeta`, `comments`, `commentmeta`, plus multisite tables when
   applicable). **fail** on any missing. (group: Database, tier 1)
 - [ ] **P2 `orphaned_tables`** — list non-core tables whose prefix-stripped name maps to
   no active plugin (heuristic, filterable allow-list via `ohsa_known_tables`); warn with
