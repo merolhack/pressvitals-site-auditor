@@ -316,6 +316,8 @@ class Test_OHSA_Engine extends WP_UnitTestCase {
 					(object) array(
 						'response' => 'latest',
 						'current'  => get_bloginfo( 'version' ),
+						'version'  => get_bloginfo( 'version' ),
+						'locale'   => 'en_US',
 					),
 				),
 				'last_checked' => time(),
