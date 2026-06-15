@@ -168,9 +168,22 @@ never run on a live site. Activation performs only a lightweight requirements ga
 
 == Development ==
 
-`composer install` then `bin/install-wp-tests.sh wordpress_test root '' localhost`
-and `composer test`. A GitHub Actions workflow runs the suite across PHP
+Two local workflows are scaffolded (both Docker-based; neither ships in the
+package):
+
+**Automated tests — wp-env (recommended):** requires Docker + Node.js.
+`npm -g install @wordpress/env`, then `wp-env start` and
+`wp-env run tests-cli --env-cwd=wp-content/plugins/omnihealth-site-auditor vendor/bin/phpunit`.
+Switch versions by editing `core` / `phpVersion` in `.wp-env.json` and running
+`wp-env start --update`. Without Docker, run the suite the classic way:
+`composer install`, `bin/install-wp-tests.sh wordpress_test root '' localhost`,
+`composer test`. A GitHub Actions workflow runs PHPUnit across PHP
 7.4 / 8.0 / 8.2 / 8.3.
+
+**Manual multi-version testing — docker-compose:** `docker compose up -d` boots
+three browsable installs at fixed WordPress x PHP combos (WP 6.7/PHP 8.3,
+WP 6.4/PHP 8.1, WP 6.3/PHP 7.4) on ports 8083 / 8081 / 8074, each with the plugin
+mounted. See `docker-compose.yml` for details.
 
 == Screenshots ==
 

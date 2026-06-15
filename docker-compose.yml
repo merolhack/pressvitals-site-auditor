@@ -1,0 +1,92 @@
+# Side-by-side WordPress installs at fixed WordPress x PHP combinations, for
+# manual / exploratory testing of OmniHealth: Deep Site Auditor.
+#
+# NOT used by CI and NOT shipped to WordPress.org (excluded via .distignore).
+# For the automated PHPUnit suite use wp-env / `composer test` instead.
+#
+# Run (inside WSL2, from this directory):
+#   docker compose up -d
+# Then install each site in the browser:
+#   - WP 6.7 / PHP 8.3  -> http://localhost:8083
+#   - WP 6.4 / PHP 8.1  -> http://localhost:8081
+#   - WP 6.3 / PHP 7.4  -> http://localhost:8074
+# Activate the plugin on each (Plugins -> OmniHealth: Deep Site Auditor) and
+# compare behaviour across versions. Tear down with `docker compose down`
+# (add `-v` to also wipe the databases and start fresh).
+#
+# The official image tags pin BOTH dimensions: wordpress:<wp>-php<php>-apache.
+# Verify/adjust tags at https://hub.docker.com/_/wordpress/tags
+# NOTE: PHP 7.4 is end-of-life; the official image only ships 7.4 on older WP
+# tags. If a 7.4 tag is unavailable, use wp-env (it bundles its own PHP images)
+# for the legacy combo.
+
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./.docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wp-latest:
+    image: wordpress:6.7-php8.3-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8083:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: wp_latest
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wp_latest:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/omnihealth-site-auditor
+
+  wp-mid:
+    image: wordpress:6.4-php8.1-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: wp_mid
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wp_mid:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/omnihealth-site-auditor
+
+  wp-legacy:
+    image: wordpress:6.3-php7.4-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8074:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: wp_legacy
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wp_legacy:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/omnihealth-site-auditor
+
+volumes:
+  db_data:
+  wp_latest:
+  wp_mid:
+  wp_legacy:

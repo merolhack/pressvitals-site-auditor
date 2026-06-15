@@ -1,0 +1,14 @@
+# Composer / npm artifacts (never committed; built on demand)
+/vendor/
+/node_modules/
+/composer.lock
+
+# Local-only wp-env personal overrides
+/.wp-env.override.json
+
+# Built plugin packages
+/*.zip
+
+# Editor cruft
+*.bak
+*.map

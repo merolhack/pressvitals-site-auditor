@@ -27,6 +27,12 @@
 /phpunit.xml
 /phpunit.xml.dist
 
+# Local development environments (wp-env / Docker) — never shipped
+/.wp-env.json
+/.wp-env.override.json
+/docker-compose.yml
+/.docker
+
 # Archives / editor cruft
 /*.zip
 *.map
