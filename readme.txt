@@ -4,7 +4,7 @@ Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -56,14 +56,15 @@ re-pointed at automation, alerting, and security/ops auditing.
 
 = Built-in probes =
 
-OmniHealth ships **22 built-in probes**, grouped by functional category:
+OmniHealth ships **25 built-in probes**, grouped by functional category:
 
 * **Availability** — database connectivity, homepage HTTPS reachability.
-* **Security** — `.env` not web-accessible, web-root stray/backup file scan, TLS
-  certificate expiry, baseline security headers, forced HTTPS, XML-RPC exposure,
-  no default `admin` user, error-display off.
+* **Security** — `.env` not web-accessible (HTTP) and not exposed on disk,
+  web-root stray/backup file scan, TLS certificate expiry, baseline security
+  headers, forced HTTPS, XML-RPC exposure, no default `admin` user,
+  wp-config.php permissions, error-display off.
 * **Errors** — error-log size, recent PHP fatal errors.
-* **Database** — autoloaded-options size, database bloat.
+* **Database** — core tables present, autoloaded-options size, database bloat.
 * **Files** — free disk space, uploads-directory writability, recent backup.
 * **Email** — SPF + DMARC DNS records for the sending domain.
 * **SEO** — homepage is indexable (not noindex).
@@ -192,6 +193,11 @@ mounted. See `docker-compose.yml` for details.
 
 == Changelog ==
 
+= 1.1.0 =
+* Add 3 security/database probes: `.env` file detected on disk (with permission
+  check), wp-config.php permissions, and core database tables present. Total
+  built-in probes: 25.
+
 = 1.0.0 =
 * Initial release: pluggable probe engine (`ohsa_registered_checks` filter), 22
   built-in probes across performance, security, deliverability and database
@@ -200,6 +206,10 @@ mounted. See `docker-compose.yml` for details.
   `/report` REST endpoints.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Adds three new security/database probes (.env on disk, wp-config.php permissions,
+core tables present).
 
 = 1.0.0 =
 Initial release.

@@ -330,6 +330,24 @@ class OHSA_Engine {
 				'tier'     => 3,
 				'callback' => array( $this, 'check_homepage_indexable' ),
 			),
+			'env_file_on_disk'        => array(
+				'label'    => __( '.env file not present/exposed on disk', 'omnihealth-site-auditor' ),
+				'group'    => __( 'Security', 'omnihealth-site-auditor' ),
+				'tier'     => 1,
+				'callback' => array( $this, 'check_env_file_on_disk' ),
+			),
+			'wp_config_permissions'   => array(
+				'label'    => __( 'wp-config.php permissions', 'omnihealth-site-auditor' ),
+				'group'    => __( 'Security', 'omnihealth-site-auditor' ),
+				'tier'     => 1,
+				'callback' => array( $this, 'check_wp_config_permissions' ),
+			),
+			'core_tables_present'     => array(
+				'label'    => __( 'Core database tables present', 'omnihealth-site-auditor' ),
+				'group'    => __( 'Database', 'omnihealth-site-auditor' ),
+				'tier'     => 1,
+				'callback' => array( $this, 'check_core_tables_present' ),
+			),
 		);
 
 		return array_merge( $core, $checks );
@@ -1293,6 +1311,147 @@ class OHSA_Engine {
 		return array(
 			'status' => 'pass',
 			'detail' => __( 'Homepage is indexable.', 'omnihealth-site-auditor' ),
+		);
+	}
+
+	/**
+	 * A .env file on disk must not exist in a web-served/readable location. This
+	 * complements check_env_file_exposed() (which probes over HTTP) by catching
+	 * the file directly — useful in CLI/headless contexts.
+	 *
+	 * @return array
+	 */
+	public function check_env_file_on_disk() {
+		// Fixed candidate paths only (no user input): web root + one level up.
+		$candidates = array(
+			ABSPATH . '.env',
+			trailingslashit( dirname( untrailingslashit( ABSPATH ) ) ) . '.env',
+		);
+
+		$found = array();
+		foreach ( array_unique( $candidates ) as $path ) {
+			if ( is_file( $path ) ) {
+				$found[] = $path;
+			}
+		}
+
+		if ( empty( $found ) ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'No .env file found on disk.', 'omnihealth-site-auditor' ),
+			);
+		}
+
+		foreach ( $found as $path ) {
+			$perms = fileperms( $path );
+			if ( false !== $perms && ( $perms & 0004 ) ) { // others-read bit.
+				return array(
+					'status' => 'fail',
+					'detail' => __( 'A .env file exists and is world-readable — set it to 0600/0640 and keep it out of the web root.', 'omnihealth-site-auditor' ),
+				);
+			}
+		}
+
+		return array(
+			'status' => 'warn',
+			'detail' => __( 'A .env file exists on disk — ensure it is outside the web root and not served (see the .env HTTP probe).', 'omnihealth-site-auditor' ),
+		);
+	}
+
+	/**
+	 * wp-config.php must not be world-readable.
+	 *
+	 * @return array
+	 */
+	public function check_wp_config_permissions() {
+		$path = ABSPATH . 'wp-config.php';
+		if ( ! is_file( $path ) ) {
+			// WordPress also supports wp-config.php one directory above ABSPATH.
+			$alt  = trailingslashit( dirname( untrailingslashit( ABSPATH ) ) ) . 'wp-config.php';
+			$path = is_file( $alt ) ? $alt : '';
+		}
+		if ( '' === $path ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'wp-config.php not found in a standard location; skipped.', 'omnihealth-site-auditor' ),
+			);
+		}
+
+		$perms = fileperms( $path );
+		if ( false === $perms ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Could not read wp-config.php permissions; skipped.', 'omnihealth-site-auditor' ),
+			);
+		}
+		$mode = $perms & 0777;
+
+		if ( $mode & 0004 ) { // others-read bit.
+			return array(
+				'status' => 'fail',
+				/* translators: %o: octal file mode */
+				'detail' => sprintf( __( 'wp-config.php is world-readable (%o) — set 0640 or 0600.', 'omnihealth-site-auditor' ), $mode ),
+			);
+		}
+
+		/* translators: %o: octal file mode */
+		return array(
+			'status' => 'pass',
+			'detail' => sprintf( __( 'wp-config.php permissions are restrictive (%o).', 'omnihealth-site-auditor' ), $mode ),
+		);
+	}
+
+	/**
+	 * Every base WordPress table exists (plus the network tables on multisite).
+	 *
+	 * @return array
+	 */
+	public function check_core_tables_present() {
+		global $wpdb;
+
+		$expected = array(
+			$wpdb->posts,
+			$wpdb->postmeta,
+			$wpdb->options,
+			$wpdb->users,
+			$wpdb->usermeta,
+			$wpdb->terms,
+			$wpdb->term_taxonomy,
+			$wpdb->term_relationships,
+			$wpdb->termmeta,
+			$wpdb->comments,
+			$wpdb->commentmeta,
+		);
+
+		if ( is_multisite() ) {
+			foreach ( array( 'blogs', 'blogmeta', 'signups', 'site', 'sitemeta', 'registration_log' ) as $prop ) {
+				if ( ! empty( $wpdb->$prop ) ) {
+					$expected[] = $wpdb->$prop;
+				}
+			}
+		}
+
+		$missing = array();
+		foreach ( array_unique( $expected ) as $table ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
+			if ( $found !== $table ) {
+				$missing[] = $table;
+			}
+		}
+
+		if ( empty( $missing ) ) {
+			/* translators: %d: number of tables */
+			return array(
+				'status' => 'pass',
+				'detail' => sprintf( __( 'All %d core database tables are present.', 'omnihealth-site-auditor' ), count( $expected ) ),
+			);
+		}
+
+		/* translators: %s: comma-separated table names */
+		return array(
+			'status' => 'fail',
+			'detail' => sprintf( __( 'Missing core database tables: %s', 'omnihealth-site-auditor' ), implode( ', ', $missing ) ),
 		);
 	}
 

@@ -254,4 +254,23 @@ class Test_OHSA_Engine extends WP_UnitTestCase {
 		);
 		$this->assertSame( 'fail', $this->engine->check_backup_recency()['status'] );
 	}
+
+	public function test_core_tables_present_passes_on_a_real_install() {
+		// The WP test suite has a complete schema, so every core table exists.
+		$result = $this->engine->check_core_tables_present();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	public function test_env_file_on_disk_passes_when_absent() {
+		// A fresh test install has no .env in ABSPATH or one level up.
+		$result = $this->engine->check_env_file_on_disk();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	public function test_wp_config_permissions_not_world_readable() {
+		// In the test environment wp-config.php is absent (skipped) or restrictive;
+		// it must never report a world-readable failure here.
+		$result = $this->engine->check_wp_config_permissions();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ), $result['detail'] );
+	}
 }
