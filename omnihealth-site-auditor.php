@@ -5,6 +5,7 @@
  * Description:       A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health — extensible to 48+ via REST API and custom filters.
  * Version:           1.2.5
  * Requires at least: 6.0
+ * Tested up to:      7.0
  * Requires PHP:      7.4
  * Author:            OmniHealth Contributors
  * Author URI:        https://merolhack.github.io/
@@ -60,18 +61,6 @@ function ohsa_init() {
 
 	if ( is_admin() ) {
 		( new OHSA_Admin( $engine ) )->init();
-
-		// GitHub Update Checker (for sideloaded installs)
-		if ( file_exists( OHSA_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
-			require_once OHSA_PLUGIN_DIR . 'vendor/autoload.php';
-			if ( class_exists( '\\YahnisElsts\\PluginUpdateChecker\\v5\\PucFactory' ) ) {
-				\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-					'https://github.com/merolhack/omnihealth-site-auditor/',
-					OHSA_PLUGIN_FILE,
-					'omnihealth-site-auditor'
-				);
-			}
-		}
 	}
 
 	add_action( OHSA_CRON_HOOK, 'ohsa_run_scheduled_check' );

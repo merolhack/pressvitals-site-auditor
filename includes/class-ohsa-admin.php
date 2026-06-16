@@ -220,24 +220,33 @@ class OHSA_Admin {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="omnihealth-report-' . gmdate( 'Ymd-His' ) . '.csv"' );
 
-		$output = fopen( 'php://output', 'w' );
-		fputcsv( $output, array( 'Group', 'Label', 'ID', 'Tier', 'Status', 'Duration (ms)', 'Detail' ) );
+		$out = '';
+		$out .= '"Group","Label","ID","Tier","Status","Duration (ms)","Detail"' . "\r\n";
 
 		foreach ( $report['checks'] as $id => $check ) {
-			fputcsv(
-				$output,
-				array(
-					isset( $check['group'] ) ? $check['group'] : '',
-					isset( $check['label'] ) ? $check['label'] : '',
-					$id,
-					isset( $check['tier'] ) ? $check['tier'] : '',
-					isset( $check['status'] ) ? $check['status'] : '',
-					isset( $check['duration_ms'] ) ? $check['duration_ms'] : '',
-					isset( $check['detail'] ) ? wp_strip_all_tags( $check['detail'] ) : '',
-				)
+			$row = array(
+				isset( $check['group'] ) ? $check['group'] : '',
+				isset( $check['label'] ) ? $check['label'] : '',
+				$id,
+				isset( $check['tier'] ) ? $check['tier'] : '',
+				isset( $check['status'] ) ? $check['status'] : '',
+				isset( $check['duration_ms'] ) ? $check['duration_ms'] : '',
+				isset( $check['detail'] ) ? wp_strip_all_tags( $check['detail'] ) : '',
 			);
+			
+			// Basic CSV escaping: quote fields that contain comma, quote, or newline.
+			$escaped_row = array_map( static function ( $field ) {
+				$field = (string) $field;
+				if ( strpos( $field, '"' ) !== false || strpos( $field, ',' ) !== false || strpos( $field, "\n" ) !== false || strpos( $field, "\r" ) !== false ) {
+					$field = '"' . str_replace( '"', '""', $field ) . '"';
+				}
+				return $field;
+			}, $row );
+
+			$out .= implode( ',', $escaped_row ) . "\r\n";
 		}
-		fclose( $output );
+		
+		echo $out; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSV output is safely generated above.
 		exit;
 	}
 
@@ -328,7 +337,7 @@ class OHSA_Admin {
 			. esc_html( strtoupper( $verdict ) ) . ' — '
 			. esc_html(
 				sprintf(
-					/* translators: 1: pass, 2: warn, 3: fail */
+					/* translators: 1: Number of passing checks, 2: Number of warning checks, 3: Number of failing checks */
 					__( '%1$d pass, %2$d warn, %3$d fail', 'omnihealth-site-auditor' ),
 					(int) $report['pass'],
 					(int) $report['warn'],
@@ -391,9 +400,9 @@ class OHSA_Admin {
 				}
 			);
 
-			$group_id = 'ohsa-group-' . esc_attr( sanitize_title( $group ) );
-			echo '<h3 id="' . $group_id . '" style="scroll-margin-top:40px; cursor:pointer;" onclick="var t=document.getElementById(\'' . $group_id . '-table\'); t.style.display=(t.style.display===\'none\'?\'\':\'none\'); localStorage.setItem(\'' . $group_id . '\', t.style.display);">' . esc_html( $group ) . ' <span class="dashicons dashicons-arrow-down-alt2" style="font-size:16px;line-height:1.5;"></span></h3>';
-			echo '<table id="' . $group_id . '-table" class="widefat striped" style="display:table;"><thead><tr>'
+			$group_id = 'ohsa-group-' . sanitize_title( $group );
+			echo '<h3 id="' . esc_attr( $group_id ) . '" style="scroll-margin-top:40px; cursor:pointer;" onclick="var t=document.getElementById(\'' . esc_js( $group_id ) . '-table\'); t.style.display=(t.style.display===\'none\'?\'\':\'none\'); localStorage.setItem(\'' . esc_js( $group_id ) . '\', t.style.display);">' . esc_html( $group ) . ' <span class="dashicons dashicons-arrow-down-alt2" style="font-size:16px;line-height:1.5;"></span></h3>';
+			echo '<table id="' . esc_attr( $group_id ) . '-table" class="widefat striped" style="display:table;"><thead><tr>'
 				. '<th>' . esc_html__( 'Status', 'omnihealth-site-auditor' ) . '</th>'
 				. '<th>' . esc_html__( 'Check', 'omnihealth-site-auditor' ) . '</th>'
 				. '<th>' . esc_html__( 'Tier', 'omnihealth-site-auditor' ) . '</th>'

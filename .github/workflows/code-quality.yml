@@ -38,4 +38,5 @@ jobs:
       - name: Run Plugin Check
         uses: wordpress/plugin-check-action@v1
         with:
-          exclude-directories: 'vendor,node_modules,tests'
+          exclude-directories: 'vendor,node_modules,tests,.github,bin'
+          exclude-files: 'LLM_WIKI.md,TODO.md,HISTORY.md,omnihealth-site-auditor.zip,.distignore,phpcs.xml,composer.lock,phpunit.xml.dist'

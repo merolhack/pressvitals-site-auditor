@@ -413,6 +413,7 @@ class Test_OHSA_Engine extends WP_UnitTestCase {
 						'strict-transport-security' => 'max-age=31536000',
 						'x-content-type-options'    => 'nosniff',
 						'x-frame-options'           => 'SAMEORIGIN',
+						'referrer-policy'           => 'no-referrer',
 					),
 					'body'     => '',
 				);
@@ -426,6 +427,9 @@ class Test_OHSA_Engine extends WP_UnitTestCase {
 	}
 
 	public function test_https_forced_pass() {
+		$original_home = get_option( 'home' );
+		update_option( 'home', 'https://example.org' );
+
 		add_filter(
 			'pre_http_request',
 			static function ( $pre, $args, $url ) {
@@ -443,6 +447,8 @@ class Test_OHSA_Engine extends WP_UnitTestCase {
 
 		$result = $this->engine->check_https_forced();
 		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+
+		update_option( 'home', $original_home );
 	}
 
 	public function test_stray_files_pass() {
