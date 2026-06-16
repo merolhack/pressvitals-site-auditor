@@ -4,7 +4,7 @@ Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -197,6 +197,9 @@ mounted. See `docker-compose.yml` for details.
 2. The settings page (thresholds and alert email).
 
 == Changelog ==
+
+= 1.2.2 =
+* Add composer make-pot script and sample Spanish (es_ES) locale translation.
 
 = 1.2.1 =
 * Phase 1 of engineering roadmap complete: data migrations and GitHub update checker implemented.

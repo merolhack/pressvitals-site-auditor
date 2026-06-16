@@ -1089,3 +1089,15 @@ msgstr ""
 #: omnihealth-site-auditor.php:152
 msgid "OmniHealth: Deep Site Auditor could not load its engine. The plugin was not activated."
 msgstr ""
+
+msgid "Security"
+msgstr "Seguridad"
+
+msgid "Performance"
+msgstr "Rendimiento"
+
+msgid "Database"
+msgstr "Base de datos"
+
+msgid "Environment"
+msgstr "Entorno"

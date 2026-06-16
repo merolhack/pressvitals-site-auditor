@@ -3,7 +3,7 @@
  * Plugin Name:       OmniHealth: Deep Site Auditor
  * Plugin URI:        https://wordpress.org/plugins/omnihealth-site-auditor/
  * Description:       A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health — extensible to 48+ via REST API and custom filters.
- * Version:           1.2.1
+ * Version:           1.2.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            OmniHealth Contributors
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'OHSA_VERSION', '1.2.1' );
+define( 'OHSA_VERSION', '1.2.2' );
 define( 'OHSA_PLUGIN_FILE', __FILE__ );
 define( 'OHSA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OHSA_CRON_HOOK', 'ohsa_daily_check' );
@@ -36,6 +36,8 @@ require_once OHSA_PLUGIN_DIR . 'includes/class-ohsa-admin.php';
  * Boot the plugin.
  */
 function ohsa_init() {
+	load_plugin_textdomain( 'omnihealth-site-auditor', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
 	// Database Migrations & Versioning
 	$db_version = get_option( 'ohsa_db_version', '0.0.0' );
 	if ( version_compare( $db_version, OHSA_VERSION, '<' ) ) {

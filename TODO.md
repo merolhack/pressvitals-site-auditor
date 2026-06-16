@@ -103,8 +103,10 @@ SEO / Performance / Environment, including: `db_connection`, `https_home`,
 
 ## i18n
 
-- [ ] Ship at least one locale (`es_ES` / `es_MX`) `.po`/`.mo` to prove the pipeline.
-- [ ] Add a `composer make-pot` script (wp-cli `i18n make-pot`) to replace the bespoke
+- [x] **Generate `.pot`** — run `wp i18n make-pot` or add a `composer make-pot` script
+  so translatable strings don't rot. Ship at least one locale (`es_ES` / `es_MX`) `.po`/`.mo`
+  to prove the pipeline.
+- [x] Add a `composer make-pot` script (wp-cli `i18n make-pot`) to replace the bespoke
   PHP extractor once wp-cli is available in CI.
 
 ## Testing / CI
