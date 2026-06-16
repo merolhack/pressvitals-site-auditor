@@ -4,7 +4,7 @@ Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -197,6 +197,9 @@ mounted. See `docker-compose.yml` for details.
 2. The settings page (thresholds and alert email).
 
 == Changelog ==
+
+= 1.2.5 =
+* Documentation updates including the LLM Wiki addition for AI agents.
 
 = 1.2.4 =
 * Phase 4 CI complete: Expanded unit tests for network and DB probes, WP version matrix, and added strict PHPCS & Plugin Check CI gates.
