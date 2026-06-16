@@ -36,8 +36,6 @@ require_once OHSA_PLUGIN_DIR . 'includes/class-ohsa-admin.php';
  * Boot the plugin.
  */
 function ohsa_init() {
-	load_plugin_textdomain( 'omnihealth-site-auditor', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
 	$engine = new OHSA_Engine();
 	$engine->init();
 

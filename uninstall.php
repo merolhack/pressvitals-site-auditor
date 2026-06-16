@@ -30,14 +30,14 @@ function ohsa_uninstall_cleanup() {
 }
 
 if ( is_multisite() ) {
-	$site_ids = get_sites(
+	$ohsa_site_ids = get_sites(
 		array(
 			'fields' => 'ids',
 			'number' => 0,
 		)
 	);
-	foreach ( $site_ids as $site_id ) {
-		switch_to_blog( (int) $site_id );
+	foreach ( $ohsa_site_ids as $ohsa_site_id ) {
+		switch_to_blog( (int) $ohsa_site_id );
 		ohsa_uninstall_cleanup();
 		restore_current_blog();
 	}

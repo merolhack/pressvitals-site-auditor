@@ -1,14 +1,14 @@
 === OmniHealth: Deep Site Auditor ===
 Contributors: yourwporgusername
 Tags: monitoring, site health, security, rest api, uptime
-Requires at least: 6.3
-Tested up to: 6.9
+Requires at least: 6.0
+Tested up to: 6.7
 Requires PHP: 7.4
 Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health — extensible to 48+ via REST API and custom filters.
+A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
 
 == Description ==
 

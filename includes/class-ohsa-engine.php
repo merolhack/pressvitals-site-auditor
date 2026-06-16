@@ -1482,6 +1482,7 @@ class OHSA_Engine {
 		/* translators: 1: current version, 2: offered version */
 		return array(
 			'status' => 'warn',
+			/* translators: 1: current version, 2: new version */
 			'detail' => sprintf( __( 'A WordPress feature update is available (%1$s → %2$s).', 'omnihealth-site-auditor' ), $current, '' !== $offered ? $offered : __( 'newer', 'omnihealth-site-auditor' ) ),
 		);
 	}
@@ -1550,6 +1551,7 @@ class OHSA_Engine {
 		/* translators: %s: semicolon-separated list of exposure vectors */
 		return array(
 			'status' => 'warn',
+			/* translators: %s: list of enumeration issues found */
 			'detail' => sprintf( __( 'User enumeration possible: %s.', 'omnihealth-site-auditor' ), implode( '; ', $issues ) ),
 		);
 	}
@@ -1637,6 +1639,7 @@ class OHSA_Engine {
 		/* translators: %o: octal file mode */
 		return array(
 			'status' => 'pass',
+			/* translators: %o: file permissions */
 			'detail' => sprintf( __( 'wp-config.php permissions are restrictive (%o).', 'omnihealth-site-auditor' ), $mode ),
 		);
 	}
@@ -1684,6 +1687,7 @@ class OHSA_Engine {
 			/* translators: %d: number of tables */
 			return array(
 				'status' => 'pass',
+				/* translators: %d: number of core tables */
 				'detail' => sprintf( __( 'All %d core database tables are present.', 'omnihealth-site-auditor' ), count( $expected ) ),
 			);
 		}
@@ -1691,6 +1695,7 @@ class OHSA_Engine {
 		/* translators: %s: comma-separated table names */
 		return array(
 			'status' => 'fail',
+			/* translators: %s: list of missing core tables */
 			'detail' => sprintf( __( 'Missing core database tables: %s', 'omnihealth-site-auditor' ), implode( ', ', $missing ) ),
 		);
 	}
