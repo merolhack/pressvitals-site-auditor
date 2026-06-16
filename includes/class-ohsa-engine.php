@@ -408,6 +408,18 @@ class OHSA_Engine {
 				'tier'     => 4,
 				'callback' => array( $this, 'check_table_collation' ),
 			),
+			'largest_tables'          => array(
+				'label'    => __( 'Largest database tables', 'omnihealth-site-auditor' ),
+				'group'    => __( 'Database', 'omnihealth-site-auditor' ),
+				'tier'     => 5,
+				'callback' => array( $this, 'check_largest_tables' ),
+			),
+			'db_charset_client'       => array(
+				'label'    => __( 'Database client charset', 'omnihealth-site-auditor' ),
+				'group'    => __( 'Database', 'omnihealth-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_db_charset_client' ),
+			),
 			'theme_updates_pending'   => array(
 				'label'    => __( 'Theme updates', 'omnihealth-site-auditor' ),
 				'group'    => __( 'Environment', 'omnihealth-site-auditor' ),
@@ -2064,6 +2076,95 @@ class OHSA_Engine {
 		return array(
 			'status' => 'pass',
 			'detail' => __( 'Object cache is not explicitly enabled, falling back to database safely.', 'omnihealth-site-auditor' ),
+		);
+	}
+	/**
+	 * Report the top N largest tables and total DB size.
+	 *
+	 * @return array
+	 */
+	public function check_largest_tables() {
+		global $wpdb;
+
+		/**
+		 * Filter the number of largest tables to report.
+		 *
+		 * @param int $count Number of tables. Default 5.
+		 */
+		$count = (int) apply_filters( 'ohsa_largest_tables_count', 5 );
+
+		/**
+		 * Filter the warning threshold for total database size in MB.
+		 *
+		 * @param int $threshold Threshold in MB. Default 500.
+		 */
+		$threshold_mb = (int) apply_filters( 'ohsa_total_db_size_warn_mb', 500 );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$results = $wpdb->get_results(
+			"SELECT TABLE_NAME as name, (DATA_LENGTH + INDEX_LENGTH) as size 
+			FROM information_schema.TABLES 
+			WHERE TABLE_SCHEMA = DATABASE() 
+			ORDER BY size DESC"
+		);
+
+		if ( empty( $results ) ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Could not determine table sizes.', 'omnihealth-site-auditor' ),
+			);
+		}
+
+		$total_bytes = 0;
+		$top_tables  = array();
+
+		foreach ( $results as $index => $row ) {
+			$size = (int) $row->size;
+			$total_bytes += $size;
+			if ( $index < $count ) {
+				$top_tables[] = $row->name . ' (' . size_format( $size, 2 ) . ')';
+			}
+		}
+
+		$total_mb = $total_bytes / 1048576; // 1024 * 1024
+
+		if ( $total_mb > $threshold_mb ) {
+			return array(
+				'status' => 'warn',
+				/* translators: 1: total size, 2: top tables list */
+				'detail' => sprintf( __( 'Database size is %1$s. Top tables: %2$s', 'omnihealth-site-auditor' ), size_format( $total_bytes, 2 ), implode( ', ', $top_tables ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			/* translators: 1: total size, 2: top tables list */
+			'detail' => sprintf( __( 'Database size is %1$s. Top tables: %2$s', 'omnihealth-site-auditor' ), size_format( $total_bytes, 2 ), implode( ', ', $top_tables ) ),
+		);
+	}
+
+	/**
+	 * Check database client character set.
+	 *
+	 * @return array
+	 */
+	public function check_db_charset_client() {
+		global $wpdb;
+
+		// The charset configured in wp-config.php DB_CHARSET.
+		$charset = $wpdb->charset;
+
+		if ( 'utf8mb4' === $charset ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Database connection uses the recommended utf8mb4 charset.', 'omnihealth-site-auditor' ),
+			);
+		}
+
+		return array(
+			'status' => 'warn',
+			/* translators: %s: current charset */
+			'detail' => sprintf( __( 'Database connection uses "%s", but utf8mb4 is recommended.', 'omnihealth-site-auditor' ), $charset ),
 		);
 	}
 }

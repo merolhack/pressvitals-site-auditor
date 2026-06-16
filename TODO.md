@@ -57,9 +57,9 @@ SEO / Performance / Environment, including: `db_connection`, `https_home`,
   multisite other-blog tables skipped) so leftovers from removed plugins are visible. (tier 4)
 - [x] **P2 `table_storage_engine`** — flag any MyISAM tables (recommend InnoDB). (tier 4)
 - [x] **P2 `table_collation`** — flag tables not on `utf8mb4` (mojibake / emoji risk). (tier 4)
-- [ ] **P3 `largest_tables`** — report the top N tables by size + total DB size, with a
+- [x] **P3 `largest_tables`** — report the top N tables by size + total DB size, with a
   filterable warn threshold. (informational, tier 5)
-- [ ] **P3 `db_charset_client`** — DB connection charset is `utf8mb4`.
+- [x] **P3 `db_charset_client`** — DB connection charset is `utf8mb4`.
 
 ## New probes — Updates & Versioning
 

@@ -16,3 +16,4 @@
   - **Database:** `table_storage_engine` (flag MyISAM), `table_collation` (flag non-utf8mb4).
   - **Environment:** `theme_updates_pending`, `inactive_plugins_themes` (warn on excessive dormant extensions).
   - **Performance:** `cron_overdue` (check for stalled WP-Cron), `transient_api_backed` (ensure persistent object cache usage).
+- **Added P3 Database Probes:** `largest_tables` (reports top tables and total size) and `db_charset_client` (validates utf8mb4 connection).
