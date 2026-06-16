@@ -33,3 +33,18 @@ The project is configured with a `docker-compose.yml` file to spin up three conc
    - Internal loopback requests (e.g., `wp_remote_get(home_url())`) fail inside Docker Desktop containers because the container binds to port 80 internally but the `home_url()` includes the host port (e.g., `:8083`).
    - The plugin has been updated so that `check_security_headers` gracefully bypasses and returns a `pass` (skipped) rather than a `warn` when loopback requests fail.
    - The `check_ssl_cert_expiry` probe also skips and passes if the `home_url()` scheme is not `https`, to prevent TLS connection errors on standard local HTTP testing.
+
+## WordPress.org Publication & Validation
+
+The plugin was validated against the official WordPress **Plugin Check (PCP)** (`wp plugin check`) tool and successfully submitted to the WordPress Plugin Directory.
+
+Key standards enforced for publication:
+1. **Direct Access Protection:** All executable PHP files must have an `ABSPATH` check to prevent direct HTTP access.
+2. **Translation Standards:** Every `__()` or `esc_html__()` call containing a placeholder (`%s`, `%d`) must be immediately preceded by a `/* translators: ... */` context comment.
+3. **No Duplicate URIs:** `Plugin URI` and `Author URI` in the headers cannot share the same URL.
+4. **Distribution Packaging:** Local development files, test scripts, and CI configurations MUST NOT be included in the production zip.
+
+### Build & Package Workflow
+
+The project uses `.distignore` to track files that should not ship to WordPress.org (e.g., `.wp-env.json`, `.github/`, `tests/`, `HISTORY.md`, `llms.txt`).
+To generate the WordPress distribution `.zip`, a Python script creates an isolated temporary directory, runs `rsync --exclude-from=.distignore`, and generates the archive, ensuring no hidden scripts or unexpected test files are flagged by the WordPress directory scanners.
