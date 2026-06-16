@@ -11,6 +11,8 @@
 /.editorconfig
 /README.md
 /TODO.md
+/HISTORY.md
+/llms.txt
 
 # WordPress.org assets live here and are deployed separately (banner/icon/screenshots)
 /.wordpress-org
