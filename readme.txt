@@ -4,7 +4,7 @@ Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -198,8 +198,11 @@ mounted. See `docker-compose.yml` for details.
 
 == Changelog ==
 
+= 1.2.1 =
+* Phase 1 of engineering roadmap complete: data migrations and GitHub update checker implemented.
+
 = 1.2.0 =
-* Add 4 probes: WordPress core update available, plugin updates pending, user
+* Implement the final P3 probes: https_mixed_content and rest_api_reachable.
   enumeration exposure (`?author=N` + REST users), and non-core/orphaned database
   tables (filterable via `ohsa_known_tables` / `ohsa_orphan_tables_warn`). Total
   built-in probes: 29.

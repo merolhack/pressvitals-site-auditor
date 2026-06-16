@@ -3,7 +3,7 @@
  * Plugin Name:       OmniHealth: Deep Site Auditor
  * Plugin URI:        https://wordpress.org/plugins/omnihealth-site-auditor/
  * Description:       A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health — extensible to 48+ via REST API and custom filters.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            OmniHealth Contributors
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'OHSA_VERSION', '1.2.0' );
+define( 'OHSA_VERSION', '1.2.1' );
 define( 'OHSA_PLUGIN_FILE', __FILE__ );
 define( 'OHSA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'OHSA_CRON_HOOK', 'ohsa_daily_check' );
@@ -36,6 +36,21 @@ require_once OHSA_PLUGIN_DIR . 'includes/class-ohsa-admin.php';
  * Boot the plugin.
  */
 function ohsa_init() {
+	// Database Migrations & Versioning
+	$db_version = get_option( 'ohsa_db_version', '0.0.0' );
+	if ( version_compare( $db_version, OHSA_VERSION, '<' ) ) {
+		if ( false === get_option( OHSA_OPTION_SETTINGS ) ) {
+			add_option( OHSA_OPTION_SETTINGS, OHSA_Engine::default_settings() );
+		}
+		if ( ! get_option( OHSA_OPTION_TOKEN ) ) {
+			add_option( OHSA_OPTION_TOKEN, bin2hex( random_bytes( 16 ) ) );
+		}
+		if ( ! wp_next_scheduled( OHSA_CRON_HOOK ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', OHSA_CRON_HOOK );
+		}
+		update_option( 'ohsa_db_version', OHSA_VERSION );
+	}
+
 	$engine = new OHSA_Engine();
 	$engine->init();
 
@@ -43,6 +58,18 @@ function ohsa_init() {
 
 	if ( is_admin() ) {
 		( new OHSA_Admin( $engine ) )->init();
+
+		// GitHub Update Checker (for sideloaded installs)
+		if ( file_exists( OHSA_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+			require_once OHSA_PLUGIN_DIR . 'vendor/autoload.php';
+			if ( class_exists( '\\YahnisElsts\\PluginUpdateChecker\\v5\\PucFactory' ) ) {
+				\YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+					'https://github.com/merolhack/omnihealth-site-auditor/',
+					OHSA_PLUGIN_FILE,
+					'omnihealth-site-auditor'
+				);
+			}
+		}
 	}
 
 	add_action( OHSA_CRON_HOOK, 'ohsa_run_scheduled_check' );

@@ -87,15 +87,15 @@ SEO / Performance / Environment, including: `db_connection`, `https_home`,
 
 ## Engineering / release
 
-- [ ] **Versioning discipline** — keep `Version:` header, the `OHSA_VERSION` constant,
+- [x] **Versioning discipline** — keep `Version:` header, the `OHSA_VERSION` constant,
   readme `Stable tag`, and the `== Changelog ==` entry in sync; add a short
   `RELEASE.md` checklist (and/or a `bin/bump-version.sh`). Follow SemVer.
-- [ ] **Settings/data versioning + migrations** — store an `ohsa_db_version` option and
+- [x] **Settings/data versioning + migrations** — store an `ohsa_db_version` option and
   run an idempotent upgrade routine on `plugins_loaded` when it lags `OHSA_VERSION`
   (re-seed/migrate settings safely instead of relying only on the activation hook).
-- [ ] **WordPress.org release** — add repo secrets `SVN_USERNAME` / `SVN_PASSWORD`,
+- [x] **WordPress.org release** — add repo secrets `SVN_USERNAME` / `SVN_PASSWORD`,
   submit the slug for review, then tag a release so `deploy.yml` ships to SVN.
-- [ ] **GitHub-sideload updates (optional)** — bundle `yahnis-elsts/plugin-update-checker`
+- [x] **GitHub-sideload updates (optional)** — bundle `yahnis-elsts/plugin-update-checker`
   so installs sideloaded from GitHub get update notifications before the wp.org listing
   exists. Remove once on wp.org.
 - [ ] **WP.org assets** — add `/.wordpress-org/` banner (1544×500), icon (256×256), and

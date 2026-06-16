@@ -12,7 +12,8 @@
     ],
     "homepage": "https://wordpress.org/plugins/omnihealth-site-auditor/",
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "yahnis-elsts/plugin-update-checker": "^5.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6",
