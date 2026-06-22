@@ -41,3 +41,6 @@
 /*.zip
 *.map
 *.bak
+*.sh
+/report_*.txt
+/LLM_WIKI.md
