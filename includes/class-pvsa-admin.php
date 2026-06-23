@@ -446,7 +446,6 @@ class PVSA_Admin {
 				$tier = isset( $check['tier'] ) ? $check['tier'] : '-';
 				$time = isset( $check['duration_ms'] ) ? $check['duration_ms'] . 'ms' : '-';
 
-
 				$row_bg_color = '';
 				$status_color = '';
 				if ( 'fail' === $check['status'] ) {
