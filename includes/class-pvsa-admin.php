@@ -392,12 +392,24 @@ class PVSA_Admin {
 			$rows  = $buckets[ $group ];
 			$total = count( $rows );
 			$pass  = 0;
+			$fail  = 0;
+			$warn  = 0;
 			foreach ( $rows as $row ) {
 				if ( 'pass' === $row['status'] ) {
 					++$pass;
+				} elseif ( 'fail' === $row['status'] ) {
+					++$fail;
+				} else {
+					++$warn;
 				}
 			}
-			$color = ( $pass === $total ) ? '#16a34a' : '#d97706';
+			if ( $fail > 0 ) {
+				$color = '#d63638';
+			} elseif ( $warn > 0 ) {
+				$color = '#d97706';
+			} else {
+				$color = '#16a34a';
+			}
 			printf(
 				'<a href="#ohsa-group-%1$s" style="padding:6px 10px;border:1px solid #dcdcde;border-left:4px solid %2$s;border-radius:4px;font-size:13px;text-decoration:none;color:inherit;box-shadow:none;">%3$s <strong>%4$d/%5$d</strong></a>',
 				esc_attr( sanitize_title( $group ) ),
@@ -433,7 +445,20 @@ class PVSA_Admin {
 			foreach ( $rows as $check ) {
 				$tier = isset( $check['tier'] ) ? $check['tier'] : '-';
 				$time = isset( $check['duration_ms'] ) ? $check['duration_ms'] . 'ms' : '-';
-				echo '<tr><td><strong>' . esc_html( strtoupper( $check['status'] ) ) . '</strong></td>'
+				
+				$row_bg = '';
+				$status_color = '';
+				if ( 'fail' === $check['status'] ) {
+					$row_bg = ' style="background-color: #fcf0f1;"';
+					$status_color = 'color: #d63638;';
+				} elseif ( 'warn' === $check['status'] ) {
+					$row_bg = ' style="background-color: #fdf6e6;"';
+					$status_color = 'color: #d97706;';
+				} else {
+					$status_color = 'color: #16a34a;';
+				}
+
+				echo '<tr' . $row_bg . '><td style="' . $status_color . '"><strong>' . esc_html( strtoupper( $check['status'] ) ) . '</strong></td>'
 					. '<td>' . esc_html( $check['label'] ) . '</td>'
 					. '<td>' . esc_html( $tier ) . '</td>'
 					. '<td>' . esc_html( $time ) . '</td>'

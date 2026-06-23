@@ -7,6 +7,12 @@ This document serves as the project's **LLM Wiki**. It contains essential contex
 - **Probe Registry:** Probes are defined in `includes/class-pvsa-engine.php` and managed via a registry hook (`pvsa_registered_checks`). 
 - **Check Anatomy:** Each probe callback must return an array with `status` (`pass`, `warn`, `fail`) and `detail` (a localized human-readable string). The engine automatically appends `duration_ms` and `tier` to each executed check.
 
+## 2. LLM-Wiki Architecture Integration
+This repository fully implements the [LLM-Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) to provide a compiled knowledge layer for agents:
+- **`index.md`**: Content-oriented catalog indexing the codebase and wiki.
+- **`HISTORY.md`**: Serves as the chronological `log.md`. Always append new changes, bug discoveries, and design shifts here.
+- **`AGENTS.md`**: Serves as the schema document. Defines rules, boundaries, and expected workflows for agents operating in this workspace.
+
 ## 2. i18n & Localization (CRITICAL)
 - **WP.org Compliance:** The WordPress Plugin Check (PCP) scanner is extremely strict. 
 - You MUST use `__()` or `esc_html__()` with the text domain `'pressvitals-site-auditor'`.

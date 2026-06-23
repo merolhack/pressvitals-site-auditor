@@ -23,3 +23,8 @@
 - **Added P3 Database Probes:** `largest_tables` (reports top tables and total size) and `db_charset_client` (validates utf8mb4 connection).
 - **Upgraded PHP Probe:** Refactored `php_version` into `php_eol_horizon` to dynamically warn against official End-of-Life dates with a customizable 6-month warning horizon.
 - **Added Final P3 Probes:** Implemented `https_mixed_content` (detects insecure HTTP assets on the homepage) and `rest_api_reachable` (validates HTTP 200 on `/wp-json/`).
+
+## 2026-06-22 (Cont.)
+- **UI Improvements:** Overhauled the admin dashboard color scheme in `class-pvsa-admin.php`. `FAIL` checks now prominently feature red text and a faint red background (`#fcf0f1`). `WARN` checks use orange. Group summary pills accurately reflect the most severe status within their group, turning red (`#d63638`) if any checks fail.
+- **WP-Config permissions check:** Diagnosed local vs remote environment permission misalignment causing the `check_wp_config_permissions` rule to falsely trigger due to Docker volume mounts or un-synced deployments. Local WSL testing does not perfectly map permissions into the Docker instance or remote host.
+- **LLM Wiki Integration:** Ingested the LLM-Wiki architecture pattern (index, log, schema). Created `index.md`, `AGENTS.md`, and mapped `HISTORY.md` to the log concept to organize agentic knowledge structurally.

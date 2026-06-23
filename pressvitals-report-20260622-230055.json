@@ -1,0 +1,397 @@
+{
+    "verdict": "fail",
+    "pass": 36,
+    "warn": 6,
+    "fail": 1,
+    "generated_at": "2026-06-22 22:59:49",
+    "duration_ms": 1793,
+    "checks": {
+        "admin_username": {
+            "status": "pass",
+            "detail": "No user with the login \"admin\".",
+            "id": "admin_username",
+            "label": "No default \"admin\" username",
+            "group": "Security",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "autoloaded_options_size": {
+            "status": "pass",
+            "detail": "Autoloaded options total 108.89 KB.",
+            "id": "autoloaded_options_size",
+            "label": "Autoloaded options size",
+            "group": "Database",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "backup_recency": {
+            "status": "warn",
+            "detail": "Last backup was 8 days ago.",
+            "id": "backup_recency",
+            "label": "Recent backup",
+            "group": "Files",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "core_tables_present": {
+            "status": "pass",
+            "detail": "All 11 core database tables are present.",
+            "id": "core_tables_present",
+            "label": "Core database tables present",
+            "group": "Database",
+            "tier": 1,
+            "duration_ms": 1
+        },
+        "core_update_available": {
+            "status": "pass",
+            "detail": "WordPress core is up to date.",
+            "id": "core_update_available",
+            "label": "WordPress core up to date",
+            "group": "Environment",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "cron_overdue": {
+            "status": "pass",
+            "detail": "WP-Cron is running normally.",
+            "id": "cron_overdue",
+            "label": "Scheduled events (WP-Cron)",
+            "group": "Performance",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "db_charset_client": {
+            "status": "pass",
+            "detail": "Database connection uses the recommended utf8mb4 charset.",
+            "id": "db_charset_client",
+            "label": "Database client charset",
+            "group": "Database",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "db_connection": {
+            "status": "pass",
+            "detail": "MySQL responds to SELECT 1.",
+            "id": "db_connection",
+            "label": "Database connection",
+            "group": "Availability",
+            "tier": 1,
+            "duration_ms": 0
+        },
+        "db_overhead": {
+            "status": "pass",
+            "detail": "Database is tidy.",
+            "id": "db_overhead",
+            "label": "Database bloat",
+            "group": "Database",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "debug_display_off": {
+            "status": "pass",
+            "detail": "Error display is off for visitors.",
+            "id": "debug_display_off",
+            "label": "Error display off in production",
+            "group": "Security",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "directory_listing_off": {
+            "status": "pass",
+            "detail": "Directory listing is safely disabled.",
+            "id": "directory_listing_off",
+            "label": "Directory listing disabled",
+            "group": "Security",
+            "tier": 3,
+            "duration_ms": 71
+        },
+        "disk_free": {
+            "status": "pass",
+            "detail": "339.68 GB free on the WordPress volume.",
+            "id": "disk_free",
+            "label": "Free disk space",
+            "group": "Files",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "email_dns": {
+            "status": "pass",
+            "detail": "SPF and DMARC present for freelancemexico.com.mx.",
+            "id": "email_dns",
+            "label": "Email DNS (SPF + DMARC)",
+            "group": "Email",
+            "tier": 3,
+            "duration_ms": 24
+        },
+        "env_file_exposed": {
+            "status": "pass",
+            "detail": ".env is not served (HTTP 403).",
+            "id": "env_file_exposed",
+            "label": ".env file not web-accessible",
+            "group": "Security",
+            "tier": 1,
+            "duration_ms": 36
+        },
+        "env_file_on_disk": {
+            "status": "warn",
+            "detail": "A .env file exists on disk \u2014 ensure it is outside the web root and not served (see the .env HTTP probe).",
+            "id": "env_file_on_disk",
+            "label": ".env file not present\/exposed on disk",
+            "group": "Security",
+            "tier": 1,
+            "duration_ms": 0
+        },
+        "error_log_size": {
+            "status": "pass",
+            "detail": "error_log is 9.32 KB.",
+            "id": "error_log_size",
+            "label": "Error log size",
+            "group": "Errors",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "file_editing_disabled": {
+            "status": "pass",
+            "detail": "File editing is disabled via wp-config.php.",
+            "id": "file_editing_disabled",
+            "label": "File editing disabled",
+            "group": "Security",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "force_ssl_admin": {
+            "status": "pass",
+            "detail": "FORCE_SSL_ADMIN is properly enabled.",
+            "id": "force_ssl_admin",
+            "label": "Force SSL for Admin",
+            "group": "Security",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "homepage_indexable": {
+            "status": "pass",
+            "detail": "Homepage is indexable.",
+            "id": "homepage_indexable",
+            "label": "Homepage is indexable",
+            "group": "SEO",
+            "tier": 3,
+            "duration_ms": 232
+        },
+        "https_forced": {
+            "status": "pass",
+            "detail": "HTTP requests redirect to HTTPS.",
+            "id": "https_forced",
+            "label": "HTTPS is forced",
+            "group": "Security",
+            "tier": 2,
+            "duration_ms": 26
+        },
+        "https_home": {
+            "status": "pass",
+            "detail": "Homepage returns HTTP 200 over HTTPS.",
+            "id": "https_home",
+            "label": "Homepage over HTTPS",
+            "group": "Availability",
+            "tier": 1,
+            "duration_ms": 190
+        },
+        "https_mixed_content": {
+            "status": "warn",
+            "detail": "The homepage contains hardcoded HTTP asset references (mixed content).",
+            "id": "https_mixed_content",
+            "label": "HTTPS Mixed Content",
+            "group": "Security",
+            "tier": 3,
+            "duration_ms": 189
+        },
+        "inactive_plugins_themes": {
+            "status": "pass",
+            "detail": "Inactive plugin and theme count is low.",
+            "id": "inactive_plugins_themes",
+            "label": "Inactive plugins and themes",
+            "group": "Environment",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "largest_tables": {
+            "status": "pass",
+            "detail": "Database size is 31.38 MB. Top tables: wp_wffilemods (9.52 MB), wp_options (5.16 MB), wp_wfknownfilelist (4.52 MB), wp_actionscheduler_actions (3.33 MB), wp_posts (1.47 MB)",
+            "id": "largest_tables",
+            "label": "Largest database tables",
+            "group": "Database",
+            "tier": 5,
+            "duration_ms": 31
+        },
+        "memory_limit": {
+            "status": "pass",
+            "detail": "PHP memory_limit is 512M.",
+            "id": "memory_limit",
+            "label": "PHP memory limit",
+            "group": "Performance",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "object_cache": {
+            "status": "pass",
+            "detail": "Persistent object cache round-trip OK.",
+            "id": "object_cache",
+            "label": "Persistent object cache",
+            "group": "Performance",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "orphaned_tables": {
+            "status": "warn",
+            "detail": "81 non-core tables (sample: wp_actionscheduler_actions, wp_actionscheduler_claims, wp_actionscheduler_groups, wp_actionscheduler_logs, wp_e_events, wp_gla_attribute_mapping_rules, wp_gla_budget_recommendations, wp_gla_merchant_issues) \u2014 review for leftovers from removed plugins; allow-list expected ones via the pvsa_known_tables filter.",
+            "id": "orphaned_tables",
+            "label": "Non-core database tables",
+            "group": "Database",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "php_fatal_errors_recent": {
+            "status": "pass",
+            "detail": "No PHP fatal\/parse errors in the last 24 h.",
+            "id": "php_fatal_errors_recent",
+            "label": "Recent PHP fatal errors",
+            "group": "Errors",
+            "tier": 2,
+            "duration_ms": 1
+        },
+        "php_version": {
+            "status": "pass",
+            "detail": "PHP 8.3.31 is fully supported.",
+            "id": "php_version",
+            "label": "Supported PHP version",
+            "group": "Environment",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "plugin_updates_pending": {
+            "status": "pass",
+            "detail": "All plugins are up to date.",
+            "id": "plugin_updates_pending",
+            "label": "Plugin updates",
+            "group": "Environment",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "rest_api_reachable": {
+            "status": "pass",
+            "detail": "The WordPress REST API is reachable and responding normally.",
+            "id": "rest_api_reachable",
+            "label": "REST API availability",
+            "group": "Environment",
+            "tier": 3,
+            "duration_ms": 301
+        },
+        "secret_keys_defined": {
+            "status": "pass",
+            "detail": "All secret keys are defined securely.",
+            "id": "secret_keys_defined",
+            "label": "Secret keys defined",
+            "group": "Security",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "security_headers": {
+            "status": "pass",
+            "detail": "All baseline security headers are present.",
+            "id": "security_headers",
+            "label": "Baseline security headers",
+            "group": "Security",
+            "tier": 3,
+            "duration_ms": 214
+        },
+        "ssl_cert_expiry": {
+            "status": "pass",
+            "detail": "TLS certificate valid for 75 more days.",
+            "id": "ssl_cert_expiry",
+            "label": "TLS certificate expiry",
+            "group": "Security",
+            "tier": 1,
+            "duration_ms": 12
+        },
+        "stray_files": {
+            "status": "pass",
+            "detail": "No stray backup\/diagnostic files in the web root.",
+            "id": "stray_files",
+            "label": "No stray backup\/diagnostic files in web root",
+            "group": "Security",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "table_collation": {
+            "status": "warn",
+            "detail": "26 tables are not using the recommended utf8mb4 collation.",
+            "id": "table_collation",
+            "label": "Database collation",
+            "group": "Database",
+            "tier": 4,
+            "duration_ms": 1
+        },
+        "table_storage_engine": {
+            "status": "warn",
+            "detail": "1 tables are not using the InnoDB storage engine.",
+            "id": "table_storage_engine",
+            "label": "Database storage engine",
+            "group": "Database",
+            "tier": 4,
+            "duration_ms": 1
+        },
+        "theme_updates_pending": {
+            "status": "pass",
+            "detail": "All themes are up to date.",
+            "id": "theme_updates_pending",
+            "label": "Theme updates",
+            "group": "Environment",
+            "tier": 3,
+            "duration_ms": 0
+        },
+        "transient_api_backed": {
+            "status": "pass",
+            "detail": "Persistent object cache is active.",
+            "id": "transient_api_backed",
+            "label": "API-backed transients",
+            "group": "Performance",
+            "tier": 4,
+            "duration_ms": 0
+        },
+        "uploads_writable": {
+            "status": "pass",
+            "detail": "Uploads directory is writable.",
+            "id": "uploads_writable",
+            "label": "Uploads directory writable",
+            "group": "Files",
+            "tier": 2,
+            "duration_ms": 0
+        },
+        "user_enumeration": {
+            "status": "pass",
+            "detail": "User enumeration is not trivially exposed.",
+            "id": "user_enumeration",
+            "label": "User enumeration not exposed",
+            "group": "Security",
+            "tier": 3,
+            "duration_ms": 420
+        },
+        "wp_config_permissions": {
+            "status": "fail",
+            "detail": "wp-config.php is world-readable (644) \u2014 set 0640 or 0600.",
+            "id": "wp_config_permissions",
+            "label": "wp-config.php permissions",
+            "group": "Security",
+            "tier": 1,
+            "duration_ms": 0
+        },
+        "xmlrpc_status": {
+            "status": "pass",
+            "detail": "xmlrpc.php is blocked (HTTP 403).",
+            "id": "xmlrpc_status",
+            "label": "XML-RPC exposure",
+            "group": "Security",
+            "tier": 4,
+            "duration_ms": 41
+        }
+    }
+}
