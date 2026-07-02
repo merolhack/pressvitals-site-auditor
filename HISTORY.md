@@ -1,5 +1,9 @@
 # History & Changelog
 
+## 2026-07-02
+- **LLM Wiki Ingestion:** Ingested complete WordPress.org Plugin Directory SVN instructions, account credentials rules, asset placement architecture, and 72-hour propagation caching constraints into `LLM_WIKI.md`.
+- **CI/CD Deployment Optimization:** Refactored `.github/workflows/deploy.yml` into separate conditional jobs: full releases run `action-wordpress-plugin-deploy` when publishing a Git Tag, while asset/documentation updates run `action-wordpress-plugin-asset-update` automatically on pushes to `main` (or via `workflow_dispatch`). This ensures `.wordpress-org/` branding images sync directly to `/assets/` in SVN without requiring a version bump.
+
 ## 2026-07-01
 - **WordPress.org Release Preparation:** Formatted and integrated official directory assets (`icon-256x256.png`, `icon-128x128.png`, `banner-1544x500.png`, `banner-772x250.png`) into `.wordpress-org/` to support automated deployment via GitHub Actions (`10up/action-wordpress-plugin-deploy`).
 - **Build Cleanliness:** Added `*Zone.Identifier*` to both `.gitignore` and `.distignore` to prevent Windows NTFS alternate data stream files from leaking into Git repositories or SVN distribution archives.

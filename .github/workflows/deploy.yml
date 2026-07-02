@@ -28,7 +28,12 @@ name: Deploy to WordPress.org
 on:
   release:
     types: [published]
-  # Manual re-deploy of the version currently in readme.txt (Stable tag).
+  push:
+    branches: [main]
+    paths:
+      - '.wordpress-org/**'
+      - 'readme.txt'
+  # Manual re-deploy of assets or full release
   workflow_dispatch:
 
 permissions:
@@ -37,6 +42,7 @@ permissions:
 jobs:
   deploy:
     name: Push to WordPress.org SVN
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -52,16 +58,14 @@ jobs:
           # root, set BUILD_DIR to that path, e.g.:
           # BUILD_DIR: ./pressvitals-site-auditor
 
-  # OPTIONAL: update only the readme + /.wordpress-org assets WITHOUT cutting a
-  # new release (handy for fixing a typo or swapping the banner). Uncomment to use.
-  #
-  # assets:
-  #   name: Update readme & assets
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: 10up/action-wordpress-plugin-asset-update@stable
-  #       env:
-  #         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-  #         SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-  #         SLUG: pressvitals-site-auditor
+  assets:
+    name: Update readme & assets
+    if: github.event_name != 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: pressvitals-site-auditor

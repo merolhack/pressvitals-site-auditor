@@ -38,9 +38,32 @@ This repository fully implements the [LLM-Wiki pattern](https://gist.github.com/
   2. `code-quality.yml`: Runs PHPCS and the official `wordpress/plugin-check-action@v1`.
   3. `deploy.yml`: Pushes tags to the WordPress.org SVN repository on release.
 
-## 5. Release Workflow
-We use a robust Python-based zip pipeline because standard git archivers bypass `.distignore`.
+## 5. WordPress.org SVN & Repository Information
+- **SVN Repository URL:** `https://plugins.svn.wordpress.org/pressvitals-site-auditor`
+- **Public Directory URL:** `https://wordpress.org/plugins/pressvitals-site-auditor`
+- **SVN Account & Credentials:**
+  - SVN Username: `merolhack` (case-sensitive; WP.org usernames must be used exactly as registered, e.g., never use email address).
+  - SVN Password: Managed separately from main WP.org login password under Account & Security: `https://profiles.wordpress.org/me/profile/edit/group/3/?screen=svn-password`.
+  - Credentials must be configured in GitHub Repository Secrets (`SVN_USERNAME` and `SVN_PASSWORD`) for automated CI deployments.
+- **Asset Placement & Formatting:**
+  - Directory assets (`banner-1544x500.png`, `banner-772x250.png`, `icon-256x256.png`, `icon-128x128.png`, and screenshots) live in `.wordpress-org/` in Git.
+  - In SVN, these map to the repository root `/assets/` directory (`https://plugins.svn.wordpress.org/pressvitals-site-auditor/assets/`), separate from `/trunk/`.
+  - **72-Hour Directory Propagation:** Due to WordPress.org CDN and directory caching, it may take up to **72 hours** after an SVN upload for search results, user profiles, and branding images (logos/banners) to fully update across the website.
+- **Key WordPress.org Developer Resources:**
+  - [Using SVN with Plugin Directory](https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/)
+  - [SVN Access & Passwords](https://make.wordpress.org/meta/handbook/tutorials-guides/svn-access/)
+  - [Plugin Developer FAQ](https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/)
+  - [Readme.txt Standard](https://wordpress.org/plugins/developers/#readme) | [Validator](https://wordpress.org/plugins/developers/readme-validator/)
+  - [Plugin Assets Specifications](https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/)
+  - [Detailed Plugin Guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/)
+  - [Block Specific Plugin Guidelines](https://developer.wordpress.org/plugins/wordpress-org/block-specific-plugin-guidelines/)
+
+## 6. Release Workflow & Automated Deployment
+We use a robust automated pipeline combining GitHub Actions and a Python-based zip archiver because standard git archivers bypass `.distignore`.
 1. Run `bin/bump-version.sh <version>` to synchronize versions across headers and `readme.txt`.
 2. Update the `readme.txt` changelog manually.
 3. Generate the ZIP (using `rsync` and Python `shutil.make_archive` honoring `.distignore`).
-4. Commit, create a tag, and push. (Creating a GitHub Release with the tag triggers the SVN deployment action).
+4. Commit, create a tag, and push.
+5. **SVN Deployment Architecture (`deploy.yml`):**
+   - **Full Plugin Release:** Creating and publishing a GitHub Release (e.g. tag `v1.2.5`) triggers `10up/action-wordpress-plugin-deploy@stable`. This pushes `/trunk` and `/tags/<version>` to WordPress.org SVN.
+   - **Asset & Readme Sync:** Pushing changes to `.wordpress-org/**` or `readme.txt` on branch `main` (or executing `workflow_dispatch`) triggers `10up/action-wordpress-plugin-asset-update@stable`. This syncs logos, banners, and documentation directly to `/assets/` in SVN without attempting to create an invalid SVN release tag.
