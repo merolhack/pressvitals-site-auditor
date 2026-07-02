@@ -1,6 +1,7 @@
 # History & Changelog
 
 ## 2026-07-02
+- **Initial WP.org Release (`v1.2.6`):** Bumped plugin version to `1.2.6` and created GitHub release tag `1.2.6` to trigger automated initial deployment of plugin code (`/trunk`) and branding assets (`/assets`) to WordPress.org SVN.
 - **LLM Wiki Ingestion:** Ingested complete WordPress.org Plugin Directory SVN instructions, account credentials rules, asset placement architecture, and 72-hour propagation caching constraints into `LLM_WIKI.md`.
 - **CI/CD Deployment Optimization:** Refactored `.github/workflows/deploy.yml` into separate conditional jobs: full releases run `action-wordpress-plugin-deploy` when publishing a Git Tag, while asset/documentation updates run `action-wordpress-plugin-asset-update` automatically on pushes to `main` (or via `workflow_dispatch`). This ensures `.wordpress-org/` branding images sync directly to `/assets/` in SVN without requiring a version bump.
 
