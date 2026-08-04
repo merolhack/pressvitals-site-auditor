@@ -456,25 +456,25 @@ class PVSA_Engine {
 				'tier'     => 4,
 				'callback' => array( $this, 'check_transient_api_backed' ),
 			),
-			'expired_transients'   => array(
+			'expired_transients'      => array(
 				'label'    => __( 'Expired transient bloat', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_expired_transients' ),
 			),
-			'php_execution_limits' => array(
+			'php_execution_limits'    => array(
 				'label'    => __( 'PHP execution limits', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_php_execution_limits' ),
 			),
-			'db_index_health'      => array(
+			'db_index_health'         => array(
 				'label'    => __( 'Core table index health', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_db_index_health' ),
 			),
-			'postmeta_orphans'     => array(
+			'postmeta_orphans'        => array(
 				'label'    => __( 'Orphaned post metadata', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
@@ -2523,8 +2523,9 @@ class PVSA_Engine {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $core_tables ), '%s' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$indexed = $wpdb->get_col(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT DISTINCT TABLE_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND INDEX_NAME = 'PRIMARY' AND TABLE_NAME IN ({$placeholders})",
