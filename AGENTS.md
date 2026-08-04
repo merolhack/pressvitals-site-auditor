@@ -7,6 +7,20 @@ This document defines the schema and operating rules for any LLM agent interacti
 
 ---
 
+# Codebase Context & Tool Usage Rules
+
+1. **Prioritize Knowledge Graph:** 
+   - ALWAYS query `codebase-memory` MCP tools (`search_graph`, `query_graph`, `trace`, `impact_analysis`) BEFORE reading large source files or performing global greps.
+   - Use `index_status` and `detect_changes` to verify project graph freshness before starting structural tasks.
+
+2. **LLM Wiki & Architecture Alignment:**
+   - Always cross-reference architectural decisions with `LLM_WIKI.md` and validate code relationships using graph node signatures.
+
+3. **Post-Task Sync:**
+   - After completing edits, run `detect_changes` to ensure the codebase graph reflects all newly created or modified functions/routes.
+
+---
+
 ## Wiki Architecture
 This repository implements the LLM-Wiki structure to manage project knowledge alongside code:
 1.  **[index.md](index.md)**: The content catalog. Agents must read this to understand the layout of the repository and the wiki.
