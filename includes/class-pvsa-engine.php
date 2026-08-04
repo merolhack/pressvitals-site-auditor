@@ -456,25 +456,25 @@ class PVSA_Engine {
 				'tier'     => 4,
 				'callback' => array( $this, 'check_transient_api_backed' ),
 			),
-			'expired_transients'     => array(
+			'expired_transients'   => array(
 				'label'    => __( 'Expired transient bloat', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_expired_transients' ),
 			),
-			'php_execution_limits'   => array(
+			'php_execution_limits' => array(
 				'label'    => __( 'PHP execution limits', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_php_execution_limits' ),
 			),
-			'db_index_health'        => array(
+			'db_index_health'      => array(
 				'label'    => __( 'Core table index health', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_db_index_health' ),
 			),
-			'postmeta_orphans'       => array(
+			'postmeta_orphans'     => array(
 				'label'    => __( 'Orphaned post metadata', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
@@ -2466,8 +2466,8 @@ class PVSA_Engine {
 		$exec_time  = (int) ini_get( 'max_execution_time' );
 		$input_vars = (int) ini_get( 'max_input_vars' );
 
-		$min_exec  = (int) apply_filters( 'pvsa_min_execution_time', 30 );
-		$min_vars  = (int) apply_filters( 'pvsa_min_input_vars', 1000 );
+		$min_exec = (int) apply_filters( 'pvsa_min_execution_time', 30 );
+		$min_vars = (int) apply_filters( 'pvsa_min_input_vars', 1000 );
 
 		$issues = array();
 
@@ -2523,7 +2523,7 @@ class PVSA_Engine {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $core_tables ), '%s' ) );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$indexed = $wpdb->get_col(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
