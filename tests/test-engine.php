@@ -69,8 +69,8 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$checks = $this->engine->get_checks();
 
 		$this->assertIsArray( $checks );
-		$this->assertGreaterThanOrEqual( 22, count( $checks ), 'Expected at least 22 built-in probes.' );
-		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns' ) as $id ) {
+		$this->assertGreaterThanOrEqual( 26, count( $checks ), 'Expected at least 26 built-in probes.' );
+		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans' ) as $id ) {
 			$this->assertArrayHasKey( $id, $checks, "Missing built-in check: {$id}" );
 		}
 	}
@@ -468,5 +468,40 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 
 		$result = $this->engine->check_stray_files();
 		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Expired transients: clean DB returns pass.
+	 */
+	public function test_check_expired_transients_pass() {
+		$result = $this->engine->check_expired_transients();
+		$this->assertContains( $result['status'], array( 'pass', 'warn', 'fail' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * PHP execution limits: always returns a valid result.
+	 */
+	public function test_check_php_execution_limits_pass() {
+		$result = $this->engine->check_php_execution_limits();
+		$this->assertContains( $result['status'], array( 'pass', 'warn', 'fail' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * DB index health: core tables in test DB have PRIMARY keys.
+	 */
+	public function test_check_db_index_health_pass() {
+		$result = $this->engine->check_db_index_health();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Postmeta orphans: clean test DB returns pass.
+	 */
+	public function test_check_postmeta_orphans_pass() {
+		$result = $this->engine->check_postmeta_orphans();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
 	}
 }

@@ -1,5 +1,14 @@
 # History & Changelog
 
+## 2026-08-04
+- **v1.3.0 — New Performance & DB Probes:** Added 4 new diagnostic probes:
+  1. `check_expired_transients` — dedicated expired transient bloat detection with configurable `pvsa_expired_transients_warn` (500) and `pvsa_expired_transients_fail` (2000) filter thresholds.
+  2. `check_php_execution_limits` — audits `max_execution_time` and `max_input_vars` against safe minimums; treats `0` (unlimited/CLI) as pass.
+  3. `check_db_index_health` — queries `information_schema.STATISTICS` to verify all 11 core WordPress tables have their PRIMARY key index.
+  4. `check_postmeta_orphans` — counts `wp_postmeta` rows with no matching `wp_posts` row (LEFT JOIN); configurable via `pvsa_orphan_postmeta_warn` (1000) / `pvsa_orphan_postmeta_fail` (10000).
+- Total built-in probes: 36 → 40. Updated tests (`test-engine.php`) to expect ≥26 probes and added 4 dedicated test methods.
+- Version bumped: `1.2.6` → `1.3.0` across plugin header, `PVSA_VERSION` constant, and `readme.txt` stable tag.
+
 ## 2026-07-02
 - **Initial WP.org Release (`v1.2.6`):** Bumped plugin version to `1.2.6` and created GitHub release tag `1.2.6` to trigger automated initial deployment of plugin code (`/trunk`) and branding assets (`/assets`) to WordPress.org SVN.
 - **LLM Wiki Ingestion:** Ingested complete WordPress.org Plugin Directory SVN instructions, account credentials rules, asset placement architecture, and 72-hour propagation caching constraints into `LLM_WIKI.md`.

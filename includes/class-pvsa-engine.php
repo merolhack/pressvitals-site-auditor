@@ -456,6 +456,30 @@ class PVSA_Engine {
 				'tier'     => 4,
 				'callback' => array( $this, 'check_transient_api_backed' ),
 			),
+			'expired_transients'     => array(
+				'label'    => __( 'Expired transient bloat', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_expired_transients' ),
+			),
+			'php_execution_limits'   => array(
+				'label'    => __( 'PHP execution limits', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
+				'tier'     => 4,
+				'callback' => array( $this, 'check_php_execution_limits' ),
+			),
+			'db_index_health'        => array(
+				'label'    => __( 'Core table index health', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
+				'tier'     => 4,
+				'callback' => array( $this, 'check_db_index_health' ),
+			),
+			'postmeta_orphans'       => array(
+				'label'    => __( 'Orphaned post metadata', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
+				'tier'     => 4,
+				'callback' => array( $this, 'check_postmeta_orphans' ),
+			),
 		);
 
 		return array_merge( $core, $checks );
@@ -2389,6 +2413,177 @@ class PVSA_Engine {
 			// translators: %d: HTTP status code
 			// translators: 1: dynamic value
 			'detail' => sprintf( __( 'The REST API responded with an unexpected status code (%d).', 'pressvitals-site-auditor' ), $status_code ),
+		);
+	}
+
+	/**
+	 * Count expired transients still stored in the options table.
+	 *
+	 * @return array
+	 */
+	public function check_expired_transients() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$expired = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+				$wpdb->esc_like( '_transient_timeout_' ) . '%',
+				time()
+			)
+		);
+
+		$warn = (int) apply_filters( 'pvsa_expired_transients_warn', 500 );
+		$fail = (int) apply_filters( 'pvsa_expired_transients_fail', 2000 );
+
+		if ( $expired >= $fail ) {
+			return array(
+				'status' => 'fail',
+				/* translators: %d: number of expired transients */
+				'detail' => sprintf( __( '%d expired transients are clogging the options table — run cleanup.', 'pressvitals-site-auditor' ), $expired ),
+			);
+		}
+		if ( $expired >= $warn ) {
+			return array(
+				'status' => 'warn',
+				/* translators: %d: number of expired transients */
+				'detail' => sprintf( __( '%d expired transients found in the options table.', 'pressvitals-site-auditor' ), $expired ),
+			);
+		}
+		return array(
+			'status' => 'pass',
+			/* translators: %d: number of expired transients */
+			'detail' => sprintf( __( '%d expired transients in the options table.', 'pressvitals-site-auditor' ), $expired ),
+		);
+	}
+
+	/**
+	 * Check PHP max_execution_time and max_input_vars against safe minimums.
+	 *
+	 * @return array
+	 */
+	public function check_php_execution_limits() {
+		$exec_time  = (int) ini_get( 'max_execution_time' );
+		$input_vars = (int) ini_get( 'max_input_vars' );
+
+		$min_exec  = (int) apply_filters( 'pvsa_min_execution_time', 30 );
+		$min_vars  = (int) apply_filters( 'pvsa_min_input_vars', 1000 );
+
+		$issues = array();
+
+		// 0 means unlimited (typical for CLI); only warn when positive and low.
+		if ( $exec_time > 0 && $exec_time < $min_exec ) {
+			/* translators: 1: current value, 2: recommended minimum */
+			$issues[] = sprintf( __( 'max_execution_time is %1$ds (recommended >= %2$ds)', 'pressvitals-site-auditor' ), $exec_time, $min_exec );
+		}
+		if ( $input_vars > 0 && $input_vars < $min_vars ) {
+			/* translators: 1: current value, 2: recommended minimum */
+			$issues[] = sprintf( __( 'max_input_vars is %1$d (recommended >= %2$d)', 'pressvitals-site-auditor' ), $input_vars, $min_vars );
+		}
+
+		if ( ! empty( $issues ) ) {
+			return array(
+				'status' => 'warn',
+				'detail' => implode( '; ', $issues ) . '.',
+			);
+		}
+
+		$exec_label = ( 0 === $exec_time )
+			? __( 'unlimited', 'pressvitals-site-auditor' )
+			: $exec_time . 's';
+
+		return array(
+			'status' => 'pass',
+			/* translators: 1: max_execution_time value, 2: max_input_vars value */
+			'detail' => sprintf( __( 'max_execution_time = %1$s, max_input_vars = %2$d.', 'pressvitals-site-auditor' ), $exec_label, $input_vars ),
+		);
+	}
+
+	/**
+	 * Verify that all WordPress core tables have their PRIMARY key index.
+	 *
+	 * @return array
+	 */
+	public function check_db_index_health() {
+		global $wpdb;
+
+		$core_tables = array(
+			$wpdb->posts,
+			$wpdb->postmeta,
+			$wpdb->options,
+			$wpdb->comments,
+			$wpdb->commentmeta,
+			$wpdb->terms,
+			$wpdb->term_taxonomy,
+			$wpdb->term_relationships,
+			$wpdb->termmeta,
+			$wpdb->users,
+			$wpdb->usermeta,
+		);
+
+		$placeholders = implode( ', ', array_fill( 0, count( $core_tables ), '%s' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$indexed = $wpdb->get_col(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT DISTINCT TABLE_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND INDEX_NAME = 'PRIMARY' AND TABLE_NAME IN ({$placeholders})",
+				...$core_tables
+			)
+		);
+
+		$missing = array_diff( $core_tables, $indexed );
+
+		if ( ! empty( $missing ) ) {
+			return array(
+				'status' => 'fail',
+				/* translators: %s: comma-separated list of table names */
+				'detail' => sprintf( __( 'Missing PRIMARY key on: %s.', 'pressvitals-site-auditor' ), implode( ', ', $missing ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			/* translators: %d: number of core tables checked */
+			'detail' => sprintf( __( 'All %d core tables have their PRIMARY key index.', 'pressvitals-site-auditor' ), count( $core_tables ) ),
+		);
+	}
+
+	/**
+	 * Count wp_postmeta rows whose post_id has no matching wp_posts row.
+	 *
+	 * @return array
+	 */
+	public function check_postmeta_orphans() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$orphans = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON pm.post_id = p.ID WHERE p.ID IS NULL"
+		);
+
+		$warn = (int) apply_filters( 'pvsa_orphan_postmeta_warn', 1000 );
+		$fail = (int) apply_filters( 'pvsa_orphan_postmeta_fail', 10000 );
+
+		if ( $orphans >= $fail ) {
+			return array(
+				'status' => 'fail',
+				/* translators: %s: number of orphaned rows */
+				'detail' => sprintf( __( '%s orphaned postmeta rows found — consider a database cleanup.', 'pressvitals-site-auditor' ), number_format_i18n( $orphans ) ),
+			);
+		}
+		if ( $orphans >= $warn ) {
+			return array(
+				'status' => 'warn',
+				/* translators: %s: number of orphaned rows */
+				'detail' => sprintf( __( '%s orphaned postmeta rows detected.', 'pressvitals-site-auditor' ), number_format_i18n( $orphans ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			/* translators: %s: number of orphaned rows */
+			'detail' => sprintf( __( '%s orphaned postmeta rows.', 'pressvitals-site-auditor' ), number_format_i18n( $orphans ) ),
 		);
 	}
 }
