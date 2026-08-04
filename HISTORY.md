@@ -1,13 +1,17 @@
 # History & Changelog
 
 ## 2026-08-04
+- **LLM Wiki Ingestion & Codebase Graph Integration:**
+  - Verified `codebase-memory-mcp` knowledge graph status for project `home-merolhack-fl-pressvitals-site-auditor` (`detect_changes` clean at SHA `9776517`).
+  - Ingested all v1.3.0 architectural rules, 40 probe definitions, array alignment standards, and prepared SQL ignore patterns into `LLM_WIKI.md`, `AGENTS.md`, and skills (`pressvitals-architecture-rules`, `pressvitals-release-workflow`).
+  - Mandated the LLM Wiki as the primary single source of truth for all AI agents working on this project.
 - **v1.3.0 — New Performance & DB Probes:** Added 4 new diagnostic probes:
   1. `check_expired_transients` — dedicated expired transient bloat detection with configurable `pvsa_expired_transients_warn` (500) and `pvsa_expired_transients_fail` (2000) filter thresholds.
   2. `check_php_execution_limits` — audits `max_execution_time` and `max_input_vars` against safe minimums; treats `0` (unlimited/CLI) as pass.
   3. `check_db_index_health` — queries `information_schema.STATISTICS` to verify all 11 core WordPress tables have their PRIMARY key index.
   4. `check_postmeta_orphans` — counts `wp_postmeta` rows with no matching `wp_posts` row (LEFT JOIN); configurable via `pvsa_orphan_postmeta_warn` (1000) / `pvsa_orphan_postmeta_fail` (10000).
 - Total built-in probes: 36 → 40. Updated tests (`test-engine.php`) to expect ≥26 probes and added 4 dedicated test methods.
-- Version bumped: `1.2.6` → `1.3.0` across plugin header, `PVSA_VERSION` constant, and `readme.txt` stable tag.
+- Version bumped: `1.2.6` → `1.3.0` across plugin header, `PVSA_VERSION` constant, and `readme.txt` stable tag. Fixed PHPCS array alignment and prepared query placeholder sniffs (100% clean PHPCS & PHPUnit CI runs).
 
 ## 2026-07-02
 - **Initial WP.org Release (`v1.2.6`):** Bumped plugin version to `1.2.6` and created GitHub release tag `1.2.6` to trigger automated initial deployment of plugin code (`/trunk`) and branding assets (`/assets`) to WordPress.org SVN.
