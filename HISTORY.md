@@ -1,5 +1,25 @@
 # History & Changelog
 
+## 2026-08-14
+- **WordPress 7.1 Imminent Release Readiness & Compatibility Audit:**
+  - Audited codebase against all key changes in the WordPress 7.1 Field Guide:
+    - *Iframed Post Editor*: Verified no impact (headless engine + isolated Tools admin UI).
+    - *Client-side Media Processing*: Verified no impact (read-only diagnostics, no media hooks).
+    - *@wordpress/components*: Verified no impact (native PHP/HTML rendering).
+    - *Persistent Toolbar*: Verified no impact (no admin bar hooks).
+    - *SVG Icon API*: Verified no impact.
+    - *jQuery UI 1.14.2*: Verified no impact (pure vanilla JS used in `pvsa-admin.js`).
+    - *Abilities API*: Verified full compatibility with core permissions.
+  - Bumped `Tested up to: 7.1` in `readme.txt` and `pressvitals-site-auditor.php`.
+  - Executed compatibility validation across 3 Docker environments:
+    - `wp-latest` (WordPress 6.7 / PHP 8.3) -> HTTP 302 OK
+    - `wp-mid` (WordPress 6.4 / PHP 8.1) -> HTTP 302 OK
+    - `wp-legacy` (WordPress 6.0 / PHP 7.4) -> HTTP 302 OK
+  - Ran PHPUnit suite in Docker: 37 tests, 83 assertions passed (100% OK).
+  - Ran PHPCS code quality checks in Docker: 100% clean (0 errors, 0 warnings).
+  - Added `.phpunit.result.cache` to `.gitignore`.
+  - Ingested WordPress 7.1 field guide knowledge into `LLM_WIKI.md` and updated skills.
+
 ## 2026-08-04
 - **LLM Wiki Ingestion & Codebase Graph Integration:**
   - Verified `codebase-memory-mcp` knowledge graph status for project `home-merolhack-fl-pressvitals-site-auditor` (`detect_changes` clean at SHA `9776517`).

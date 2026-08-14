@@ -5,7 +5,7 @@
  * Description:       A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health — extensible to 48+ via REST API and custom filters.
  * Version:           1.3.0
  * Requires at least: 6.0
- * Tested up to:      7.0
+ * Tested up to:      7.1
  * Requires PHP:      7.4
  * Author: merolhack
  * Author URI:        https://merolhack.github.io/

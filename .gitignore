@@ -15,5 +15,6 @@
 *Zone.Identifier*
 
 # Testing and scratch files
+.phpunit.result.cache
 test*.php
 report_*.txt

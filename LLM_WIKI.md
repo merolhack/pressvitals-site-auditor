@@ -87,10 +87,25 @@ This repository fully implements the [LLM-Wiki pattern](https://gist.github.com/
 
 ---
 
-## 8. Release Workflow & Automated Deployment
+## 8. WordPress Compatibility & Field Guide Audits
+
+### WordPress 7.1 Compatibility Audit (Verified 2026-08-14)
+The plugin has been fully audited against the WordPress 7.1 Field Guide changes:
+- **Iframed Post Editor**: No impact. PVSA is a headless-first diagnostic tool with an independent admin dashboard (`Tools -> PressVitals Site Auditor`), zero post editor canvas hooks, and no Gutenberg blocks.
+- **Client-Side Media Processing**: No impact. PVSA performs read-only filesystem and diagnostic checks, without intercepting media uploads or image workflows.
+- **@wordpress/components Updates**: No impact. Admin UI is rendered server-side in PHP with vanilla CSS/JS.
+- **Persistent Toolbar**: No impact. PVSA does not add custom nodes or modify the admin toolbar.
+- **Public SVG Icon API**: No impact. PVSA iconography is self-contained.
+- **jQuery UI 1.14.2 Upgrade**: No impact. PVSA uses vanilla JavaScript (`pvsa-admin.js`) without jQuery or jQuery UI dependencies.
+- **Abilities API Improvements**: Fully compatible with standard capability checks (`manage_options`).
+- **Compatibility Status**: `Tested up to: 7.1` confirmed across plugin headers and `readme.txt`. Verified 100% pass across local multi-version Docker containers (`wp-latest`, `wp-mid`, `wp-legacy`) and PHPUnit test suite.
+
+---
+
+## 9. Release Workflow & Automated Deployment
 1. Run `bin/bump-version.sh <version>` to synchronize versions across headers and `readme.txt`.
 2. Update `readme.txt` changelog and `HISTORY.md`.
 3. Generate the ZIP using `rsync` and Python `shutil.make_archive` honoring `.distignore`.
 4. Run local Docker PHPUnit and PHPCS checks (`vendor/bin/phpcs` must report 0 errors/0 warnings).
 5. Commit, tag (`vX.Y.Z`), and push to GitHub.
-6. **SVN Deployment (`deploy.yml`):** Tag push or GitHub release triggers automated SVN deployment of `/trunk` and `/tags/<version>`.
+6. **SVN Deployment (`deploy.yml`):** Tag push or GitHub release triggers automated SVN deployment of `/trunk` and `/tags/<version>`. Pushes to `main` touching `readme.txt` or `.wordpress-org/` automatically sync assets and readme metadata to SVN via `10up/action-wordpress-plugin-asset-update`.

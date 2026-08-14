@@ -85,7 +85,7 @@ CI runs PHPUnit across PHP 7.4 / 8.0 / 8.2 / 8.3.
 ## AI Agents / Assistants
 
 > **Are you an AI, LLM, or coding assistant?**
-> Please read the [`LLM_WIKI.md`](LLM_WIKI.md) and the `pressvitals-architecture-rules` SKILL before making architectural changes. These documents encode the strict Plugin Check rules, environmental testing realities, and release workflows necessary to contribute to this plugin successfully.
+> You **MUST** always consult the [`LLM_WIKI.md`](LLM_WIKI.md), [`AGENTS.md`](AGENTS.md), and use the `codebase-memory-mcp` knowledge graph tools (`search_graph`, `trace_path`, `get_code_snippet`) for repository knowledge and architecture constraints before making modifications. Also review the `pressvitals-architecture-rules` and `pressvitals-release-workflow` skills.
 
 ## License
 
