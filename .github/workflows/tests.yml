@@ -24,14 +24,17 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:10.6
+        image: mariadb:10.11
         env:
+          MARIADB_ROOT_PASSWORD: root
           MYSQL_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress_test
+          MYSQL_DATABASE: wordpress_test
         ports:
           - 3306:3306
         options: >-
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
-          --health-interval=10s --health-timeout=5s --health-retries=5
+          --health-interval=10s --health-timeout=5s --health-retries=10
 
     steps:
       - uses: actions/checkout@v4
