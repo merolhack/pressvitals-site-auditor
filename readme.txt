@@ -4,11 +4,11 @@ Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A headless-first diagnostic engine featuring 22+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
+A headless-first diagnostic engine featuring 45+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
 
 == Description ==
 
@@ -21,9 +21,8 @@ dashboard.
 
 It is **dependency-free** — no WooCommerce, no page builder, no other plugin
 required — and **pluggable**: every probe is registered through a filter, so the
-**22+ built-in probes** are just the starting point. The architecture is designed
-to scale to **48+ probes** in production; register your own via
-`pvsa_registered_checks`.
+**45+ built-in probes** are just the starting point. The architecture is designed
+to scale; register your own via `pvsa_registered_checks`.
 
 = How is this different from the built-in Site Health? =
 
@@ -195,6 +194,14 @@ mounted. See `docker-compose.yml` for details.
 
 1. The admin report grouped by category with the summary box.
 2. The settings page (thresholds and alert email).
+
+= 1.4.0 =
+* New probe: debug.log HTTP exposure audit — verifies error logs containing sensitive stack traces are not web-accessible.
+* New probe: Large individual autoloaded options scanner (warns on single option rows >= 100 KB).
+* New probe: Post revisions and trashed posts/comments accumulation auditor.
+* New probe: WP-Cron HTTP loopback spawn health check.
+* New probe: Zend OPcache status, hit rate, and memory utilization audit.
+* Total built-in probes increased from 40 to 45.
 
 = 1.3.0 =
 * New probe: Expired transient bloat detection with configurable warn/fail thresholds.

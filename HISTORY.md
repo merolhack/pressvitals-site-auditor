@@ -1,6 +1,21 @@
 # History & Changelog
 
-## 2026-08-14
+## 2026-08-14 (v1.4.0 Release)
+- **v1.4.0 — Phase 1 Feature Expansion & 5 New Diagnostic Probes:**
+  - Added 5 new high-impact diagnostic probes across Security, Database, and Performance:
+    1. `debug_log_not_public` (Security, Tier 1) — Probes `wp-content/debug.log` over HTTP to ensure stack traces and sensitive error logs are not publicly exposed.
+    2. `heavy_autoloaded_options` (Database, Tier 3) — Inspects `wp_options` for individual autoloaded option records exceeding 100 KB (filterable via `pvsa_heavy_autoload_warn_bytes`).
+    3. `revision_and_trash_bloat` (Database, Tier 4) — Audits post revision accumulation against published post ratios and trashed content count.
+    4. `cron_loopback_health` (Performance, Tier 2) — Tests HTTP loopback reachability for `wp-cron.php` to ensure background workers can spawn.
+    5. `opcache_status` (Performance, Tier 3) — Audits PHP Zend OPcache configuration, hit rate, and memory utilization.
+  - Total built-in probes increased from 40 to 45.
+  - Bumped version to `1.4.0` across `pressvitals-site-auditor.php`, `PVSA_VERSION` constant, and `readme.txt` stable tag.
+  - Expanded unit test suite (`tests/test-engine.php`): 43 tests, 95 assertions (100% pass).
+  - Validated PHPCS code quality: 0 errors, 0 warnings (100% clean).
+  - Verified multi-container Docker runtime smoke tests (`wp-latest`, `wp-mid`, `wp-legacy`).
+  - Ingested updated probe definitions into `LLM_WIKI.md`.
+
+## 2026-08-14 (Compatibility Audit)
 - **WordPress 7.1 Imminent Release Readiness & Compatibility Audit:**
   - Audited codebase against all key changes in the WordPress 7.1 Field Guide:
     - *Iframed Post Editor*: Verified no impact (headless engine + isolated Tools admin UI).

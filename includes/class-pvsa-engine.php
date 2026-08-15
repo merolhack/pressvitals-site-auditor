@@ -194,67 +194,67 @@ class PVSA_Engine {
 		}
 
 		$core = array(
-			'db_connection'           => array(
+			'db_connection'            => array(
 				'label'    => __( 'Database connection', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Availability', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_db_connection' ),
 			),
-			'https_home'              => array(
+			'https_home'               => array(
 				'label'    => __( 'Homepage over HTTPS', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Availability', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_https_home' ),
 			),
-			'debug_display_off'       => array(
+			'debug_display_off'        => array(
 				'label'    => __( 'Error display off in production', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_debug_display_off' ),
 			),
-			'error_log_size'          => array(
+			'error_log_size'           => array(
 				'label'    => __( 'Error log size', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Errors', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_error_log_size' ),
 			),
-			'php_fatal_errors_recent' => array(
+			'php_fatal_errors_recent'  => array(
 				'label'    => __( 'Recent PHP fatal errors', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Errors', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_php_fatal_errors_recent' ),
 			),
-			'autoloaded_options_size' => array(
+			'autoloaded_options_size'  => array(
 				'label'    => __( 'Autoloaded options size', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_autoloaded_options_size' ),
 			),
-			'disk_free'               => array(
+			'disk_free'                => array(
 				'label'    => __( 'Free disk space', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Files', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_disk_free' ),
 			),
-			'uploads_writable'        => array(
+			'uploads_writable'         => array(
 				'label'    => __( 'Uploads directory writable', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Files', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_uploads_writable' ),
 			),
-			'memory_limit'            => array(
+			'memory_limit'             => array(
 				'label'    => __( 'PHP memory limit', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_memory_limit' ),
 			),
-			'object_cache'            => array(
+			'object_cache'             => array(
 				'label'    => __( 'Persistent object cache', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_object_cache' ),
 			),
-			'php_version'             => array(
+			'php_version'              => array(
 				'label'    => __( 'Supported PHP version', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
@@ -264,221 +264,251 @@ class PVSA_Engine {
 			// --- Deep-audit probes that WordPress core's Site Health does NOT
 			// perform (security posture, deliverability, TLS expiry, backups,
 			// secret/file leaks, DB bloat). These are the auditor's signature. ---
-			'env_file_exposed'        => array(
+			'env_file_exposed'         => array(
 				'label'    => __( '.env file not web-accessible', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_env_file_exposed' ),
 			),
-			'stray_files'             => array(
+			'stray_files'              => array(
 				'label'    => __( 'No stray backup/diagnostic files in web root', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_stray_files' ),
 			),
-			'ssl_cert_expiry'         => array(
+			'ssl_cert_expiry'          => array(
 				'label'    => __( 'TLS certificate expiry', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_ssl_cert_expiry' ),
 			),
-			'security_headers'        => array(
+			'security_headers'         => array(
 				'label'    => __( 'Baseline security headers', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_security_headers' ),
 			),
-			'https_forced'            => array(
+			'https_forced'             => array(
 				'label'    => __( 'HTTPS is forced', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_https_forced' ),
 			),
-			'xmlrpc_status'           => array(
+			'xmlrpc_status'            => array(
 				'label'    => __( 'XML-RPC exposure', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_xmlrpc_status' ),
 			),
-			'admin_username'          => array(
+			'admin_username'           => array(
 				'label'    => __( 'No default "admin" username', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_admin_username' ),
 			),
-			'db_overhead'             => array(
+			'db_overhead'              => array(
 				'label'    => __( 'Database bloat', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_db_overhead' ),
 			),
-			'backup_recency'          => array(
+			'backup_recency'           => array(
 				'label'    => __( 'Recent backup', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Files', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_backup_recency' ),
 			),
-			'email_dns'               => array(
+			'email_dns'                => array(
 				'label'    => __( 'Email DNS (SPF + DMARC)', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Email', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_email_dns' ),
 			),
-			'homepage_indexable'      => array(
+			'homepage_indexable'       => array(
 				'label'    => __( 'Homepage is indexable', 'pressvitals-site-auditor' ),
 				'group'    => __( 'SEO', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_homepage_indexable' ),
 			),
-			'https_mixed_content'     => array(
+			'https_mixed_content'      => array(
 				'label'    => __( 'HTTPS Mixed Content', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_https_mixed_content' ),
 			),
-			'rest_api_reachable'      => array(
+			'rest_api_reachable'       => array(
 				'label'    => __( 'REST API availability', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_rest_api_reachable' ),
 			),
-			'env_file_on_disk'        => array(
+			'env_file_on_disk'         => array(
 				'label'    => __( '.env file not present/exposed on disk', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_env_file_on_disk' ),
 			),
-			'wp_config_permissions'   => array(
+			'wp_config_permissions'    => array(
 				'label'    => __( 'wp-config.php permissions', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_wp_config_permissions' ),
 			),
-			'core_tables_present'     => array(
+			'core_tables_present'      => array(
 				'label'    => __( 'Core database tables present', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 1,
 				'callback' => array( $this, 'check_core_tables_present' ),
 			),
-			'orphaned_tables'         => array(
+			'orphaned_tables'          => array(
 				'label'    => __( 'Non-core database tables', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_orphaned_tables' ),
 			),
-			'core_update_available'   => array(
+			'core_update_available'    => array(
 				'label'    => __( 'WordPress core up to date', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_core_update_available' ),
 			),
-			'plugin_updates_pending'  => array(
+			'plugin_updates_pending'   => array(
 				'label'    => __( 'Plugin updates', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_plugin_updates_pending' ),
 			),
-			'user_enumeration'        => array(
+			'user_enumeration'         => array(
 				'label'    => __( 'User enumeration not exposed', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_user_enumeration_blocked' ),
 			),
-			'secret_keys_defined'     => array(
+			'secret_keys_defined'      => array(
 				'label'    => __( 'Secret keys defined', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 2,
 				'callback' => array( $this, 'check_secret_keys_defined' ),
 			),
-			'file_editing_disabled'   => array(
+			'file_editing_disabled'    => array(
 				'label'    => __( 'File editing disabled', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_file_editing_disabled' ),
 			),
-			'directory_listing_off'   => array(
+			'directory_listing_off'    => array(
 				'label'    => __( 'Directory listing disabled', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_directory_listing_off' ),
 			),
-			'force_ssl_admin'         => array(
+			'force_ssl_admin'          => array(
 				'label'    => __( 'Force SSL for Admin', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_force_ssl_admin' ),
 			),
-			'table_storage_engine'    => array(
+			'table_storage_engine'     => array(
 				'label'    => __( 'Database storage engine', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_table_storage_engine' ),
 			),
-			'table_collation'         => array(
+			'table_collation'          => array(
 				'label'    => __( 'Database collation', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_table_collation' ),
 			),
-			'largest_tables'          => array(
+			'largest_tables'           => array(
 				'label'    => __( 'Largest database tables', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 5,
 				'callback' => array( $this, 'check_largest_tables' ),
 			),
-			'db_charset_client'       => array(
+			'db_charset_client'        => array(
 				'label'    => __( 'Database client charset', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_db_charset_client' ),
 			),
-			'theme_updates_pending'   => array(
+			'theme_updates_pending'    => array(
 				'label'    => __( 'Theme updates', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_theme_updates_pending' ),
 			),
-			'inactive_plugins_themes' => array(
+			'inactive_plugins_themes'  => array(
 				'label'    => __( 'Inactive plugins and themes', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_inactive_plugins_themes' ),
 			),
-			'cron_overdue'            => array(
+			'cron_overdue'             => array(
 				'label'    => __( 'Scheduled events (WP-Cron)', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_cron_overdue' ),
 			),
-			'transient_api_backed'    => array(
+			'transient_api_backed'     => array(
 				'label'    => __( 'API-backed transients', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_transient_api_backed' ),
 			),
-			'expired_transients'      => array(
+			'expired_transients'       => array(
 				'label'    => __( 'Expired transient bloat', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 3,
 				'callback' => array( $this, 'check_expired_transients' ),
 			),
-			'php_execution_limits'    => array(
+			'php_execution_limits'     => array(
 				'label'    => __( 'PHP execution limits', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_php_execution_limits' ),
 			),
-			'db_index_health'         => array(
+			'db_index_health'          => array(
 				'label'    => __( 'Core table index health', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_db_index_health' ),
 			),
-			'postmeta_orphans'        => array(
+			'postmeta_orphans'         => array(
 				'label'    => __( 'Orphaned post metadata', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
 				'tier'     => 4,
 				'callback' => array( $this, 'check_postmeta_orphans' ),
+			),
+			'debug_log_not_public'     => array(
+				'label'    => __( 'debug.log not publicly exposed', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
+				'tier'     => 1,
+				'callback' => array( $this, 'check_debug_log_not_public' ),
+			),
+			'heavy_autoloaded_options' => array(
+				'label'    => __( 'Large individual autoloaded options', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_heavy_autoloaded_options' ),
+			),
+			'revision_and_trash_bloat' => array(
+				'label'    => __( 'Post revisions and trash accumulation', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Database', 'pressvitals-site-auditor' ),
+				'tier'     => 4,
+				'callback' => array( $this, 'check_revision_and_trash_bloat' ),
+			),
+			'cron_loopback_health'     => array(
+				'label'    => __( 'WP-Cron HTTP loopback spawn', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
+				'tier'     => 2,
+				'callback' => array( $this, 'check_cron_loopback_health' ),
+			),
+			'opcache_status'           => array(
+				'label'    => __( 'Zend OPcache enabled', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_opcache_status' ),
 			),
 		);
 
@@ -2585,6 +2615,258 @@ class PVSA_Engine {
 			'status' => 'pass',
 			/* translators: %s: number of orphaned rows */
 			'detail' => sprintf( __( '%s orphaned postmeta rows.', 'pressvitals-site-auditor' ), number_format_i18n( $orphans ) ),
+		);
+	}
+
+	/**
+	 * Probe wp-content/debug.log over HTTP to ensure error logs are not public.
+	 *
+	 * @return array
+	 */
+	public function check_debug_log_not_public() {
+		$debug_log_file = defined( 'WP_CONTENT_DIR' ) ? WP_CONTENT_DIR . '/debug.log' : ABSPATH . 'wp-content/debug.log';
+		$file_exists    = file_exists( $debug_log_file );
+
+		$debug_log_url = defined( 'WP_CONTENT_URL' ) ? WP_CONTENT_URL . '/debug.log' : content_url( 'debug.log' );
+		/**
+		 * Filter the URL used to probe debug.log exposure.
+		 *
+		 * @param string $debug_log_url The debug.log URL.
+		 */
+		$debug_log_url = apply_filters( 'pvsa_debug_log_url', $debug_log_url );
+
+		$response = wp_remote_get(
+			$debug_log_url,
+			array(
+				'timeout'     => 5,
+				'redirection' => 0,
+				'headers'     => array(
+					'Range' => 'bytes=0-256',
+				),
+			)
+		);
+
+		if ( ! is_wp_error( $response ) ) {
+			$code = wp_remote_retrieve_response_code( $response );
+			if ( 200 === $code || 206 === $code ) {
+				$body = wp_remote_retrieve_body( $response );
+				if ( ! empty( $body ) ) {
+					return array(
+						'status' => 'fail',
+						/* translators: 1: debug.log URL, 2: HTTP status code */
+						'detail' => sprintf( __( 'debug.log is publicly accessible via HTTP at %1$s (code %2$d) — sensitive traces may be exposed.', 'pressvitals-site-auditor' ), esc_url( $debug_log_url ), $code ),
+					);
+				}
+			}
+		}
+
+		if ( $file_exists ) {
+			$size_kb = round( (float) @filesize( $debug_log_file ) / 1024, 1 );
+			return array(
+				'status' => 'pass',
+				/* translators: %s: file size in kilobytes */
+				'detail' => sprintf( __( 'debug.log is present on disk (%s KB) and properly protected from direct web access.', 'pressvitals-site-auditor' ), number_format_i18n( $size_kb, 1 ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			'detail' => __( 'debug.log is not publicly exposed and not present in wp-content.', 'pressvitals-site-auditor' ),
+		);
+	}
+
+	/**
+	 * Inspect wp_options for individual heavy autoloaded option records.
+	 *
+	 * @return array
+	 */
+	public function check_heavy_autoloaded_options() {
+		global $wpdb;
+
+		$warn_bytes = (int) apply_filters( 'pvsa_heavy_autoload_warn_bytes', 102400 ); // 100 KB default.
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$heavy = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name, LENGTH(option_value) AS opt_bytes FROM {$wpdb->options} WHERE autoload IN ('yes', 'on', 'auto', 'auto-on') AND LENGTH(option_value) >= %d ORDER BY opt_bytes DESC LIMIT 5",
+				$warn_bytes
+			)
+		);
+
+		if ( ! empty( $heavy ) ) {
+			$summary = array();
+			foreach ( $heavy as $row ) {
+				$kb        = round( (int) $row->opt_bytes / 1024, 1 );
+				$summary[] = sprintf( '%s (%s KB)', $row->option_name, number_format_i18n( $kb, 1 ) );
+			}
+
+			return array(
+				'status' => 'warn',
+				/* translators: 1: count of bloated options, 2: list of options with sizes */
+				'detail' => sprintf( __( '%1$d heavy autoloaded option(s) found (>= 100 KB): %2$s.', 'pressvitals-site-auditor' ), count( $heavy ), implode( ', ', $summary ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			'detail' => __( 'No individual autoloaded options exceed 100 KB.', 'pressvitals-site-auditor' ),
+		);
+	}
+
+	/**
+	 * Check post revisions, trashed posts, and trashed comments accumulation.
+	 *
+	 * @return array
+	 */
+	public function check_revision_and_trash_bloat() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$revisions = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'revision'"
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$published_posts = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type NOT IN ('revision', 'attachment')"
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$trash_posts = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'trash'"
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$trash_comments = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_approved IN ('spam', 'trash')"
+		);
+
+		$total_trash = $trash_posts + $trash_comments;
+
+		$warn_rev_count = (int) apply_filters( 'pvsa_revisions_warn_count', 500 );
+		$warn_trash     = (int) apply_filters( 'pvsa_trash_warn_count', 200 );
+
+		$high_ratio = ( $published_posts > 0 && $revisions > ( $published_posts * 5 ) && $revisions > 100 );
+		$high_count = ( $revisions >= $warn_rev_count );
+		$high_trash = ( $total_trash >= $warn_trash );
+
+		if ( $high_count || $high_ratio || $high_trash ) {
+			$details = array();
+			if ( $high_count || $high_ratio ) {
+				$details[] = sprintf(
+					/* translators: 1: revisions count, 2: published posts count */
+					__( '%1$s revisions (%2$s published posts)', 'pressvitals-site-auditor' ),
+					number_format_i18n( $revisions ),
+					number_format_i18n( $published_posts )
+				);
+			}
+			if ( $high_trash ) {
+				$details[] = sprintf(
+					/* translators: %s: total trashed posts/comments count */
+					__( '%s trashed/spam items', 'pressvitals-site-auditor' ),
+					number_format_i18n( $total_trash )
+				);
+			}
+
+			return array(
+				'status' => 'warn',
+				/* translators: %s: detailed breakdown of revision/trash accumulation */
+				'detail' => sprintf( __( 'Database accumulation detected: %s. Consider limiting revisions or cleaning trash.', 'pressvitals-site-auditor' ), implode( '; ', $details ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			/* translators: 1: revisions count, 2: trashed items count */
+			'detail' => sprintf( __( 'Revisions and trash under control: %1$s revisions, %2$s trashed/spam items.', 'pressvitals-site-auditor' ), number_format_i18n( $revisions ), number_format_i18n( $total_trash ) ),
+		);
+	}
+
+	/**
+	 * Verify that the server can perform an HTTP loopback to wp-cron.php.
+	 *
+	 * @return array
+	 */
+	public function check_cron_loopback_health() {
+		$cron_url = site_url( 'wp-cron.php' );
+		/**
+		 * Filter the URL used to test loopback reachability.
+		 *
+		 * @param string $cron_url The wp-cron.php URL.
+		 */
+		$cron_url = apply_filters( 'pvsa_cron_loopback_url', $cron_url );
+
+		$response = wp_remote_get(
+			$cron_url,
+			array(
+				'timeout'   => 5,
+				'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return array(
+				'status' => 'warn',
+				/* translators: %s: WP_Error error message */
+				'detail' => sprintf( __( 'WP-Cron loopback failed: %s. Scheduled events may not trigger.', 'pressvitals-site-auditor' ), $response->get_error_message() ),
+			);
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( 200 !== $code && 204 !== $code ) {
+			return array(
+				'status' => 'warn',
+				/* translators: %d: HTTP response code */
+				'detail' => sprintf( __( 'WP-Cron loopback returned HTTP %d. Background tasks may be failing.', 'pressvitals-site-auditor' ), $code ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			/* translators: %d: HTTP status code */
+			'detail' => sprintf( __( 'WP-Cron loopback reachable (HTTP %d).', 'pressvitals-site-auditor' ), $code ),
+		);
+	}
+
+	/**
+	 * Audit Zend OPcache status, hit rate, and memory utilization.
+	 *
+	 * @return array
+	 */
+	public function check_opcache_status() {
+		$opcache_enabled = (bool) ini_get( 'opcache.enable' );
+
+		if ( ! $opcache_enabled && ! extension_loaded( 'Zend OPcache' ) ) {
+			return array(
+				'status' => 'warn',
+				'detail' => __( 'Zend OPcache is disabled. Enabling OPcache significantly improves PHP execution speed.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		if ( function_exists( 'opcache_get_status' ) ) {
+			$status = @opcache_get_status( false );
+			if ( is_array( $status ) && isset( $status['opcache_enabled'] ) && $status['opcache_enabled'] ) {
+				$hit_rate = isset( $status['opcache_statistics']['opcache_hit_rate'] )
+					? round( (float) $status['opcache_statistics']['opcache_hit_rate'], 1 )
+					: null;
+
+				$used_mem = isset( $status['memory_usage']['used_memory'] )
+					? round( (float) $status['memory_usage']['used_memory'] / ( 1024 * 1024 ), 1 )
+					: null;
+
+				if ( null !== $hit_rate && null !== $used_mem ) {
+					return array(
+						'status' => 'pass',
+						/* translators: 1: OPcache hit rate percentage, 2: OPcache memory used in MB */
+						'detail' => sprintf( __( 'Zend OPcache active (%1$s%% hit rate, %2$s MB memory used).', 'pressvitals-site-auditor' ), number_format_i18n( $hit_rate, 1 ), number_format_i18n( $used_mem, 1 ) ),
+					);
+				}
+			}
+		}
+
+		return array(
+			'status' => 'pass',
+			'detail' => __( 'Zend OPcache is enabled.', 'pressvitals-site-auditor' ),
 		);
 	}
 }

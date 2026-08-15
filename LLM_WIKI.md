@@ -12,16 +12,16 @@ This document serves as the project's **LLM Wiki** (per [Karpathy's LLM-Wiki pat
 - **Probe Registry:** Probes are defined in `includes/class-pvsa-engine.php` and managed via a registry hook (`pvsa_registered_checks`). 
 - **Check Anatomy:** Each probe callback must return an array with `status` (`pass`, `warn`, `fail`) and `detail` (a localized human-readable string). The engine automatically appends `duration_ms` and `tier` to each executed check.
 
-### Built-in Probes (40 Total as of v1.3.0)
+### Built-in Probes (45 Total as of v1.4.0)
 Probes are categorized into 8 functional groups:
 - **Availability**: `db_connection`, `https_home`
-- **Security**: `debug_display_off`, `env_file_exposed`, `stray_files`, `ssl_cert_expiry`, `security_headers`, `https_forced`, `xmlrpc_status`, `admin_username`, `https_mixed_content`, `env_file_on_disk`, `wp_config_permissions`, `user_enumeration`, `secret_keys_defined`, `file_editing_disabled`, `directory_listing_off`, `force_ssl_admin`
+- **Security**: `debug_display_off`, `env_file_exposed`, `stray_files`, `ssl_cert_expiry`, `security_headers`, `https_forced`, `xmlrpc_status`, `admin_username`, `https_mixed_content`, `env_file_on_disk`, `wp_config_permissions`, `user_enumeration`, `secret_keys_defined`, `file_editing_disabled`, `directory_listing_off`, `force_ssl_admin`, **`debug_log_not_public`** (v1.4.0)
 - **Errors**: `error_log_size`, `php_fatal_errors_recent`
-- **Database**: `autoloaded_options_size`, `db_overhead`, `core_tables_present`, `orphaned_tables`, `table_storage_engine`, `table_collation`, `largest_tables`, `db_charset_client`, **`expired_transients`** (v1.3.0), **`db_index_health`** (v1.3.0), **`postmeta_orphans`** (v1.3.0)
+- **Database**: `autoloaded_options_size`, `db_overhead`, `core_tables_present`, `orphaned_tables`, `table_storage_engine`, `table_collation`, `largest_tables`, `db_charset_client`, `expired_transients`, `db_index_health`, `postmeta_orphans`, **`heavy_autoloaded_options`** (v1.4.0), **`revision_and_trash_bloat`** (v1.4.0)
 - **Files**: `disk_free`, `uploads_writable`, `backup_recency`
 - **Email**: `email_dns`
 - **SEO**: `homepage_indexable`
-- **Performance**: `memory_limit`, `object_cache`, `cron_overdue`, `transient_api_backed`, **`php_execution_limits`** (v1.3.0)
+- **Performance**: `memory_limit`, `object_cache`, `cron_overdue`, `transient_api_backed`, `php_execution_limits`, **`cron_loopback_health`** (v1.4.0), **`opcache_status`** (v1.4.0)
 - **Environment**: `php_version`, `rest_api_reachable`, `core_update_available`, `plugin_updates_pending`, `theme_updates_pending`, `inactive_plugins_themes`
 
 ---

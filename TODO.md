@@ -40,7 +40,7 @@ SEO / Performance / Environment, including: `db_connection`, `https_home`,
 - [x] **P2 `directory_listing_off`** — a known directory (e.g. `/wp-content/uploads/`)
   does not return an Apache/nginx autoindex. (tier 3)
 - [x] **P2 `force_ssl_admin`** — `FORCE_SSL_ADMIN` is on when the site is HTTPS. (tier 3)
-- [ ] **P3 `debug_log_not_public`** — `wp-content/debug.log` returns 403/404, not 200.
+- [x] **P3 `debug_log_not_public`** — *(done in v1.4.0)* `wp-content/debug.log` returns 403/404, not 200.
 - [ ] **P3 `login_protection_present`** — heuristic: a limit-login / 2FA / firewall
   plugin is active (filterable allow-list), else informational warn.
 - [ ] **P3 `file_permissions_sane`** — spot-check dirs `0755` / files `0644` for

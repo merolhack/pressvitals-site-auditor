@@ -69,8 +69,8 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$checks = $this->engine->get_checks();
 
 		$this->assertIsArray( $checks );
-		$this->assertGreaterThanOrEqual( 26, count( $checks ), 'Expected at least 26 built-in probes.' );
-		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans' ) as $id ) {
+		$this->assertGreaterThanOrEqual( 45, count( $checks ), 'Expected at least 45 built-in probes.' );
+		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status' ) as $id ) {
 			$this->assertArrayHasKey( $id, $checks, "Missing built-in check: {$id}" );
 		}
 	}
@@ -501,6 +501,88 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 	 */
 	public function test_check_postmeta_orphans_pass() {
 		$result = $this->engine->check_postmeta_orphans();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * Debug log not public: mock 404 response returns pass.
+	 */
+	public function test_check_debug_log_not_public_pass() {
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 404, 'message' => 'Not Found' ),
+					'headers'  => array(),
+					'body'     => '',
+				);
+			}
+		);
+
+		$result = $this->engine->check_debug_log_not_public();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Debug log not public: mock 200 with log body returns fail.
+	 */
+	public function test_check_debug_log_not_public_fail_when_exposed() {
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 200, 'message' => 'OK' ),
+					'headers'  => array(),
+					'body'     => '[14-Aug-2026 12:00:00 UTC] PHP Fatal error: Uncaught Exception',
+				);
+			}
+		);
+
+		$result = $this->engine->check_debug_log_not_public();
+		$this->assertSame( 'fail', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Heavy autoloaded options: clean test DB returns pass.
+	 */
+	public function test_check_heavy_autoloaded_options_pass() {
+		$result = $this->engine->check_heavy_autoloaded_options();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Revision and trash bloat: clean test DB returns pass.
+	 */
+	public function test_check_revision_and_trash_bloat_pass() {
+		$result = $this->engine->check_revision_and_trash_bloat();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * WP-Cron loopback: mock 200 OK returns pass.
+	 */
+	public function test_check_cron_loopback_health_pass() {
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 200, 'message' => 'OK' ),
+					'headers'  => array(),
+					'body'     => '',
+				);
+			}
+		);
+
+		$result = $this->engine->check_cron_loopback_health();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * OPcache status: always returns a valid status array.
+	 */
+	public function test_check_opcache_status() {
+		$result = $this->engine->check_opcache_status();
 		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
 		$this->assertNotEmpty( $result['detail'] );
 	}
