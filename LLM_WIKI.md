@@ -35,6 +35,13 @@ This project integrates `codebase-memory-mcp` for structural codebase queries.
 > 3. `get_code_snippet` — Fetch exact source code for a symbol by `qualified_name`.
 > 4. `query_graph` — Run Cypher queries for complex structural dependencies.
 
+### WordPress File Inspection & Live Site Analysis
+- **DO NOT USE WP FILE MANAGER** in the WordPress browser admin to inspect files.
+- All WordPress core, plugin, and theme files from the live environment (Freelance México) are available locally in the synchronized repository:
+  - Local Path: `\\wsl$\Ubuntu-20.04\home\merolhack\fl\freelancemexico` (or `/home/merolhack/fl/freelancemexico` in WSL).
+- To inspect code structures, functions, and plugin architecture of the live site, query the codebase memory knowledge graph directly with:
+  - Project: `home-merolhack-fl-freelancemexico` (e.g. `search_graph(project="home-merolhack-fl-freelancemexico", name_pattern=".*")`).
+
 ---
 
 ## 3. LLM-Wiki Architecture Integration

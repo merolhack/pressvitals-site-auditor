@@ -25,10 +25,17 @@ This document defines the schema and operating rules for any LLM agent interacti
    - ALWAYS query `codebase-memory` MCP tools (`search_graph`, `query_graph`, `trace`, `impact_analysis`) BEFORE reading large source files or performing global greps.
    - Use `index_status` and `detect_changes` to verify project graph freshness before starting structural tasks.
 
-2. **LLM Wiki & Architecture Alignment:**
+2. **WordPress Core / Site File Discovery (Freelance México):**
+   - **DO NOT USE THE WP FILE MANAGER** inside the WordPress admin dashboard to browse files.
+   - If you need to inspect site files, plugins, or themes from the live WordPress environment (Freelance México), check the local repository directly at:
+     - Path: `\\wsl$\Ubuntu-20.04\home\merolhack\fl\freelancemexico` (or `/home/merolhack/fl/freelancemexico` in WSL).
+   - Query the knowledge graph for that project using `codebase-memory-mcp` with project name:
+     - `home-merolhack-fl-freelancemexico`
+
+3. **LLM Wiki & Architecture Alignment:**
    - Always cross-reference architectural decisions with `LLM_WIKI.md` and validate code relationships using graph node signatures.
 
-3. **Post-Task Sync:**
+4. **Post-Task Sync:**
    - After completing edits, run `detect_changes` to ensure the codebase graph reflects all newly created or modified functions/routes.
 
 ---
