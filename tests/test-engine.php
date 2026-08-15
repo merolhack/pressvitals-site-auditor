@@ -586,4 +586,19 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
 		$this->assertNotEmpty( $result['detail'] );
 	}
+
+	/**
+	 * WordPress 7.1 compatibility: verify core update probe recognizes WP 7.1+.
+	 */
+	public function test_wordpress_71_compatibility_pass() {
+		global $wp_version;
+		$orig_version = $wp_version;
+		$wp_version   = '7.1';
+
+		$result = $this->engine->check_core_update_available();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
+
+		$wp_version = $orig_version;
+	}
 }

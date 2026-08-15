@@ -7,9 +7,10 @@
 # Run (inside WSL2, from this directory):
 #   docker compose up -d
 # Then install each site in the browser:
-#   - WP 6.7 / PHP 8.3  -> http://localhost:8083
-#   - WP 6.4 / PHP 8.1  -> http://localhost:8081
-#   - WP 6.3 / PHP 7.4  -> http://localhost:8074
+#   - WP 7.1 / PHP 8.3  -> http://localhost:8071 (wp-71 / latest WP)
+#   - WP 7.0 / PHP 8.3  -> http://localhost:8083 (wp-latest)
+#   - WP 6.4 / PHP 8.1  -> http://localhost:8081 (wp-mid)
+#   - WP 6.0 / PHP 7.4  -> http://localhost:8074 (wp-legacy)
 # Activate the plugin on each (Plugins -> PressVitals Site Auditor) and
 # compare behaviour across versions. Tear down with `docker compose down`
 # (add `-v` to also wipe the databases and start fresh).
@@ -34,8 +35,25 @@ services:
       timeout: 5s
       retries: 5
 
+  wp-71:
+    image: wordpress:beta
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8071:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: wp_71
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wp_71:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/pressvitals-site-auditor
+
   wp-latest:
-    image: wordpress:6.7-php8.3-apache
+    image: wordpress:php8.3-apache
     depends_on:
       db:
         condition: service_healthy
@@ -87,6 +105,7 @@ services:
 
 volumes:
   db_data:
+  wp_71:
   wp_latest:
   wp_mid:
   wp_legacy:

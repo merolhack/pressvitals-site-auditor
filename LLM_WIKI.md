@@ -98,7 +98,7 @@ The plugin has been fully audited against the WordPress 7.1 Field Guide changes:
 - **Public SVG Icon API**: No impact. PVSA iconography is self-contained.
 - **jQuery UI 1.14.2 Upgrade**: No impact. PVSA uses vanilla JavaScript (`pvsa-admin.js`) without jQuery or jQuery UI dependencies.
 - **Abilities API Improvements**: Fully compatible with standard capability checks (`manage_options`).
-- **Compatibility Status**: `Tested up to: 7.1` confirmed across plugin headers and `readme.txt`. Verified 100% pass across local multi-version Docker containers (`wp-latest`, `wp-mid`, `wp-legacy`) and PHPUnit test suite.
+- **Compatibility Status**: `Tested up to: 7.1` confirmed across plugin headers and `readme.txt`. Verified 100% pass across local multi-version Docker containers (`wp-71` on 8071, `wp-latest` on 8083, `wp-mid` on 8081, `wp-legacy` on 8074) and PHPUnit test suite.
 
 ---
 

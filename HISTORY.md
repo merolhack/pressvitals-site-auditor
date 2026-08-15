@@ -9,10 +9,12 @@
     4. `cron_loopback_health` (Performance, Tier 2) — Tests HTTP loopback reachability for `wp-cron.php` to ensure background workers can spawn.
     5. `opcache_status` (Performance, Tier 3) — Audits PHP Zend OPcache configuration, hit rate, and memory utilization.
   - Total built-in probes increased from 40 to 45.
+  - Added dedicated WordPress 7.1 container (`wp-71` using `wordpress:beta` / WP 7.1-RC3 on port 8071) alongside `wp-latest` (WP 7.0 / port 8083), `wp-mid` (WP 6.4 / port 8081), and `wp-legacy` (WP 6.0 / port 8074).
+  - Updated CI test matrix (`tests.yml`) to test across WP 6.3–7.1 + nightly and PHP 7.4–8.4.
+  - Added dedicated WP 7.1 compatibility unit test in `tests/test-engine.php` (44 tests, 97 assertions, 100% pass).
   - Bumped version to `1.4.0` across `pressvitals-site-auditor.php`, `PVSA_VERSION` constant, and `readme.txt` stable tag.
-  - Expanded unit test suite (`tests/test-engine.php`): 43 tests, 95 assertions (100% pass).
   - Validated PHPCS code quality: 0 errors, 0 warnings (100% clean).
-  - Verified multi-container Docker runtime smoke tests (`wp-latest`, `wp-mid`, `wp-legacy`).
+  - Verified multi-container Docker runtime smoke tests (`wp-71`, `wp-latest`, `wp-mid`, `wp-legacy`).
   - Ingested updated probe definitions into `LLM_WIKI.md`.
 
 ## 2026-08-14 (Compatibility Audit)
