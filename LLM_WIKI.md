@@ -130,4 +130,12 @@ The plugin has been fully audited against the WordPress 7.1 Field Guide changes:
 6. **Git Commit:** Commit changes to Git (`git add . && git commit -m "..."`).
 7. **Git Push & Tag:** Push commits and tag to GitHub (`git push <PAT_URL> main` and `git push <PAT_URL> <version>`).
 8. **Publish GitHub Release (Deploys to SVN):** Create and publish a GitHub Release matching the version tag (e.g. `gh release create <version> --title "<version>" --notes "..."`). This triggers the `deploy` job in `.github/workflows/deploy.yml` (`10up/action-wordpress-plugin-deploy`), which pushes the codebase to `/trunk` and creates `/tags/<version>` on WordPress.org SVN.
-9. **Verify SVN & WP.org API:** Check `curl -s https://plugins.svn.wordpress.org/pressvitals-site-auditor/tags/` and `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=pressvitals-site-auditor` to confirm the new version is live.
+9. **Verify SVN Tags & Both WordPress.org APIs:**
+   - **SVN Tag Verification**: Check `curl -s https://plugins.svn.wordpress.org/pressvitals-site-auditor/tags/` to verify `/tags/<version>/` is created and public.
+   - **1. WordPress.org Plugin Information API** (`https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=pressvitals-site-auditor`):
+     - Check `version` equals release version.
+     - Check `download_link` serves `https://downloads.wordpress.org/plugin/pressvitals-site-auditor.<version>.zip`.
+     - Check `versions` dictionary includes the new version.
+   - **2. WordPress Core Update-Check API** (`https://api.wordpress.org/plugins/update-check/1.1/`):
+     - Send test POST request with plugin header payload to verify broadcast status.
+     - Note that WordPress.org's backend Redis/Varnish update dictionary has a 15–60 minute indexing cache delay before switching from `no_update` to broadcast mode.
