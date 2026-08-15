@@ -83,6 +83,10 @@ This repository fully implements the [LLM-Wiki pattern](https://gist.github.com/
 - **SVN Repository URL:** `https://plugins.svn.wordpress.org/pressvitals-site-auditor`
 - **Public Directory URL:** `https://wordpress.org/plugins/pressvitals-site-auditor`
 - **SVN Account & Credentials:** Username `merolhack` (case-sensitive). SVN Password configured in GitHub Repository Secrets (`SVN_USERNAME` and `SVN_PASSWORD`).
+- **Deployed SVN Tags:**
+  - `tags/1.2.6/` (Initial release)
+  - `tags/1.3.0/` (40 probes, performance & index audits)
+  - `tags/1.4.0/` (45 probes, WP 7.1 readiness, OPcache, debug.log audit)
 - **Directory Assets:** Banners and icons live in `.wordpress-org/` in Git and map to `/assets/` in SVN. Note 72-hour CDN propagation delay for directory images.
 
 ---
@@ -103,9 +107,12 @@ The plugin has been fully audited against the WordPress 7.1 Field Guide changes:
 ---
 
 ## 9. Release Workflow & Automated Deployment
-1. Run `bin/bump-version.sh <version>` to synchronize versions across headers and `readme.txt`.
-2. Update `readme.txt` changelog and `HISTORY.md`.
-3. Generate the ZIP using `rsync` and Python `shutil.make_archive` honoring `.distignore`.
-4. Run local Docker PHPUnit and PHPCS checks (`vendor/bin/phpcs` must report 0 errors/0 warnings).
-5. Commit, tag (`vX.Y.Z`), and push to GitHub.
-6. **SVN Deployment (`deploy.yml`):** Tag push or GitHub release triggers automated SVN deployment of `/trunk` and `/tags/<version>`. Pushes to `main` touching `readme.txt` or `.wordpress-org/` automatically sync assets and readme metadata to SVN via `10up/action-wordpress-plugin-asset-update`.
+1. Synchronize versions across `pressvitals-site-auditor.php` (`Version:` header + `PVSA_VERSION` constant) and `readme.txt` (`Stable tag:`).
+2. Update `readme.txt` changelog, `HISTORY.md`, and `LLM_WIKI.md`.
+3. Generate the distribution ZIP using `rsync` and Python `shutil.make_archive` honoring `.distignore`.
+4. Run local Docker PHPUnit (`docker compose exec wp-71 vendor/bin/phpunit`) and PHPCS checks (`docker compose exec wp-latest vendor/bin/phpcs` — 0 errors/0 warnings required).
+5. Verify container health across all 4 environments (`wp-71`, `wp-latest`, `wp-mid`, `wp-legacy`).
+6. Commit changes to Git (`git add . && git commit -m "..."`).
+7. Push commits and tag to GitHub (`git push <PAT_URL> main` and `git push <PAT_URL> <version>`).
+8. **Publish GitHub Release:** Create and publish a GitHub Release matching the version tag (e.g. `gh release create 1.4.0 --title "1.4.0" --notes "..."`). This triggers the `deploy` job in `.github/workflows/deploy.yml` (`10up/action-wordpress-plugin-deploy`), which pushes the codebase to `/trunk` and creates `/tags/<version>` on WordPress.org SVN.
+9. **Verify SVN & WP.org API:** Check `curl -s https://plugins.svn.wordpress.org/pressvitals-site-auditor/tags/` and `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=pressvitals-site-auditor` to confirm the new version is live.

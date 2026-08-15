@@ -1,5 +1,13 @@
 # History & Changelog
 
+## 2026-08-15
+- **v1.3.0 & v1.4.0 Official Deployment to GitHub & WordPress.org SVN:**
+  - Published GitHub Release `1.3.0` (tag `1.3.0`) -> Deployed to WordPress.org SVN (`tags/1.3.0/`).
+  - Published GitHub Release `1.4.0` (tag `1.4.0`) -> Deployed to WordPress.org SVN trunk and `tags/1.4.0/`.
+  - Verified WordPress.org Plugin Directory API serving `pressvitals-site-auditor.1.4.0.zip` with 45 proactive diagnostic probes.
+  - Validated test suite across all 4 Docker environments (`wp-71`, `wp-latest`, `wp-mid`, `wp-legacy`) — 44 tests, 97 assertions passed (100% OK), PHPCS 100% clean.
+  - Enforced mandatory LLM Wiki pattern and `codebase-memory-mcp` knowledge graph usage across all AI agents and skills.
+
 ## 2026-08-14 (v1.4.0 Release)
 - **v1.4.0 — Phase 1 Feature Expansion & 5 New Diagnostic Probes:**
   - Added 5 new high-impact diagnostic probes across Security, Database, and Performance:
