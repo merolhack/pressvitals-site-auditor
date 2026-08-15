@@ -24,7 +24,7 @@ This document defines the schema and operating rules for any LLM agent interacti
 ## Wiki Architecture
 This repository implements the LLM-Wiki structure to manage project knowledge alongside code:
 1.  **[index.md](index.md)**: The content catalog. Agents must read this to understand the layout of the repository and the wiki.
-2.  **[LLM_WIKI.md](LLM_WIKI.md)**: The central knowledge base detailing architecture, probe registry (40 probes), localization rules, PHPCS formatting, and local environment quirks.
+2.  **[LLM_WIKI.md](LLM_WIKI.md)**: The central knowledge base detailing architecture, probe registry (45 probes), localization rules, PHPCS formatting, and local environment quirks.
 3.  **[HISTORY.md](HISTORY.md)**: Acts as the chronological `log.md`. Every significant session, ingestion, or structural change must be appended here.
 4.  **[AGENTS.md](AGENTS.md)**: This file. It is the schema that dictates agent behavior.
 
@@ -33,11 +33,11 @@ This repository implements the LLM-Wiki structure to manage project knowledge al
 ## Operating Procedures
 When answering questions, building features, or fixing bugs, agents MUST follow this workflow:
 
-1.  **Consult the LLM Wiki:** Review [LLM_WIKI.md](LLM_WIKI.md) for architectural constraints (e.g., how the Docker environment functions, WP.org translation rules, direct access protection, probe structure).
+1.  **Consult the LLM Wiki:** Review [LLM_WIKI.md](LLM_WIKI.md) for architectural constraints (e.g., how the 4 Docker environments function, WP.org translation rules, direct access protection, probe structure).
 2.  **Query Codebase Memory First:** Before reading large files or grepping across the repository, use `codebase-memory` MCP tools (`search_graph`, `trace_path`, `get_code_snippet`, `query_graph`) to inspect the knowledge graph.
 3.  **Analyze the Log:** Check [HISTORY.md](HISTORY.md) to see recent changes and ensure you don't overwrite past bugfixes or architectural improvements.
 4.  **Execute Safely:**
-    *   Do not test changes by running `composer` in raw WSL environment; use Docker containers (`docker compose exec wp-latest vendor/bin/phpunit` and `vendor/bin/phpcs`).
+    *   Do not test changes by running `composer` in raw WSL environment; use Docker containers (`docker compose exec wp-71 vendor/bin/phpunit` or `wp-latest` and `vendor/bin/phpcs`).
     *   Be aware of `chmod` and file permission differences between WSL and Docker volume mounts.
 5.  **Update the Wiki & History:** After solving a problem or making a significant code change, append a record of the change to `HISTORY.md`. If a new architectural rule is discovered, integrate it into `LLM_WIKI.md`.
 6.  **Release Workflow:** Build the release ZIP using Python `shutil.make_archive` with `.distignore`, verify PHPCS passes with 0 errors/warnings, tag `vX.Y.Z`, push to GitHub with explicit PAT URL, and verify remote CI runs.

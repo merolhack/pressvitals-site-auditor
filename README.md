@@ -1,11 +1,12 @@
 # PressVitals Site Auditor
 
-A **headless-first** WordPress diagnostic engine featuring **22+ proactive probes** for
-performance, security, and DB health — extensible to 48+ via REST API and custom filters.
+A **headless-first** WordPress diagnostic engine featuring **45+ proactive probes** for
+performance, security, and DB health — extensible via REST API and custom filters.
 
 [![PHPUnit](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml/badge.svg)](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml)
-![WordPress 6.3+](https://img.shields.io/badge/WordPress-6.3%2B-blue)
-![PHP 7.4+](https://img.shields.io/badge/PHP-7.4%2B-blue)
+[![Code Quality](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/code-quality.yml/badge.svg)](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/code-quality.yml)
+![WordPress 6.0 - 7.1+](https://img.shields.io/badge/WordPress-6.0%20--%207.1%2B-blue)
+![PHP 7.4 - 8.4](https://img.shields.io/badge/PHP-7.4%20--%208.4-blue)
 ![License GPL-2.0+](https://img.shields.io/badge/license-GPL--2.0%2B-green)
 
 PressVitals runs read-only probes across performance, security, deliverability and
@@ -26,7 +27,7 @@ machine-readable monitoring and auditing**:
 - **Probes core does not run** — TLS certificate-expiry countdown, `.env`/secret web
   exposure, a web-root stray-backup scanner, baseline security headers, forced-HTTPS,
   XML-RPC exposure, default-`admin` detection, SPF + DMARC email DNS, homepage
-  indexability, and database-bloat checks.
+  indexability, OPcache status, cron loopback health, and database-bloat checks.
 - **Pluggable + configurable** — register your own probes via `pvsa_registered_checks`
   and tune every threshold with filters.
 
@@ -76,11 +77,15 @@ composer install
 bin/install-wp-tests.sh wordpress_test root '' localhost
 composer test
 
-# Manual multi-version testing — three browsable installs
-docker compose up -d   # WP 6.7/PHP 8.3 :8083, 6.4/8.1 :8081, 6.0/7.4 :8074
+# Manual multi-version testing — four browsable installs
+docker compose up -d
+# - WP 7.1 / PHP 8.3  -> http://localhost:8071 (wp-71)
+# - WP 7.0 / PHP 8.3  -> http://localhost:8083 (wp-latest)
+# - WP 6.4 / PHP 8.1  -> http://localhost:8081 (wp-mid)
+# - WP 6.0 / PHP 7.4  -> http://localhost:8074 (wp-legacy)
 ```
 
-CI runs PHPUnit across PHP 7.4 / 8.0 / 8.2 / 8.3.
+CI runs PHPUnit across PHP 7.4 / 8.0 / 8.2 / 8.3 / 8.4 and WordPress 6.3 through 7.1 + nightly.
 
 ## AI Agents / Assistants
 
