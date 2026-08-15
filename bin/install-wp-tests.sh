@@ -22,9 +22,9 @@ WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
 
 download() {
 	if [ "$(which curl)" ]; then
-		curl -s "$1" > "$2";
+		curl -sSf "$1" > "$2" || return 1
 	elif [ "$(which wget)" ]; then
-		wget -nv -O "$2" "$1"
+		wget -nv -O "$2" "$1" || return 1
 	else
 		echo "Error: neither curl nor wget is available."
 		exit 1
@@ -45,13 +45,13 @@ elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
 elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
 	WP_TESTS_TAG="trunk"
 else
-	download http://api.wordpress.org/core/version-check/1.7/ /tmp/wp-latest.json
-	LATEST_VERSION=$(grep -o '"version":"[^"]*' /tmp/wp-latest.json | sed 's/"version":"//' | head -1)
+	download http://api.wordpress.org/core/version-check/1.7/ /tmp/wp-latest.json || true
+	LATEST_VERSION=$(grep -o '"version":"[^"]*' /tmp/wp-latest.json 2>/dev/null | sed 's/"version":"//' | head -1)
 	if [[ -z "$LATEST_VERSION" ]]; then
-		echo "Latest WordPress version could not be found"
-		exit 1
+		WP_TESTS_TAG="trunk"
+	else
+		WP_TESTS_TAG="tags/$LATEST_VERSION"
 	fi
-	WP_TESTS_TAG="tags/$LATEST_VERSION"
 fi
 set -ex
 
@@ -63,25 +63,46 @@ install_wp() {
 	if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
 		mkdir -p "$TMPDIR/wordpress-nightly"
 		download https://wordpress.org/nightly-builds/wordpress-latest.zip "$TMPDIR/wordpress-nightly/wordpress-nightly.zip"
-		unzip -q "$TMPDIR/wordpress-nightly/wordpress-nightly.zip" -d "$TMPDIR/wordpress-nightly/"
+		if [ "$(which unzip)" ]; then
+			unzip -q "$TMPDIR/wordpress-nightly/wordpress-nightly.zip" -d "$TMPDIR/wordpress-nightly/"
+		elif [ "$(which python3)" ]; then
+			python3 -c "import zipfile; zipfile.ZipFile('$TMPDIR/wordpress-nightly/wordpress-nightly.zip').extractall('$TMPDIR/wordpress-nightly/')"
+		elif [ "$(which php)" ]; then
+			php -r "\$zip = new ZipArchive; if (\$zip->open('$TMPDIR/wordpress-nightly/wordpress-nightly.zip') === TRUE) { \$zip->extractTo('$TMPDIR/wordpress-nightly/'); \$zip->close(); }"
+		fi
 		mv "$TMPDIR/wordpress-nightly/wordpress"/* "$WP_CORE_DIR"
 	else
+		local downloaded=false
 		if [ "$WP_VERSION" == 'latest' ]; then
-			local ARCHIVE_NAME='latest'
+			download https://wordpress.org/latest.tar.gz "$TMPDIR/wordpress.tar.gz" && downloaded=true
 		elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
-			download https://wordpress.org/wordpress-$WP_VERSION.tar.gz "$TMPDIR/wordpress.tar.gz"
 			if [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0]+ ]]; then
 				local ARCHIVE_NAME="wordpress-${WP_VERSION%??}"
 			else
 				local ARCHIVE_NAME="wordpress-$WP_VERSION"
 			fi
-		else
-			local ARCHIVE_NAME="wordpress-$WP_VERSION"
+			if download https://wordpress.org/${ARCHIVE_NAME}.tar.gz "$TMPDIR/wordpress.tar.gz"; then
+				downloaded=true
+			fi
 		fi
-		download https://wordpress.org/${ARCHIVE_NAME}.tar.gz "$TMPDIR/wordpress.tar.gz"
-		tar --strip-components=1 -zxmf "$TMPDIR/wordpress.tar.gz" -C "$WP_CORE_DIR"
+
+		if [ "$downloaded" = true ]; then
+			tar --strip-components=1 -zxmf "$TMPDIR/wordpress.tar.gz" -C "$WP_CORE_DIR"
+		else
+			echo "Specific release tarball for $WP_VERSION not found (pre-release/unreleased). Falling back to nightly/pre-release build..."
+			mkdir -p "$TMPDIR/wordpress-nightly"
+			download https://wordpress.org/nightly-builds/wordpress-latest.zip "$TMPDIR/wordpress-nightly/wordpress-nightly.zip"
+			if [ "$(which unzip)" ]; then
+				unzip -q "$TMPDIR/wordpress-nightly/wordpress-nightly.zip" -d "$TMPDIR/wordpress-nightly/"
+			elif [ "$(which python3)" ]; then
+				python3 -c "import zipfile; zipfile.ZipFile('$TMPDIR/wordpress-nightly/wordpress-nightly.zip').extractall('$TMPDIR/wordpress-nightly/')"
+			elif [ "$(which php)" ]; then
+				php -r "\$zip = new ZipArchive; if (\$zip->open('$TMPDIR/wordpress-nightly/wordpress-nightly.zip') === TRUE) { \$zip->extractTo('$TMPDIR/wordpress-nightly/'); \$zip->close(); }"
+			fi
+			mv "$TMPDIR/wordpress-nightly/wordpress"/* "$WP_CORE_DIR"
+		fi
 	fi
-	download https://raw.githubusercontent.com/markoheijnen/wp-mysqli/master/db.php "$WP_CORE_DIR/wp-content/db.php"
+	download https://raw.githubusercontent.com/markoheijnen/wp-mysqli/master/db.php "$WP_CORE_DIR/wp-content/db.php" || true
 }
 
 install_test_suite() {
