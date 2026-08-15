@@ -87,7 +87,9 @@ This repository fully implements the [LLM-Wiki pattern](https://gist.github.com/
   - `tags/1.2.6/` (Initial release)
   - `tags/1.3.0/` (40 probes, performance & index audits)
   - `tags/1.4.0/` (45 probes, WP 7.1 readiness, OPcache, debug.log audit)
-- **Directory Assets:** Banners and icons live in `.wordpress-org/` in Git and map to `/assets/` in SVN. Note 72-hour CDN propagation delay for directory images.
+- **Directory Assets & Propagation Delays:**
+  - Assets (`.wordpress-org/`) have a ~72-hour CDN propagation delay for directory images.
+  - **Update-Check API Cache:** While `api.wordpress.org/plugins/info/1.2/` updates instantly, the WordPress core update notification endpoint (`api.wordpress.org/plugins/update-check/1.1/`) has a background indexing cache delay of **15 to 60 minutes** before WordPress dashboards receive the update notification.
 
 ---
 
