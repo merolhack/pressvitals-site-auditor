@@ -5,6 +5,18 @@ This document defines the schema and operating rules for any LLM agent interacti
 > [!IMPORTANT]
 > **MANDATORY RULE FOR ALL AGENTS:** Always consult and use the LLM Wiki ([LLM_WIKI.md](LLM_WIKI.md), [index.md](index.md), [AGENTS.md](AGENTS.md), and [HISTORY.md](HISTORY.md)) as the single source of truth for repository knowledge, architecture constraints, translation standards, and environment workflows.
 
+> [!CAUTION]
+> **MANDATORY DEPLOYMENT RULE:** 
+> Whenever ANY code change or version bump is performed, the agent **MUST** complete the full release lifecycle to publish the update to WordPress.org Plugins via GitHub Actions and SVN:
+> 1. Run Docker test suite (`wp-71`, `wp-latest`) & verify PHPCS is 100% clean (0 errors, 0 warnings).
+> 2. Synchronize versions in `pressvitals-site-auditor.php` (header + `PVSA_VERSION`) and `readme.txt` (`Stable tag:`).
+> 3. Generate production `.zip` via Python `shutil.make_archive` with `.distignore`.
+> 4. Commit and push `main` to GitHub using PAT URL.
+> 5. Create and **publish a GitHub Release** (`gh release create <version> --title "<version>" --notes "<notes>"`).
+> 6. Verify GitHub Actions workflow (`deploy.yml`) runs and deploys trunk + `tags/<version>` to WordPress.org SVN.
+> 7. Confirm deployment with `curl -s https://plugins.svn.wordpress.org/pressvitals-site-auditor/tags/`.
+> **NEVER leave code modifications or version bumps unpushed or unreleased on GitHub / SVN.**
+
 ---
 
 # Codebase Context & Tool Usage Rules
@@ -40,4 +52,9 @@ When answering questions, building features, or fixing bugs, agents MUST follow 
     *   Do not test changes by running `composer` in raw WSL environment; use Docker containers (`docker compose exec wp-71 vendor/bin/phpunit` or `wp-latest` and `vendor/bin/phpcs`).
     *   Be aware of `chmod` and file permission differences between WSL and Docker volume mounts.
 5.  **Update the Wiki & History:** After solving a problem or making a significant code change, append a record of the change to `HISTORY.md`. If a new architectural rule is discovered, integrate it into `LLM_WIKI.md`.
-6.  **Release Workflow:** Build the release ZIP using Python `shutil.make_archive` with `.distignore`, verify PHPCS passes with 0 errors/warnings, tag `vX.Y.Z`, push to GitHub with explicit PAT URL, and verify remote CI runs.
+6.  **Publish Release to WordPress.org via GitHub Actions & SVN:** 
+    *   Build the release ZIP using Python `shutil.make_archive` with `.distignore`.
+    *   Verify PHPCS passes with 0 errors/warnings.
+    *   Commit, push to `main` with explicit PAT URL.
+    *   Tag and publish GitHub Release (`gh release create <version>`).
+    *   Confirm automated SVN deployment completes in GitHub Actions.

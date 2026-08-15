@@ -106,13 +106,19 @@ The plugin has been fully audited against the WordPress 7.1 Field Guide changes:
 
 ---
 
-## 9. Release Workflow & Automated Deployment
-1. Synchronize versions across `pressvitals-site-auditor.php` (`Version:` header + `PVSA_VERSION` constant) and `readme.txt` (`Stable tag:`).
-2. Update `readme.txt` changelog, `HISTORY.md`, and `LLM_WIKI.md`.
-3. Generate the distribution ZIP using `rsync` and Python `shutil.make_archive` honoring `.distignore`.
-4. Run local Docker PHPUnit (`docker compose exec wp-71 vendor/bin/phpunit`) and PHPCS checks (`docker compose exec wp-latest vendor/bin/phpcs` — 0 errors/0 warnings required).
-5. Verify container health across all 4 environments (`wp-71`, `wp-latest`, `wp-mid`, `wp-legacy`).
-6. Commit changes to Git (`git add . && git commit -m "..."`).
-7. Push commits and tag to GitHub (`git push <PAT_URL> main` and `git push <PAT_URL> <version>`).
-8. **Publish GitHub Release:** Create and publish a GitHub Release matching the version tag (e.g. `gh release create 1.4.0 --title "1.4.0" --notes "..."`). This triggers the `deploy` job in `.github/workflows/deploy.yml` (`10up/action-wordpress-plugin-deploy`), which pushes the codebase to `/trunk` and creates `/tags/<version>` on WordPress.org SVN.
+## 9. Release Workflow & Mandatory Deployment (WordPress.org Plugins & SVN)
+
+> [!CAUTION]
+> **CRITICAL RELEASE POLICY:**
+> Any change of code and version **MUST** be deployed to WordPress.org Plugins via GitHub Actions and SVN. Never leave code changes unreleased.
+
+### End-to-End Release Steps:
+1. **Version Sync:** Synchronize versions in `pressvitals-site-auditor.php` (`Version:` header + `PVSA_VERSION` constant) and `readme.txt` (`Stable tag:`).
+2. **Docs Update:** Update `readme.txt` changelog, `HISTORY.md`, and `LLM_WIKI.md`.
+3. **Distribution ZIP:** Generate the distribution ZIP using `rsync` and Python `shutil.make_archive` honoring `.distignore`.
+4. **Code Quality & Tests:** Run local Docker PHPUnit (`docker compose exec wp-71 vendor/bin/phpunit`) and PHPCS checks (`docker compose exec wp-latest vendor/bin/phpcs` — 0 errors/0 warnings required).
+5. **Container Smoke Test:** Verify container health across all 4 environments (`wp-71`, `wp-latest`, `wp-mid`, `wp-legacy`).
+6. **Git Commit:** Commit changes to Git (`git add . && git commit -m "..."`).
+7. **Git Push & Tag:** Push commits and tag to GitHub (`git push <PAT_URL> main` and `git push <PAT_URL> <version>`).
+8. **Publish GitHub Release (Deploys to SVN):** Create and publish a GitHub Release matching the version tag (e.g. `gh release create <version> --title "<version>" --notes "..."`). This triggers the `deploy` job in `.github/workflows/deploy.yml` (`10up/action-wordpress-plugin-deploy`), which pushes the codebase to `/trunk` and creates `/tags/<version>` on WordPress.org SVN.
 9. **Verify SVN & WP.org API:** Check `curl -s https://plugins.svn.wordpress.org/pressvitals-site-auditor/tags/` and `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=pressvitals-site-auditor` to confirm the new version is live.
