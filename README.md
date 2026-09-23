@@ -1,6 +1,6 @@
 # PressVitals Site Auditor
 
-A **headless-first** WordPress diagnostic engine featuring **45+ proactive probes** for
+A **headless-first** WordPress diagnostic engine featuring **50+ proactive probes** for
 performance, security, and DB health — extensible via REST API and custom filters.
 
 [![PHPUnit](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml/badge.svg)](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml)
@@ -90,7 +90,7 @@ CI runs PHPUnit across PHP 7.4 / 8.0 / 8.2 / 8.3 / 8.4 and WordPress 6.3 through
 ## AI Agents / Assistants
 
 > **Are you an AI, LLM, or coding assistant?**
-> You **MUST** always consult the [`LLM_WIKI.md`](LLM_WIKI.md), [`AGENTS.md`](AGENTS.md), and use the `codebase-memory-mcp` knowledge graph tools (`search_graph`, `trace_path`, `get_code_snippet`) for repository knowledge and architecture constraints before making modifications. Also review the `pressvitals-architecture-rules` and `pressvitals-release-workflow` skills.
+> You **MUST** always consult the Karpathy-style modular wiki ([`wiki/index.md`](wiki/index.md)), [`AGENTS.md`](AGENTS.md), and use the `codebase-memory-mcp` knowledge graph tools (`search_graph`, `trace_path`, `get_code_snippet`) for repository knowledge and architecture constraints before making modifications. Also review the `pressvitals-architecture-rules` and `pressvitals-release-workflow` skills.
 
 ## License
 

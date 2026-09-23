@@ -510,6 +510,36 @@ class PVSA_Engine {
 				'tier'     => 3,
 				'callback' => array( $this, 'check_opcache_status' ),
 			),
+			'maintenance_mode_stuck'   => array(
+				'label'    => __( 'Maintenance mode not stuck', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Availability', 'pressvitals-site-auditor' ),
+				'tier'     => 1,
+				'callback' => array( $this, 'check_maintenance_mode_stuck' ),
+			),
+			'development_mode_off'     => array(
+				'label'    => __( 'Development mode off in production', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
+				'tier'     => 2,
+				'callback' => array( $this, 'check_development_mode_off' ),
+			),
+			'env_type_production'      => array(
+				'label'    => __( 'Environment type is production', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Environment', 'pressvitals-site-auditor' ),
+				'tier'     => 2,
+				'callback' => array( $this, 'check_env_type_production' ),
+			),
+			'db_prefix_customized'     => array(
+				'label'    => __( 'Custom database table prefix', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
+				'tier'     => 4,
+				'callback' => array( $this, 'check_db_prefix_customized' ),
+			),
+			'uploads_php_execution'    => array(
+				'label'    => __( 'PHP execution blocked in uploads', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
+				'tier'     => 2,
+				'callback' => array( $this, 'check_uploads_php_execution' ),
+			),
 		);
 
 		return array_merge( $core, $checks );
@@ -2867,6 +2897,199 @@ class PVSA_Engine {
 		return array(
 			'status' => 'pass',
 			'detail' => __( 'Zend OPcache is enabled.', 'pressvitals-site-auditor' ),
+		);
+	}
+
+	/**
+	 * Audit whether site is stuck in maintenance mode.
+	 *
+	 * Detects orphaned or stuck .maintenance files in ABSPATH exceeding 10 minutes.
+	 *
+	 * @return array
+	 */
+	public function check_maintenance_mode_stuck() {
+		$maintenance_file = ABSPATH . '.maintenance';
+
+		if ( ! file_exists( $maintenance_file ) ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Site is not in maintenance mode.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$content   = (string) file_get_contents( $maintenance_file );
+		$upgrading = 0;
+
+		if ( preg_match( '/\$upgrading\s*=\s*(\d+);/', $content, $matches ) ) {
+			$upgrading = (int) $matches[1];
+		}
+
+		$elapsed_seconds = time() - $upgrading;
+
+		// If stuck for over 10 minutes (600s), it indicates an interrupted upgrade causing site outage.
+		if ( $upgrading > 0 && $elapsed_seconds > 600 ) {
+			$minutes = (int) round( $elapsed_seconds / 60 );
+			return array(
+				'status' => 'fail',
+				/* translators: %d: Number of elapsed minutes site has been in maintenance mode. */
+				'detail' => sprintf( __( 'Site is stuck in maintenance mode (.maintenance file active for %d minutes). Delete the .maintenance file in your WordPress root to restore site access.', 'pressvitals-site-auditor' ), $minutes ),
+			);
+		}
+
+		return array(
+			'status' => 'warn',
+			'detail' => __( 'Maintenance mode is currently active (an update appears to be in progress).', 'pressvitals-site-auditor' ),
+		);
+	}
+
+	/**
+	 * Audit whether WordPress development mode is active in production.
+	 *
+	 * In WP 6.3+, WP_DEVELOPMENT_MODE bypasses caching for theme.json, block templates,
+	 * and translations, which severely degrades production TTFB.
+	 *
+	 * @return array
+	 */
+	public function check_development_mode_off() {
+		$dev_mode = '';
+
+		if ( function_exists( 'wp_get_development_mode' ) ) {
+			$dev_mode = wp_get_development_mode();
+		} elseif ( defined( 'WP_DEVELOPMENT_MODE' ) ) {
+			$dev_mode = (string) WP_DEVELOPMENT_MODE;
+		}
+
+		if ( ! empty( $dev_mode ) ) {
+			return array(
+				'status' => 'warn',
+				/* translators: %s: The active development mode setting (e.g. core, plugin, theme, all). */
+				'detail' => sprintf( __( 'WP_DEVELOPMENT_MODE is active ("%s"). This disables core caching for block templates, theme.json, and translations, degrading performance in production.', 'pressvitals-site-auditor' ), $dev_mode ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			'detail' => __( 'Development mode is disabled. Block templates, theme.json, and translation caches are active.', 'pressvitals-site-auditor' ),
+		);
+	}
+
+	/**
+	 * Audit whether WordPress environment type is configured as production.
+	 *
+	 * Sites should run in production mode to avoid debug leaks and staging behavior.
+	 *
+	 * @return array
+	 */
+	public function check_env_type_production() {
+		$env_type = function_exists( 'wp_get_environment_type' )
+			? wp_get_environment_type()
+			: ( defined( 'WP_ENVIRONMENT_TYPE' ) ? WP_ENVIRONMENT_TYPE : 'production' );
+
+		if ( 'production' === $env_type ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Environment type is set to production.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		if ( 'staging' === $env_type ) {
+			return array(
+				'status' => 'warn',
+				'detail' => __( 'Environment type is set to staging. Ensure staging behavior is intended for this site.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		return array(
+			'status' => 'fail',
+			/* translators: %s: The active environment type (e.g. development, local). */
+			'detail' => sprintf( __( 'Environment type is set to "%s". Live sites should use production mode to prevent debug disclosure and cache bypass.', 'pressvitals-site-auditor' ), $env_type ),
+		);
+	}
+
+	/**
+	 * Audit whether WordPress database table prefix is customized.
+	 *
+	 * Default 'wp_' prefix makes automated SQL injection easier.
+	 *
+	 * @return array
+	 */
+	public function check_db_prefix_customized() {
+		global $wpdb;
+		$prefix = isset( $wpdb->prefix ) ? $wpdb->prefix : '';
+
+		if ( 'wp_' === $prefix ) {
+			return array(
+				'status' => 'warn',
+				'detail' => __( 'Database is using the default "wp_" table prefix. Using a custom prefix provides defense-in-depth against automated SQL injection attacks.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			/* translators: %s: The custom database table prefix in use. */
+			'detail' => sprintf( __( 'Database table prefix is customized ("%s").', 'pressvitals-site-auditor' ), $prefix ),
+		);
+	}
+
+	/**
+	 * Audit whether PHP execution is blocked inside wp-content/uploads.
+	 *
+	 * Uploads should never execute PHP scripts directly.
+	 *
+	 * @return array
+	 */
+	public function check_uploads_php_execution() {
+		$uploads = wp_upload_dir();
+		$basedir = isset( $uploads['basedir'] ) ? $uploads['basedir'] : '';
+
+		if ( empty( $basedir ) || ! is_dir( $basedir ) ) {
+			return array(
+				'status' => 'warn',
+				'detail' => __( 'Uploads directory is not available to inspect PHP execution hardening.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		// 1. Inspect .htaccess in uploads directory.
+		$htaccess_file = trailingslashit( $basedir ) . '.htaccess';
+		if ( file_exists( $htaccess_file ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$content = (string) file_get_contents( $htaccess_file );
+			if ( preg_match( '/\.(php[0-9]?|phtml)/i', $content ) && preg_match( '/(Deny from all|Require all denied|SetHandler\s+none)/i', $content ) ) {
+				return array(
+					'status' => 'pass',
+					'detail' => __( 'Direct PHP execution is blocked in uploads directory via .htaccess policy.', 'pressvitals-site-auditor' ),
+				);
+			}
+		}
+
+		// 2. Perform non-destructive active probe via loopback GET on dummy PHP file in uploads.
+		$baseurl = isset( $uploads['baseurl'] ) ? $uploads['baseurl'] : '';
+		if ( ! empty( $baseurl ) ) {
+			$probe_url = trailingslashit( $baseurl ) . 'pvsa-php-probe-test.php';
+			$response  = wp_remote_get(
+				$probe_url,
+				array(
+					'timeout'   => 3,
+					'sslverify' => false,
+				)
+			);
+
+			if ( ! is_wp_error( $response ) ) {
+				$code = wp_remote_retrieve_response_code( $response );
+				// HTTP 403 Forbidden indicates server forbids PHP scripts in uploads (e.g. Nginx location block).
+				if ( 403 === $code ) {
+					return array(
+						'status' => 'pass',
+						'detail' => __( 'Web server configuration successfully forbids PHP execution in uploads directory (HTTP 403).', 'pressvitals-site-auditor' ),
+					);
+				}
+			}
+		}
+
+		return array(
+			'status' => 'warn',
+			'detail' => __( 'No PHP execution restriction detected in wp-content/uploads. Consider blocking .php file execution in uploads via server configuration or .htaccess.', 'pressvitals-site-auditor' ),
 		);
 	}
 }

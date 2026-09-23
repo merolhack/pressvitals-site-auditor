@@ -1,5 +1,41 @@
 # History & Changelog
 
+## 2026-09-23 (v1.5.0 Release)
+- **v1.5.0 — 50-Probe Milestone & Core Hardening Expansion:**
+  - Added 5 new high-impact diagnostic probes across Availability, Performance, Security, and Environment:
+    1. `maintenance_mode_stuck` (Availability, Tier 1) — Probes `.maintenance` file in WordPress root, parsing `$upgrading` timestamp to detect persistent site outages exceeding 10 minutes from aborted core/plugin updates.
+    2. `development_mode_off` (Performance, Tier 2) — Audits `WP_DEVELOPMENT_MODE` / `wp_is_development_mode()` (introduced in WP 6.3) to verify core block templates, theme.json, and translation caches are active in production.
+    3. `env_type_production` (Environment, Tier 2) — Validates `wp_get_environment_type()` against expected `'production'` mode to prevent debug leakage and staging behavior.
+    4. `db_prefix_customized` (Security, Tier 4) — Checks whether table prefix `$wpdb->prefix` is the default `'wp_'` to defend against automated blind SQL injection attacks.
+    5. `uploads_php_execution` (Security, Tier 2) — Audits `.htaccess` directives and issues loopback test probes to verify PHP script execution is blocked inside `wp-content/uploads/`.
+  - Total built-in probes increased from 45 to 50.
+  - Regenerated translation template (`languages/pressvitals-site-auditor.pot`) via `wp i18n make-pot`.
+  - Expanded unit test suite in `tests/test-engine.php` (49 tests, 111 assertions, 100% PASS).
+  - Validated PHPCS `WordPress-Core` coding standards (0 errors, 0 warnings).
+  - Updated modular wiki (`wiki/index.md`, `wiki/architecture.md`, `wiki/wordpress-org-and-releases.md`).
+  - Bumped version to `1.5.0` across plugin headers, `PVSA_VERSION`, and `readme.txt`.
+
+- **Modular Karpathy LLM Wiki Architecture Migration (`wiki/`):**
+  - Migrated monolithic knowledge base (`LLM_WIKI.md`) into modular Karpathy-style knowledge base directory [`wiki/`](wiki/index.md) to maximize token efficiency and eliminate context window bloat.
+  - Extracted and categorized all documentation into 6 dedicated modules:
+    - [`wiki/index.md`](wiki/index.md) — Master navigation catalog, source code pointers, and repository metadata.
+    - [`wiki/architecture.md`](wiki/architecture.md) — Headless-first design, REST API endpoints, WP-Cron scheduler, and complete 45-probe diagnostic catalog.
+    - [`wiki/wordpress-standards-and-i18n.md`](wiki/wordpress-standards-and-i18n.md) — WP.org PCP compliance, i18n rules, translator comments, array alignment, and prepared SQL ignore patterns.
+    - [`wiki/wordpress-compatibility.md`](wiki/wordpress-compatibility.md) — Complete WordPress 7.1 Field Guide compatibility audit matrix.
+    - [`wiki/wordpress-org-and-releases.md`](wiki/wordpress-org-and-releases.md) — SVN credentials, deployed tags, 9-step release deployment workflow, CDN delays (72h), and dual API verification.
+    - [`wiki/tools-and-operations.md`](wiki/tools-and-operations.md) — Multi-version Docker environments, PHPUnit & PHPCS playbooks, Git PAT push requirements, and `codebase-memory-mcp` knowledge graph usage.
+    - [`wiki/ollama-delegation.md`](wiki/ollama-delegation.md) — Secondary model delegation protocol (`consultar_modelo_local`), cascading quota (`gemma4:cloud` &rarr; `qwen3:8b-8k`), and mandatory delegation matrix.
+    - [`wiki/sources/`](wiki/sources/) — Canonical storage directory for diagnostic outputs and evidence.
+  - Eliminated monolithic `LLM_WIKI.md` and root `index.md`.
+  - Updated all references across `AGENTS.md`, `README.md`, `HISTORY.md`, and Gemini skills (`pressvitals-architecture-rules`, `pressvitals-release-workflow`).
+
+## 2026-09-18
+- **Ollama Local Model (`qwen3:8b-8k`) Delegation Protocol & LLM Wiki Integration:**
+  - Researched technical specs and benchmarked local Ollama model `qwen3:8b-8k` (8.2B dense decoder-only transformer, Q4_K_M, 8K active context / 40K native).
+  - Validated the `ollama-local` MCP bridge tool `consultar_modelo_local` with live executions.
+  - Formalized and documented the mandatory ("MUST") delegation protocol across `AGENTS.md`, `LLM_WIKI.md` (Section 10), `index.md`, and `pressvitals-architecture-rules` skill.
+  - Established canonical delegation matrix: mechanical, repetitive, and low-risk tasks (boilerplate, docstrings, regex, formatting) MUST be delegated to `consultar_modelo_local`; architecture, multi-file code, Git/SVN releases, and security stay with Antigravity.
+
 ## 2026-08-15
 - **v1.3.0 & v1.4.0 Official Deployment to GitHub & WordPress.org SVN:**
   - Published GitHub Release `1.3.0` (tag `1.3.0`) -> Deployed to WordPress.org SVN (`tags/1.3.0/`).

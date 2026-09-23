@@ -69,8 +69,8 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$checks = $this->engine->get_checks();
 
 		$this->assertIsArray( $checks );
-		$this->assertGreaterThanOrEqual( 45, count( $checks ), 'Expected at least 45 built-in probes.' );
-		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status' ) as $id ) {
+		$this->assertGreaterThanOrEqual( 50, count( $checks ), 'Expected at least 50 built-in probes.' );
+		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status', 'maintenance_mode_stuck', 'development_mode_off', 'env_type_production', 'db_prefix_customized', 'uploads_php_execution' ) as $id ) {
 			$this->assertArrayHasKey( $id, $checks, "Missing built-in check: {$id}" );
 		}
 	}
@@ -600,5 +600,73 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$this->assertNotEmpty( $result['detail'] );
 
 		$wp_version = $orig_version;
+	}
+
+	/**
+	 * Maintenance mode stuck: verify clean pass when file is absent, and fail when file is older than 10m.
+	 */
+	public function test_check_maintenance_mode_stuck() {
+		$file = ABSPATH . '.maintenance';
+		if ( file_exists( $file ) ) {
+			unlink( $file );
+		}
+
+		$result = $this->engine->check_maintenance_mode_stuck();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+
+		// Simulate stuck maintenance file from 20 minutes ago.
+		$old_timestamp = time() - 1200;
+		file_put_contents( $file, "<?php \$upgrading = {$old_timestamp};" );
+
+		$result = $this->engine->check_maintenance_mode_stuck();
+		$this->assertSame( 'fail', $result['status'], $result['detail'] );
+
+		unlink( $file );
+	}
+
+	/**
+	 * Development mode probe: returns valid pass/warn status.
+	 */
+	public function test_check_development_mode_off() {
+		$result = $this->engine->check_development_mode_off();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * Environment type probe: returns valid pass/warn/fail status.
+	 */
+	public function test_check_env_type_production() {
+		$result = $this->engine->check_env_type_production();
+		$this->assertContains( $result['status'], array( 'pass', 'warn', 'fail' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * DB table prefix customized probe: returns pass or warn.
+	 */
+	public function test_check_db_prefix_customized() {
+		$result = $this->engine->check_db_prefix_customized();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * Uploads PHP execution blocked: test pass when mock server responds 403 Forbidden.
+	 */
+	public function test_check_uploads_php_execution_pass_on_403() {
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 403, 'message' => 'Forbidden' ),
+					'headers'  => array(),
+					'body'     => '',
+				);
+			}
+		);
+
+		$result = $this->engine->check_uploads_php_execution();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
 	}
 }

@@ -4,11 +4,11 @@ Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A headless-first diagnostic engine featuring 45+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
+A headless-first diagnostic engine featuring 50+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
 
 == Description ==
 
@@ -21,7 +21,7 @@ dashboard.
 
 It is **dependency-free** — no WooCommerce, no page builder, no other plugin
 required — and **pluggable**: every probe is registered through a filter, so the
-**45+ built-in probes** are just the starting point. The architecture is designed
+**50+ built-in probes** are just the starting point. The architecture is designed
 to scale; register your own via `pvsa_registered_checks`.
 
 = How is this different from the built-in Site Health? =
@@ -194,6 +194,14 @@ mounted. See `docker-compose.yml` for details.
 
 1. The admin report grouped by category with the summary box.
 2. The settings page (thresholds and alert email).
+
+= 1.5.0 =
+* New probe: Maintenance mode not stuck — inspects .maintenance file in WordPress root and flags outages exceeding 10 minutes.
+* New probe: Development mode off in production — audits WP_DEVELOPMENT_MODE to prevent core caching disablement for theme.json, block templates, and translations.
+* New probe: Environment type is production — validates WP_ENVIRONMENT_TYPE against production mode to prevent debug leakage and staging behavior.
+* New probe: Custom database table prefix — warns on default "wp_" table prefix to harden against automated blind SQL injection attacks.
+* New probe: PHP execution blocked in uploads — audits .htaccess policy and web server configuration to verify .php scripts cannot execute inside wp-content/uploads.
+* Total built-in probes increased from 45 to 50.
 
 = 1.4.0 =
 * New probe: debug.log HTTP exposure audit — verifies error logs containing sensitive stack traces are not web-accessible.
