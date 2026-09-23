@@ -2,7 +2,7 @@
 Contributors: merolhack
 Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
-Tested up to: 7.1.2
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.5.1
 License: GPLv2 or later
