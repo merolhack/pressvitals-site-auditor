@@ -2,13 +2,13 @@
 Contributors: merolhack
 Tags: monitoring, site health, security, rest api, uptime
 Requires at least: 6.0
-Tested up to: 7.1
+Tested up to: 7.1.2
 Requires PHP: 7.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A headless-first diagnostic engine featuring 50+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
+A headless-first diagnostic engine featuring 52+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
 
 == Description ==
 
@@ -21,7 +21,7 @@ dashboard.
 
 It is **dependency-free** — no WooCommerce, no page builder, no other plugin
 required — and **pluggable**: every probe is registered through a filter, so the
-**50+ built-in probes** are just the starting point. The architecture is designed
+**52+ built-in probes** are just the starting point. The architecture is designed
 to scale; register your own via `pvsa_registered_checks`.
 
 = How is this different from the built-in Site Health? =
@@ -194,6 +194,12 @@ mounted. See `docker-compose.yml` for details.
 
 1. The admin report grouped by category with the summary box.
 2. The settings page (thresholds and alert email).
+
+= 1.5.1 =
+* New probe: Password hashing algorithm modernization — scans wp_users to identify accounts retaining legacy MD5 (phpass) hashes, prompting migration to modern bcrypt hashing (introduced in WordPress 6.8+).
+* New probe: Modern image format support — verifies active image editor (Imagick/GD) supports WebP and AVIF (WordPress 6.5+) to protect Core Web Vitals (LCP).
+* Confirmed compatibility with WordPress 7.1.2.
+* Total built-in probes increased from 50 to 52.
 
 = 1.5.0 =
 * New probe: Maintenance mode not stuck — inspects .maintenance file in WordPress root and flags outages exceeding 10 minutes.

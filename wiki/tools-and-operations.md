@@ -30,13 +30,13 @@ Running Composer or PHPCS directly in the raw WSL environment can fail due to PH
 ### Docker Testing Commands
 ```bash
 # Run PHPUnit test suite inside bleeding-edge container
-docker compose exec wp-71 vendor/bin/phpunit
+docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor wp-71 vendor/bin/phpunit
 
 # Run PHPUnit test suite inside current stable container
-docker compose exec wp-latest vendor/bin/phpunit
+docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor wp-latest vendor/bin/phpunit
 
 # Run PHPCS checks (WordPress-Core ruleset)
-docker compose exec wp-latest vendor/bin/phpcs
+docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor wp-latest vendor/bin/phpcs
 ```
 
 ### Git Push Authentication Constraint

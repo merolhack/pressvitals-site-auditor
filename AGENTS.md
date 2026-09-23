@@ -69,7 +69,7 @@ Se establece como instrucción obligatoria (**"MUST"**) para **TODOS los agentes
 ## Wiki Architecture
 This repository implements the Karpathy LLM-Wiki structure to manage project knowledge alongside code:
 1.  **[`wiki/index.md`](wiki/index.md)**: The content catalog. Agents must read this to understand the layout of the repository and the modular wiki.
-2.  **[`wiki/`](wiki/)**: The modular knowledge base detailing architecture, probe registry (50 probes), localization rules, PHPCS formatting, and local environment quirks.
+2.  **[`wiki/`](wiki/)**: The modular knowledge base detailing architecture, probe registry (52 probes), localization rules, PHPCS formatting, and local environment quirks.
 3.  **[HISTORY.md](HISTORY.md)**: Acts as the chronological `log.md`. Every significant session, ingestion, or structural change must be appended here.
 4.  **[AGENTS.md](AGENTS.md)**: This file. It is the schema that dictates agent behavior.
 

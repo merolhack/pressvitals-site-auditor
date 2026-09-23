@@ -540,6 +540,18 @@ class PVSA_Engine {
 				'tier'     => 2,
 				'callback' => array( $this, 'check_uploads_php_execution' ),
 			),
+			'password_hashes_modern'   => array(
+				'label'    => __( 'Password hashing algorithm', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_password_hashes_modern' ),
+			),
+			'modern_image_formats'     => array(
+				'label'    => __( 'Modern image format support (WebP/AVIF)', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Performance', 'pressvitals-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_modern_image_formats' ),
+			),
 		);
 
 		return array_merge( $core, $checks );
@@ -3090,6 +3102,76 @@ class PVSA_Engine {
 		return array(
 			'status' => 'warn',
 			'detail' => __( 'No PHP execution restriction detected in wp-content/uploads. Consider blocking .php file execution in uploads via server configuration or .htaccess.', 'pressvitals-site-auditor' ),
+		);
+	}
+
+	/**
+	 * Audit whether user accounts have migrated from legacy phpass (MD5) to bcrypt hashing.
+	 *
+	 * WordPress 6.8+ upgraded core password hashing from MD5-based phpass to bcrypt.
+	 * Accounts created or active prior to 6.8 retain legacy MD5 hashes until next login.
+	 *
+	 * @return array
+	 */
+	public function check_password_hashes_modern() {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$legacy_hashes = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->users} WHERE user_pass LIKE %s OR user_pass LIKE %s",
+				$wpdb->esc_like( '$P$' ) . '%',
+				$wpdb->esc_like( '$H$' ) . '%'
+			)
+		);
+
+		if ( 0 === $legacy_hashes ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'All user passwords use modern bcrypt hashing (no legacy MD5/phpass hashes detected).', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		return array(
+			'status' => 'warn',
+			/* translators: %d: Number of user accounts retaining legacy MD5 phpass password hashes. */
+			'detail' => sprintf( __( '%d user account(s) still use legacy MD5 (phpass) password hashes. Encourage users to log in or reset passwords to upgrade to bcrypt (introduced in WordPress 6.8+).', 'pressvitals-site-auditor' ), $legacy_hashes ),
+		);
+	}
+
+	/**
+	 * Audit modern compressed image format support (WebP and AVIF).
+	 *
+	 * WordPress 6.5+ supports AVIF, and 5.8+ supports WebP. Delivering compressed modern
+	 * formats drastically improves Largest Contentful Paint (LCP) Core Web Vitals.
+	 *
+	 * @return array
+	 */
+	public function check_modern_image_formats() {
+		if ( ! function_exists( 'wp_image_editor_supports' ) ) {
+			require_once ABSPATH . WPINC . '/media.php';
+		}
+
+		$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
+		$avif_supported = wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) );
+
+		if ( $webp_supported && $avif_supported ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Active image editor (Imagick/GD) fully supports modern WebP and AVIF image generation.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		if ( $webp_supported ) {
+			return array(
+				'status' => 'pass',
+				'detail' => __( 'Active image editor supports WebP image generation (AVIF support requires updated Imagick/libavif).', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		return array(
+			'status' => 'warn',
+			'detail' => __( 'Active image editor does not support modern WebP or AVIF image generation. Upgrade PHP GD or ImageMagick to optimize image delivery and LCP.', 'pressvitals-site-auditor' ),
 		);
 	}
 }

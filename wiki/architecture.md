@@ -15,16 +15,16 @@ PressVitals Site Auditor is designed with three core architectural pillars:
 
 ---
 
-## 2. Built-in Probes (50 Total as of v1.5.0)
+## 2. Built-in Probes (59 Total as of v1.5.1)
 
-Probes are categorized into 8 functional diagnostic groups:
+Probes are categorized into 9 functional diagnostic groups:
 
 ### 1. Availability (3 Probes)
 - `db_connection`: Validates direct database connectivity via `$wpdb`.
 - `https_home`: Ensures the home and site URL options enforce HTTPS.
 - **`maintenance_mode_stuck`** *(New in v1.5.0)*: Audits presence of `.maintenance` file in WordPress root and flags persistent outages exceeding 10 minutes.
 
-### 2. Security (19 Probes)
+### 2. Security (20 Probes)
 - `debug_display_off`: Verifies `WP_DEBUG_DISPLAY` is disabled in production.
 - `env_file_exposed`: Tests whether `.env` or sensitive config files are publicly accessible via HTTP.
 - `stray_files`: Scans for stray backup or dump files (e.g. `.sql`, `.zip`, `.tar.gz`, `phpinfo.php`).
@@ -44,6 +44,7 @@ Probes are categorized into 8 functional diagnostic groups:
 - `debug_log_not_public`: Verifies `wp-content/debug.log` cannot be read directly via HTTP request.
 - **`db_prefix_customized`** *(New in v1.5.0)*: Audits table prefix against default "wp_" to harden against automated blind SQL injection attacks.
 - **`uploads_php_execution`** *(New in v1.5.0)*: Verifies PHP script execution is blocked inside `wp-content/uploads` via .htaccess or web server rule.
+- **`password_hashes_modern`** *(New in v1.5.1)*: Audits `wp_users` for legacy MD5 ($P$ / $H$) password hashes and verifies migration to modern bcrypt hashing native in WP 6.8+.
 
 ### 3. Errors
 - `error_log_size`: Inspects PHP error log file size and warns if bloated.
@@ -75,7 +76,7 @@ Probes are categorized into 8 functional diagnostic groups:
 ### 7. SEO
 - `homepage_indexable`: Checks whether search engines are discouraged (`blog_public` option) or `noindex` headers are present.
 
-### 8. Performance (8 Probes)
+### 8. Performance (9 Probes)
 - `memory_limit`: Inspects PHP `memory_limit` against recommended thresholds.
 - `object_cache`: Verifies whether a persistent object cache backend (Redis, Memcached) is active.
 - `cron_overdue`: Identifies overdue scheduled WP-Cron tasks.
@@ -84,6 +85,7 @@ Probes are categorized into 8 functional diagnostic groups:
 - `cron_loopback_health`: Tests loopback HTTP connection required for `wp-cron.php` spawn.
 - `opcache_status`: Checks PHP OPcache extension status, memory consumption, and hit rate.
 - **`development_mode_off`** *(New in v1.5.0)*: Audits WP_DEVELOPMENT_MODE to verify block template, theme.json, and translation caches are active in production.
+- **`modern_image_formats`** *(New in v1.5.1)*: Audits whether the active image editor (Imagick or GD) supports modern WebP and AVIF generation native in WP 6.5+.
 
 ### 9. Environment (7 Probes)
 - `php_version`: Evaluates current PHP runtime version against supported WordPress minimums.

@@ -13,6 +13,7 @@
   - `tags/1.3.0/` (40 probes, performance, index health audits)
   - `tags/1.4.0/` (45 probes, WP 7.1 readiness, OPcache, debug.log audit)
   - `tags/1.5.0/` (50 probes, maintenance mode stuck, dev mode, env type, db prefix, uploads PHP hardening)
+  - `tags/1.5.1/` (52+ probes, WordPress 7.1.2 modernization, bcrypt audit, modern image formats)
 
 ### Directory Assets & Caching Delays
 - **Directory Assets (`.wordpress-org/`)**: Banner and icon images have a **~72-hour CDN propagation delay** on `ps.w.org`.
@@ -45,8 +46,8 @@ Generate the clean production `.zip` using Python `shutil.make_archive` honoring
 ### Step 4: Code Quality & Testing Validation
 Run tests and standards checking inside the local Docker containers:
 ```bash
-docker compose exec wp-71 vendor/bin/phpunit
-docker compose exec wp-latest vendor/bin/phpcs
+docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor wp-71 vendor/bin/phpunit
+docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor wp-latest vendor/bin/phpcs
 ```
 *Requirement: 100% PHPUnit pass, 0 errors, 0 warnings in PHPCS.*
 

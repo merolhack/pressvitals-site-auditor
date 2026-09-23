@@ -69,8 +69,8 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$checks = $this->engine->get_checks();
 
 		$this->assertIsArray( $checks );
-		$this->assertGreaterThanOrEqual( 50, count( $checks ), 'Expected at least 50 built-in probes.' );
-		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status', 'maintenance_mode_stuck', 'development_mode_off', 'env_type_production', 'db_prefix_customized', 'uploads_php_execution' ) as $id ) {
+		$this->assertCount( 59, $checks, 'Expected exactly 59 built-in probes.' );
+		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status', 'maintenance_mode_stuck', 'development_mode_off', 'env_type_production', 'db_prefix_customized', 'uploads_php_execution', 'password_hashes_modern', 'modern_image_formats' ) as $id ) {
 			$this->assertArrayHasKey( $id, $checks, "Missing built-in check: {$id}" );
 		}
 	}
@@ -668,5 +668,23 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 
 		$result = $this->engine->check_uploads_php_execution();
 		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Password hashes modern: returns valid pass/warn status.
+	 */
+	public function test_check_password_hashes_modern() {
+		$result = $this->engine->check_password_hashes_modern();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
+	}
+
+	/**
+	 * Modern image format support: returns valid pass/warn status.
+	 */
+	public function test_check_modern_image_formats() {
+		$result = $this->engine->check_modern_image_formats();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
+		$this->assertNotEmpty( $result['detail'] );
 	}
 }

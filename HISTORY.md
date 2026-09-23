@@ -1,5 +1,16 @@
 # History & Changelog
 
+## 2026-09-23 (v1.5.1 Release)
+- **v1.5.1 — 52-Probe Milestone & WordPress 7.1.2 Modernization:**
+  - Added 2 new high-impact diagnostic probes:
+    1. `password_hashes_modern` (Security, Tier 3): Audita la tabla `wp_users` para identificar cuentas con hashes MD5 heredados (phpass `$P$` / `$H$`) y alertar sobre la necesidad de migrar al algoritmo moderno bcrypt nativo en WordPress 6.8+.
+    2. `modern_image_formats` (Performance, Tier 3): Audita si el editor de imágenes activo de WordPress (Imagick o GD) soporta generación comprimida de formatos modernos WebP y AVIF (nativos en WP 6.5+).
+  - Incremento del total de probes de **50 a 52**.
+  - Actualización de compatibilidad verificada a **WordPress 7.1.2** ('Tested up to: 7.1.2').
+  - Regeneración de catálogo de traducción (`languages/pressvitals-site-auditor.pot`) vía WP-CLI.
+  - Expansión de suite de pruebas unitarias (**51 tests**, **117 assertions**, **100% PASS** en PHP 8.1 - 8.3 / WP 6.0 - 7.1.2).
+  - Cumplimiento **100% de PHPCS WordPress-Core** (0 errores, 0 warnings).
+
 ## 2026-09-23 (v1.5.0 Release)
 - **v1.5.0 — 50-Probe Milestone & Core Hardening Expansion:**
   - Added 5 new high-impact diagnostic probes across Availability, Performance, Security, and Environment:

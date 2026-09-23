@@ -1,11 +1,11 @@
 # PressVitals Site Auditor
 
-A **headless-first** WordPress diagnostic engine featuring **50+ proactive probes** for
+A **headless-first** WordPress diagnostic engine featuring **52+ proactive probes** for
 performance, security, and DB health — extensible via REST API and custom filters.
 
 [![PHPUnit](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml/badge.svg)](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml)
 [![Code Quality](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/code-quality.yml/badge.svg)](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/code-quality.yml)
-![WordPress 6.0 - 7.1+](https://img.shields.io/badge/WordPress-6.0%20--%207.1%2B-blue)
+![WordPress 6.0 - 7.1.2+](https://img.shields.io/badge/WordPress-6.0%20--%207.1.2%2B-blue)
 ![PHP 7.4 - 8.4](https://img.shields.io/badge/PHP-7.4%20--%208.4-blue)
 ![License GPL-2.0+](https://img.shields.io/badge/license-GPL--2.0%2B-green)
 
