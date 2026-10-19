@@ -1,10 +1,10 @@
 === PressVitals Site Auditor ===
 Contributors: merolhack
-Tags: monitoring, site health, security, rest api, uptime
+Tags: audit, performance, security, monitoring, site health
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,7 +55,7 @@ re-pointed at automation, alerting, and security/ops auditing.
 
 = Built-in probes =
 
-PressVitals ships **29 built-in probes**, grouped by functional category:
+PressVitals ships **52 built-in probes**, grouped by functional category:
 
 * **Availability** — database connectivity, homepage HTTPS reachability.
 * **Security** — `.env` not web-accessible (HTTP) and not exposed on disk,
@@ -194,6 +194,13 @@ mounted. See `docker-compose.yml` for details.
 
 1. The admin report grouped by category with the summary box.
 2. The settings page (thresholds and alert email).
+
+= 1.5.2 =
+* Feature: Onboarding & Quick Start card in admin dashboard for frictionless first-run experience.
+* Feature: Direct Dashboard and Settings navigation action links in WordPress Plugins list.
+* Feature: Autonomous background monitoring status badge with next scheduled audit countdown and alert destination.
+* Feature: Non-intrusive community review prompt to gather ratings on WordPress.org with permanent dismissal option.
+* Optimization: Refreshed search tags and updated probe count documentation for improved directory discoverability.
 
 = 1.5.1 =
 * New probe: Password hashing algorithm modernization — scans wp_users to identify accounts retaining legacy MD5 (phpass) hashes, prompting migration to modern bcrypt hashing (introduced in WordPress 6.8+).

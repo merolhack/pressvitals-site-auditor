@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: PressVitals Site Auditor 1.5.0\n"
+"Project-Id-Version: PressVitals Site Auditor 1.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pressvitals-site-auditor\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1455,3 +1455,54 @@ msgstr ""
 #: pressvitals-site-auditor.php:148
 msgid "PressVitals Site Auditor could not load its engine. The plugin was not activated."
 msgstr ""
+
+#: includes/class-pvsa-admin.php:307
+msgid "Dashboard"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:350
+msgid "Help PressVitals Site Auditor grow!"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:353
+msgid "If PressVitals is helping keep your site reliable, secure, and fast, please consider taking a moment to rate us on WordPress.org. Honest reviews help fellow WordPress administrators discover the plugin and keep development active."
+msgstr ""
+
+#: includes/class-pvsa-admin.php:357
+msgid "Leave a 5-Star Review ★★★★★"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:363
+msgid "I already did / Dismiss"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:373
+msgid "Autonomous Daily Monitoring: Active"
+msgstr ""
+
+#. translators: 1: Relative time until next check, 2: Alert recipient email
+#: includes/class-pvsa-admin.php:379
+#, php-format
+msgid "Next automated background check in %1$s. Daily alerts are routed to %2$s on failure."
+msgstr ""
+
+#: includes/class-pvsa-admin.php:387
+msgid "Keep plugin active for 24/7 background site protection"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:333
+msgid "shortly"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:433
+msgid "Welcome to PressVitals Site Auditor"
+msgstr ""
+
+#: includes/class-pvsa-admin.php:436
+msgid "No health checks have been performed yet. Start your first comprehensive audit across availability, security, database health, email deliverability, and performance to establish your baseline."
+msgstr ""
+
+#: includes/class-pvsa-admin.php:442
+msgid "Start Initial Site Audit"
+msgstr ""
+

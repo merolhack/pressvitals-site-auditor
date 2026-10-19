@@ -37,7 +37,7 @@ This LLM Wiki is structured according to the [Karpathy LLM Wiki Architecture](ht
 ## 3. Quick Repository Metadata
 
 - **Plugin Slug**: `pressvitals-site-auditor`
-- **Current Version**: `1.5.1`
+- **Current Version**: `1.5.2`
 - **WordPress.org Directory URL**: [https://wordpress.org/plugins/pressvitals-site-auditor](https://wordpress.org/plugins/pressvitals-site-auditor)
 - **SVN Repository URL**: `https://plugins.svn.wordpress.org/pressvitals-site-auditor`
 - **Codebase Memory Graph**: `home-merolhack-fl-pressvitals-site-auditor`

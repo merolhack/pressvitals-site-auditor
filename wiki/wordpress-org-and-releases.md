@@ -14,6 +14,7 @@
   - `tags/1.4.0/` (45 probes, WP 7.1 readiness, OPcache, debug.log audit)
   - `tags/1.5.0/` (50 probes, maintenance mode stuck, dev mode, env type, db prefix, uploads PHP hardening)
   - `tags/1.5.1/` (52+ probes, WordPress 7.1.2 modernization, bcrypt audit, modern image formats)
+  - `tags/1.5.2/` (Onboarding quick-start, background monitoring status, review prompt, ASO tags)
 
 ### Directory Assets & Caching Delays
 - **Directory Assets (`.wordpress-org/`)**: Banner and icon images have a **~72-hour CDN propagation delay** on `ps.w.org`.

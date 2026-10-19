@@ -1,5 +1,14 @@
 # History & Changelog
 
+## 2026-10-19 (v1.5.2 Release)
+- **v1.5.2 — Onboarding Experience, Retention Badging, Review Prompt & Directory ASO:**
+  - **Quick Start & Frictionless Onboarding**: Introducción de tarjeta destacada de bienvenida en el panel de administración cuando el sitio aún no cuenta con auditorías previas, permitiendo lanzar el análisis inicial con un solo clic.
+  - **Enlaces de Acción Directa en Lista de Plugins**: Integración del filtro `plugin_action_links` en `wp-admin/plugins.php` con accesos directos a "Dashboard" y "Settings".
+  - **Indicador de Monitoreo Autónomo y Retención**: Incorporación de tarjeta de estado en el panel principal que visibiliza la ejecución automática en segundo plano vía WP-Cron, la cuenta regresiva al próximo escaneo y el correo de alertas en caso de fallo crítico.
+  - **Solicitud de Reseñas Comunitaria No Intrusiva**: Banner cordial en el panel tras auditorías exitosas que invita al usuario a valorar el plugin en WordPress.org, con descarte permanente vía `update_user_meta` y protección por nonces.
+  - **Optimización ASO en WordPress.org**: Actualización de etiquetas (`audit`, `performance`, `security`, `monitoring`, `site health`) y corrección del inventario documentado a 52 probes integrados.
+  - **i18n & PHPCS**: Catálogo `.pot` actualizado y cumplimiento 100% de WordPress Coding Standards (0 errores, 0 warnings).
+
 ## 2026-09-23 (v1.5.1 Release)
 - **v1.5.1 — 52-Probe Milestone & WordPress 7.1.2 Modernization:**
   - Added 2 new high-impact diagnostic probes:

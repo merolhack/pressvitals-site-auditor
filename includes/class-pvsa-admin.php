@@ -37,10 +37,12 @@ class PVSA_Admin {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( PVSA_PLUGIN_FILE ), array( $this, 'add_action_links' ) );
 		add_action( 'admin_post_pvsa_run_now', array( $this, 'handle_run_now' ) );
 		add_action( 'admin_post_pvsa_rotate_token', array( $this, 'handle_rotate_token' ) );
 		add_action( 'admin_post_pvsa_export_json', array( $this, 'handle_export_json' ) );
 		add_action( 'admin_post_pvsa_export_csv', array( $this, 'handle_export_csv' ) );
+		add_action( 'admin_post_pvsa_dismiss_review', array( $this, 'handle_dismiss_review' ) );
 	}
 
 	/**
@@ -272,6 +274,35 @@ class PVSA_Admin {
 	}
 
 	/**
+	 * Handle dismissing the review request prompt.
+	 */
+	public function handle_dismiss_review() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do this.', 'pressvitals-site-auditor' ) );
+		}
+		check_admin_referer( 'pvsa_dismiss_review' );
+
+		update_user_meta( get_current_user_id(), 'pvsa_review_dismissed', 1 );
+
+		wp_safe_redirect( admin_url( 'tools.php?page=' . self::PAGE_SLUG ) );
+		exit;
+	}
+
+	/**
+	 * Add settings & audit dashboard links to plugins.php row.
+	 *
+	 * @param array $links Existing action links.
+	 * @return array
+	 */
+	public function add_action_links( array $links ) {
+		$custom_links = array(
+			'<a href="' . esc_url( admin_url( 'tools.php?page=' . self::PAGE_SLUG ) ) . '">' . esc_html__( 'Dashboard', 'pressvitals-site-auditor' ) . '</a>',
+			'<a href="' . esc_url( admin_url( 'tools.php?page=' . self::PAGE_SLUG . '#pvsa-settings' ) ) . '">' . esc_html__( 'Settings', 'pressvitals-site-auditor' ) . '</a>',
+		);
+		return array_merge( $custom_links, $links );
+	}
+
+	/**
 	 * Render the admin page.
 	 */
 	public function render_page() {
@@ -279,10 +310,14 @@ class PVSA_Admin {
 			wp_die( esc_html__( 'You are not allowed to view this page.', 'pressvitals-site-auditor' ) );
 		}
 
-		$report = get_option( PVSA_OPTION_REPORT );
-		$token  = (string) get_option( PVSA_OPTION_TOKEN, '' );
-		$msg    = isset( $_GET['pvsa_msg'] ) ? sanitize_key( wp_unslash( $_GET['pvsa_msg'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = esc_url( admin_url( 'admin-post.php' ) );
+		$report           = get_option( PVSA_OPTION_REPORT );
+		$token            = (string) get_option( PVSA_OPTION_TOKEN, '' );
+		$msg              = isset( $_GET['pvsa_msg'] ) ? sanitize_key( wp_unslash( $_GET['pvsa_msg'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$action           = esc_url( admin_url( 'admin-post.php' ) );
+		$review_dismissed = (bool) get_user_meta( get_current_user_id(), 'pvsa_review_dismissed', true );
+		$next_cron        = wp_next_scheduled( PVSA_CRON_HOOK );
+		$diff_string      = ( $next_cron && $next_cron > time() ) ? human_time_diff( time(), $next_cron ) : __( 'shortly', 'pressvitals-site-auditor' );
+		$alert_email      = PVSA_Engine::get_setting( 'alert_email', (string) get_option( 'admin_email' ) );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'PressVitals Site Auditor', 'pressvitals-site-auditor' ); ?></h1>
@@ -296,6 +331,51 @@ class PVSA_Admin {
 			<?php elseif ( 'rotated' === $msg ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Token rotated. Update any external probe that uses it.', 'pressvitals-site-auditor' ); ?></p></div>
 			<?php endif; ?>
+
+			<?php if ( is_array( $report ) && ! empty( $report['checks'] ) && ! $review_dismissed ) : ?>
+				<div class="notice notice-info" style="border-left-color:#00a32a; padding:12px 16px; margin:16px 0;">
+					<p style="font-weight:600; font-size:14px; margin:0 0 6px 0;">
+						<?php esc_html_e( 'Help PressVitals Site Auditor grow!', 'pressvitals-site-auditor' ); ?>
+					</p>
+					<p style="margin:0 0 10px 0; font-size:13px;">
+						<?php esc_html_e( 'If PressVitals is helping keep your site reliable, secure, and fast, please consider taking a moment to rate us on WordPress.org. Honest reviews help fellow WordPress administrators discover the plugin and keep development active.', 'pressvitals-site-auditor' ); ?>
+					</p>
+					<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+						<a href="https://wordpress.org/support/plugin/pressvitals-site-auditor/reviews/#new-post" target="_blank" rel="noopener noreferrer" class="button button-primary" style="background:#00a32a; border-color:#008a20;">
+							<?php esc_html_e( 'Leave a 5-Star Review ★★★★★', 'pressvitals-site-auditor' ); ?>
+						</a>
+						<form method="post" action="<?php echo $action; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" style="display:inline;">
+							<input type="hidden" name="action" value="pvsa_dismiss_review" />
+							<?php wp_nonce_field( 'pvsa_dismiss_review' ); ?>
+							<button type="submit" class="button button-secondary">
+								<?php esc_html_e( 'I already did / Dismiss', 'pressvitals-site-auditor' ); ?>
+							</button>
+						</form>
+					</div>
+				</div>
+			<?php endif; ?>
+
+			<div style="background:#fff; border:1px solid #c3c4c7; border-left:4px solid #2271b1; padding:12px 16px; margin:16px 0; border-radius:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+				<div>
+					<p style="margin:0 0 4px 0; font-weight:600; font-size:14px; color:#1d2327;">
+						<span class="dashicons dashicons-shield" style="color:#2271b1; margin-right:4px;"></span>
+						<?php esc_html_e( 'Autonomous Daily Monitoring: Active', 'pressvitals-site-auditor' ); ?>
+					</p>
+					<p style="margin:0; font-size:13px; color:#646970;">
+						<?php
+						printf(
+							/* translators: 1: Relative time until next check, 2: Alert recipient email */
+							esc_html__( 'Next automated background check in %1$s. Daily alerts are routed to %2$s on failure.', 'pressvitals-site-auditor' ),
+							esc_html( $diff_string ),
+							esc_html( $alert_email )
+						);
+						?>
+					</p>
+				</div>
+				<div style="font-size:12px; color:#50575e; background:#f0f0f1; padding:6px 10px; border-radius:3px;">
+					<?php esc_html_e( 'Keep plugin active for 24/7 background site protection', 'pressvitals-site-auditor' ); ?>
+				</div>
+			</div>
 
 			<p>
 				<form method="post" action="<?php echo $action; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above. ?>" style="display:inline;">
@@ -318,7 +398,7 @@ class PVSA_Admin {
 			<?php $this->render_report( is_array( $report ) ? $report : array() ); ?>
 
 			<hr />
-			<h2><?php esc_html_e( 'Settings', 'pressvitals-site-auditor' ); ?></h2>
+			<h2 id="pvsa-settings"><?php esc_html_e( 'Settings', 'pressvitals-site-auditor' ); ?></h2>
 			<form method="post" action="options.php">
 				<?php
 				settings_fields( self::SETTINGS_GROUP );
@@ -349,7 +429,23 @@ class PVSA_Admin {
 	 */
 	private function render_report( array $report ) {
 		if ( empty( $report['checks'] ) ) {
-			echo '<div class="notice notice-info"><p>' . esc_html__( 'No report yet. Click "Run now".', 'pressvitals-site-auditor' ) . '</p></div>';
+			?>
+			<div style="background:#fff; border:1px solid #c3c4c7; padding:24px; border-radius:6px; margin:20px 0; max-width:800px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+				<h2 style="margin-top:0; font-size:18px; color:#1d2327;">
+					<?php esc_html_e( 'Welcome to PressVitals Site Auditor', 'pressvitals-site-auditor' ); ?>
+				</h2>
+				<p style="font-size:14px; line-height:1.6; color:#50575e;">
+					<?php esc_html_e( 'No health checks have been performed yet. Start your first comprehensive audit across availability, security, database health, email deliverability, and performance to establish your baseline.', 'pressvitals-site-auditor' ); ?>
+				</p>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:16px;">
+					<input type="hidden" name="action" value="pvsa_run_now" />
+					<?php wp_nonce_field( 'pvsa_run_now' ); ?>
+					<button type="submit" class="button button-primary button-hero">
+						<?php esc_html_e( 'Start Initial Site Audit', 'pressvitals-site-auditor' ); ?>
+					</button>
+				</form>
+			</div>
+			<?php
 			return;
 		}
 
