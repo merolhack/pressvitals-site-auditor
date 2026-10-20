@@ -1,5 +1,13 @@
 # History & Changelog
 
+## 2026-10-19 (LLM Wiki Modular Ingestion — Production Deployments & Validation)
+- **Modular Knowledge Ingestion of Live Deployments:**
+  - Registrados expedientes modulares de auditoría en producción para dos arquitecturas clave:
+    1. [`wiki/deployments-dqro.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/deployments-dqro.md): `dqro.mx` alojado en IONOS Cloud Managed WAAS (Nginx, PHP 8.3.35, MariaDB). Documentada la investigación y resolución del falso positivo transitorio de PHP 8.0 por caché de reporte previo en `pvsa_last_report`.
+    2. [`wiki/deployments-freelancemexico.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/deployments-freelancemexico.md): `freelancemexico.com.mx` alojado en Hostgator Shared Hosting (cPanel Jupiter `mx98`, Apache 2.4.69, PHP 8.3.35, MySQL 5.7). Documentado rendimiento OPcache del 98.5% y patrón de filtrado `pvsa_known_tables` para tablas de marketplace HivePress.
+    3. [`wiki/live-deployments.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/live-deployments.md): Matriz comparativa entre IONOS y Hostgator, análisis de la advertencia legítima `php_eol_horizon` para PHP 8.3 a finales de 2026, y protocolo de invalidación de caché de actualizaciones de WordPress.
+  - Actualizado el índice maestro [`wiki/index.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/index.md) con los nuevos módulos navegables.
+
 ## 2026-10-19 (v1.5.2 Release)
 - **v1.5.2 — Onboarding Experience, Retention Badging, Review Prompt & Directory ASO:**
   - **Quick Start & Frictionless Onboarding**: Introducción de tarjeta destacada de bienvenida en el panel de administración cuando el sitio aún no cuenta con auditorías previas, permitiendo lanzar el análisis inicial con un solo clic.
