@@ -1,6 +1,10 @@
 # History & Changelog
 
 ## 2026-10-23 (60-Probe Milestone — PHP Runtime Security & CVE Advisory Auditing)
+- **CI & PHPUnit Matrix Compatibility Fix:**
+  - Fixed `test_php_version_fails_on_unpatched_micro_version` in `tests/test-engine.php` by filtering `pvsa_php_eol_dates` to a future date (`2099-01-01`), isolating micro-patch CVE assertions from the EOL check when executing PHPUnit under legacy runtimes (PHP 7.4 and PHP 8.0).
+  - Added dedicated `test_php_version_fails_when_eol` unit test to explicitly validate end-of-life detection.
+  - Satisfied WordPress Plugin Check (PCP) remote offloading policy by defaulting `pvsa_php_security_feed_url` to empty.
 - **PHP Runtime Security & CVE Advisory Auditing (PHP2Shell CVE-2026-109618 / 109619 Response):**
   - **Evolved `php_version` (Environment, Tier 3):** Upgraded from high-level branch/EOL checking to granular micro-patch vulnerability auditing. Enforces minimum secure patch versions (e.g. 8.2.35, 8.3.36, 8.4.27, 8.5.12) against active unauthenticated RCE exploits in the PHP core runtime.
   - **New Sonda `php_hardening` (Security, Tier 3):** Audits critical php.ini runtime directives, warning on `expose_php` HTTP version leakage and unconstrained high-risk execution functions (`exec`, `shell_exec`, `system`, `proc_open`, `popen`), while immediately failing on `allow_url_include`.

@@ -214,6 +214,12 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 	public function test_php_version_fails_on_unpatched_micro_version() {
 		$major_minor = implode( '.', array_slice( explode( '.', PHP_VERSION ), 0, 2 ) );
 		add_filter(
+			'pvsa_php_eol_dates',
+			static function () use ( $major_minor ) {
+				return array( $major_minor => '2099-01-01' );
+			}
+		);
+		add_filter(
 			'pvsa_php_min_secure_versions',
 			static function () use ( $major_minor ) {
 				return array( $major_minor => '99.99.99' );
@@ -223,6 +229,20 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$result = $this->engine->check_php_version();
 		$this->assertSame( 'fail', $result['status'] );
 		$this->assertStringContainsString( 'below the minimum secure patch', $result['detail'] );
+	}
+
+	public function test_php_version_fails_when_eol() {
+		$major_minor = implode( '.', array_slice( explode( '.', PHP_VERSION ), 0, 2 ) );
+		add_filter(
+			'pvsa_php_eol_dates',
+			static function () use ( $major_minor ) {
+				return array( $major_minor => '2000-01-01' );
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'fail', $result['status'] );
+		$this->assertStringContainsString( 'end-of-life', $result['detail'] );
 	}
 
 	public function test_php_version_passes_when_patched_and_active() {
