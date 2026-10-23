@@ -1072,9 +1072,9 @@ class PVSA_Engine {
 		/**
 		 * Filter the URL from which to fetch remote PHP security advisories.
 		 *
-		 * @param string $url Advisory endpoint.
+		 * @param string $url Advisory endpoint. Default empty (uses local data/php-advisories.json).
 		 */
-		$feed_url = apply_filters( 'pvsa_php_security_feed_url', 'https://raw.githubusercontent.com/merolhack/pressvitals-site-auditor/main/data/php-advisories.json' );
+		$feed_url = apply_filters( 'pvsa_php_security_feed_url', '' );
 
 		if ( empty( $feed_url ) ) {
 			return false;
