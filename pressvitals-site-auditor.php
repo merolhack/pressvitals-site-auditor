@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       PressVitals Site Auditor
  * Plugin URI:        https://wordpress.org/plugins/pressvitals-site-auditor/
- * Description:       A headless-first diagnostic engine featuring 52+ proactive probes for performance, security, and DB health — extensible via REST API and custom filters.
- * Version:           1.5.2
+ * Description:       A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health — extensible via REST API and custom filters.
+ * Version:           1.5.3
  * Requires at least: 6.0
  * Tested up to:      7.1
  * Requires PHP:      7.4
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PVSA_VERSION', '1.5.2' );
+define( 'PVSA_VERSION', '1.5.3' );
 define( 'PVSA_PLUGIN_FILE', __FILE__ );
 define( 'PVSA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PVSA_CRON_HOOK', 'pvsa_daily_check' );
@@ -72,6 +72,7 @@ add_action( 'plugins_loaded', 'pvsa_init' );
 function pvsa_run_scheduled_check() {
 	$engine = new PVSA_Engine();
 	$engine->init();
+	$engine->sync_security_advisories();
 	$report = $engine->run();
 
 	update_option( PVSA_OPTION_REPORT, $report, false );

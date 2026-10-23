@@ -1,6 +1,6 @@
 # PressVitals Site Auditor
 
-A **headless-first** WordPress diagnostic engine featuring **52+ proactive probes** for
+A **headless-first** WordPress diagnostic engine featuring **60+ proactive probes** for
 performance, security, and DB health — extensible via REST API and custom filters.
 
 [![PHPUnit](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml/badge.svg)](https://github.com/merolhack/pressvitals-site-auditor/actions/workflows/tests.yml)
@@ -24,7 +24,9 @@ machine-readable monitoring and auditing**:
   `/report` JSON endpoint (HTTP `503` on a failing verdict) for uptime monitors / CI.
 - **Scheduled + alerting** — daily WP-Cron run that emails the admin on a fail verdict.
 - **Severity tiers + worst-of verdict** — a single green/red signal.
-- **Probes core does not run** — TLS certificate-expiry countdown, `.env`/secret web
+- **Probes core does not run** — TLS certificate-expiry countdown, PHP micro-patch
+  security advisory auditing (CVE-2026-109618 / PHP2Shell), PHP runtime hardening
+  (`expose_php`, `disable_functions`, `allow_url_include`), `.env`/secret web
   exposure, a web-root stray-backup scanner, baseline security headers, forced-HTTPS,
   XML-RPC exposure, default-`admin` detection, SPF + DMARC email DNS, homepage
   indexability, OPcache status, cron loopback health, and database-bloat checks.

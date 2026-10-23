@@ -1,6 +1,6 @@
 {
     "name": "pressvitals/site-auditor",
-    "description": "A headless-first WordPress diagnostic engine with 22+ proactive probes for performance, security, and DB health.",
+    "description": "A headless-first WordPress diagnostic engine with 60+ proactive probes for performance, security, and DB health.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "keywords": [

@@ -288,6 +288,12 @@ class PVSA_Engine {
 				'tier'     => 3,
 				'callback' => array( $this, 'check_security_headers' ),
 			),
+			'php_hardening'            => array(
+				'label'    => __( 'PHP runtime hardening', 'pressvitals-site-auditor' ),
+				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
+				'tier'     => 3,
+				'callback' => array( $this, 'check_php_hardening' ),
+			),
 			'https_forced'             => array(
 				'label'    => __( 'HTTPS is forced', 'pressvitals-site-auditor' ),
 				'group'    => __( 'Security', 'pressvitals-site-auditor' ),
@@ -919,9 +925,9 @@ class PVSA_Engine {
 	}
 
 	/**
-	 * PHP version is within a security-supported range.
+	 * PHP version is within a security-supported range and patched against known critical CVEs.
 	 *
-	 * @return array
+	 * @return array{status:string,detail:string}
 	 */
 	public function check_php_version() {
 		$version     = PHP_VERSION;
@@ -932,10 +938,17 @@ class PVSA_Engine {
 			'7.4' => '2022-11-28',
 			'8.0' => '2023-11-26',
 			'8.1' => '2024-12-31',
-			'8.2' => '2025-12-31',
+			'8.2' => '2026-12-31',
 			'8.3' => '2026-12-31',
 			'8.4' => '2027-12-31',
 		);
+
+		/**
+		 * Filter the official PHP End-Of-Life dates.
+		 *
+		 * @param array $eol_dates Map of 'major.minor' => 'YYYY-MM-DD'.
+		 */
+		$eol_dates = (array) apply_filters( 'pvsa_php_eol_dates', $eol_dates );
 
 		/**
 		 * Filter the number of months before EOL to warn.
@@ -970,8 +983,36 @@ class PVSA_Engine {
 				'status' => 'fail',
 				// translators: %s: PHP version
 				// translators: 1: dynamic value
-				'detail' => sprintf( __( 'PHP %s is end-of-life — upgrade.', 'pressvitals-site-auditor' ), $version ),
+				'detail' => sprintf( __( 'PHP %s is end-of-life and no longer receives security updates — upgrade.', 'pressvitals-site-auditor' ), $version ),
 			);
+		}
+
+		// Micro-patch security validation against active critical CVEs (e.g. PHP2Shell CVE-2026-109618 / 109619).
+		$clean_version      = preg_replace( '/^([0-9]+\.[0-9]+\.[0-9]+).*/', '$1', $version );
+		$default_min_secure = array(
+			'8.2' => '8.2.35',
+			'8.3' => '8.3.36',
+			'8.4' => '8.4.27',
+			'8.5' => '8.5.12',
+		);
+
+		/**
+		 * Filter the minimum secure PHP patch versions per branch.
+		 *
+		 * @param array $min_secure Map of 'major.minor' => 'major.minor.patch'.
+		 */
+		$min_secure_patches = (array) apply_filters( 'pvsa_php_min_secure_versions', $this->get_min_secure_php_versions( $default_min_secure ) );
+
+		if ( isset( $min_secure_patches[ $major_minor ] ) ) {
+			$min_patch = $min_secure_patches[ $major_minor ];
+			if ( version_compare( $clean_version, $min_patch, '<' ) ) {
+				return array(
+					'status' => 'fail',
+					// translators: 1: current PHP version, 2: minimum secure PHP version
+					// translators: 1: dynamic value, 2: dynamic value
+					'detail' => sprintf( __( 'PHP %1$s is below the minimum secure patch (%2$s) and vulnerable to critical security issues (e.g. PHP2Shell RCE) — upgrade PHP immediately or verify host security backports.', 'pressvitals-site-auditor' ), $version, $min_patch ),
+				);
+			}
 		}
 
 		// Calculate horizon (approx 30 days per month).
@@ -989,7 +1030,142 @@ class PVSA_Engine {
 			'status' => 'pass',
 			// translators: %s: PHP version
 			// translators: 1: dynamic value
-			'detail' => sprintf( __( 'PHP %s is fully supported.', 'pressvitals-site-auditor' ), $version ),
+			'detail' => sprintf( __( 'PHP %s is actively supported and up to date with critical security patches.', 'pressvitals-site-auditor' ), $version ),
+		);
+	}
+
+	/**
+	 * Get the minimum secure patch versions for PHP branches, checking cached security advisories.
+	 *
+	 * @param array $defaults Default hardcoded patch versions.
+	 * @return array
+	 */
+	public function get_min_secure_php_versions( array $defaults ) {
+		$advisories = get_transient( 'pvsa_php_security_advisories' );
+		if ( is_array( $advisories ) && ! empty( $advisories['php_branches'] ) && is_array( $advisories['php_branches'] ) ) {
+			return array_merge( $defaults, $advisories['php_branches'] );
+		}
+
+		// Check if bundled fallback data file exists.
+		$plugin_dir = defined( 'PVSA_PLUGIN_DIR' ) ? PVSA_PLUGIN_DIR : dirname( __DIR__ ) . '/';
+		$local_file = $plugin_dir . 'data/php-advisories.json';
+		if ( file_exists( $local_file ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$raw = file_get_contents( $local_file );
+			if ( false !== $raw ) {
+				$parsed = json_decode( $raw, true );
+				if ( is_array( $parsed ) && ! empty( $parsed['php_branches'] ) && is_array( $parsed['php_branches'] ) ) {
+					return array_merge( $defaults, $parsed['php_branches'] );
+				}
+			}
+		}
+
+		return $defaults;
+	}
+
+	/**
+	 * Fetch and cache remote PHP security advisories in the background.
+	 *
+	 * @return bool True if updated, false on failure or skipped.
+	 */
+	public function sync_security_advisories() {
+		/**
+		 * Filter the URL from which to fetch remote PHP security advisories.
+		 *
+		 * @param string $url Advisory endpoint.
+		 */
+		$feed_url = apply_filters( 'pvsa_php_security_feed_url', 'https://raw.githubusercontent.com/merolhack/pressvitals-site-auditor/main/data/php-advisories.json' );
+
+		if ( empty( $feed_url ) ) {
+			return false;
+		}
+
+		$response = wp_remote_get(
+			$feed_url,
+			array(
+				'timeout'    => 5,
+				'user-agent' => 'PressVitalsSiteAuditor/' . ( defined( 'PVSA_VERSION' ) ? PVSA_VERSION : '1.5.2' ) . '; ' . home_url(),
+			)
+		);
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			// Cache fallback for 6 hours on error to prevent repeated remote requests.
+			set_transient( 'pvsa_php_security_advisories', array( 'updated' => time() ), 6 * HOUR_IN_SECONDS );
+			return false;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( ! is_array( $data ) || empty( $data['php_branches'] ) ) {
+			set_transient( 'pvsa_php_security_advisories', array( 'updated' => time() ), 6 * HOUR_IN_SECONDS );
+			return false;
+		}
+
+		// Cache successful feed for 24 hours.
+		set_transient( 'pvsa_php_security_advisories', $data, DAY_IN_SECONDS );
+		return true;
+	}
+
+	/**
+	 * Audits critical security directives in php.ini (expose_php, high-risk disable_functions
+	 * such as exec/shell_exec/system, and allow_url_include).
+	 *
+	 * @return array{status:string,detail:string}
+	 */
+	public function check_php_hardening() {
+		$issues = array();
+
+		// 1. allow_url_include must be disabled (critical vulnerability vector).
+		$allow_url_include = ini_get( 'allow_url_include' );
+		if ( ! empty( $allow_url_include ) && 'off' !== strtolower( $allow_url_include ) && '0' !== $allow_url_include ) {
+			return array(
+				'status' => 'fail',
+				'detail' => __( 'allow_url_include is enabled in php.ini — high risk of remote file inclusion; disable it immediately.', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		// 2. expose_php leaks runtime version banner in HTTP headers (X-Powered-By).
+		$expose_php = ini_get( 'expose_php' );
+		if ( ! empty( $expose_php ) && 'off' !== strtolower( $expose_php ) && '0' !== $expose_php ) {
+			$issues[] = __( 'expose_php is enabled (leaks PHP version in HTTP headers)', 'pressvitals-site-auditor' );
+		}
+
+		// 3. High-risk system execution functions.
+		$dangerous = array( 'exec', 'passthru', 'shell_exec', 'system', 'proc_open', 'popen' );
+		/**
+		 * Filter the list of dangerous execution functions checked by the hardening probe.
+		 *
+		 * @param array $dangerous List of function names.
+		 */
+		$dangerous = (array) apply_filters( 'pvsa_php_hardening_dangerous_functions', $dangerous );
+
+		$disabled_raw = (string) ini_get( 'disable_functions' );
+		$disabled     = array_filter( array_map( 'trim', explode( ',', strtolower( $disabled_raw ) ) ) );
+
+		$enabled_dangerous = array();
+		foreach ( $dangerous as $func ) {
+			if ( function_exists( $func ) && ! in_array( strtolower( $func ), $disabled, true ) ) {
+				$enabled_dangerous[] = $func;
+			}
+		}
+
+		if ( count( $enabled_dangerous ) === count( $dangerous ) ) {
+			$issues[] = __( 'all high-risk execution functions (exec, shell_exec, system, etc.) are unconstrained', 'pressvitals-site-auditor' );
+		}
+
+		if ( ! empty( $issues ) ) {
+			return array(
+				'status' => 'warn',
+				// translators: %s: comma-separated list of hardening recommendations
+				// translators: 1: dynamic value
+				'detail' => sprintf( __( 'PHP configuration needs hardening: %s.', 'pressvitals-site-auditor' ), implode( '; ', $issues ) ),
+			);
+		}
+
+		return array(
+			'status' => 'pass',
+			'detail' => __( 'PHP runtime directives are hardened (expose_php is off and dangerous execution directives are restricted).', 'pressvitals-site-auditor' ),
 		);
 	}
 

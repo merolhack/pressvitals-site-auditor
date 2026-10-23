@@ -24,7 +24,7 @@ Probes are categorized into 9 functional diagnostic groups:
 - `https_home`: Ensures the home and site URL options enforce HTTPS.
 - **`maintenance_mode_stuck`** *(New in v1.5.0)*: Audits presence of `.maintenance` file in WordPress root and flags persistent outages exceeding 10 minutes.
 
-### 2. Security (20 Probes)
+### 2. Security (21 Probes)
 - `debug_display_off`: Verifies `WP_DEBUG_DISPLAY` is disabled in production.
 - `env_file_exposed`: Tests whether `.env` or sensitive config files are publicly accessible via HTTP.
 - `stray_files`: Scans for stray backup or dump files (e.g. `.sql`, `.zip`, `.tar.gz`, `phpinfo.php`).
@@ -45,6 +45,7 @@ Probes are categorized into 9 functional diagnostic groups:
 - **`db_prefix_customized`** *(New in v1.5.0)*: Audits table prefix against default "wp_" to harden against automated blind SQL injection attacks.
 - **`uploads_php_execution`** *(New in v1.5.0)*: Verifies PHP script execution is blocked inside `wp-content/uploads` via .htaccess or web server rule.
 - **`password_hashes_modern`** *(New in v1.5.1)*: Audits `wp_users` for legacy MD5 ($P$ / $H$) password hashes and verifies migration to modern bcrypt hashing native in WP 6.8+.
+- **`php_hardening`**: Audits critical PHP ini directives (`expose_php` HTTP version leakage, `allow_url_include`, and high-risk system execution functions such as `exec`, `shell_exec`, `system`).
 
 ### 3. Errors
 - `error_log_size`: Inspects PHP error log file size and warns if bloated.
@@ -88,7 +89,7 @@ Probes are categorized into 9 functional diagnostic groups:
 - **`modern_image_formats`** *(New in v1.5.1)*: Audits whether the active image editor (Imagick or GD) supports modern WebP and AVIF generation native in WP 6.5+.
 
 ### 9. Environment (7 Probes)
-- `php_version`: Evaluates current PHP runtime version against supported WordPress minimums.
+- `php_version`: Evaluates current PHP runtime version against supported WordPress minimums, official End-of-Life (EOL) calendar with a customizable warning horizon, and active critical micro-patch CVE security advisories (e.g. PHP2Shell CVE-2026-109618/109619).
 - `rest_api_reachable`: Verifies the WordPress REST API root endpoint is reachable.
 - `core_update_available`: Checks if WordPress core updates are pending.
 - `plugin_updates_pending`: Audits pending plugin updates.

@@ -4,11 +4,11 @@ Tags: audit, performance, security, monitoring, site health
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A headless-first diagnostic engine featuring 52+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
+A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
 
 == Description ==
 
@@ -21,7 +21,7 @@ dashboard.
 
 It is **dependency-free** — no WooCommerce, no page builder, no other plugin
 required — and **pluggable**: every probe is registered through a filter, so the
-**52+ built-in probes** are just the starting point. The architecture is designed
+**60+ built-in probes** are just the starting point. The architecture is designed
 to scale; register your own via `pvsa_registered_checks`.
 
 = How is this different from the built-in Site Health? =
@@ -42,8 +42,10 @@ job — **continuous, automated, machine-readable monitoring and auditing**:
   critical. PressVitals assigns each probe a 1–5 severity tier and computes a
   single rolled-up verdict suitable for a green/red status signal.
 * **Probes core does not have.** TLS *certificate-expiry countdown* (core only
-  checks that HTTPS works today), `.env`/secret-file web exposure, a web-root
-  stray-backup scanner, baseline security headers (HSTS / X-Frame-Options / …),
+  checks that HTTPS works today), PHP micro-patch security advisory auditing
+  (against active CVEs like PHP2Shell CVSS 9.2 RCE), PHP runtime hardening
+  (`expose_php`, `disable_functions`, `allow_url_include`), `.env`/secret-file
+  web exposure, a web-root stray-backup scanner, baseline security headers,
   forced-HTTPS redirect, XML-RPC exposure, default-`admin`-username detection,
   SPF + DMARC email-DNS records, homepage indexability, and database-bloat
   (expired transients / revisions / spam) checks.
@@ -55,22 +57,27 @@ re-pointed at automation, alerting, and security/ops auditing.
 
 = Built-in probes =
 
-PressVitals ships **52 built-in probes**, grouped by functional category:
+PressVitals ships **60 built-in probes**, grouped by functional category:
 
-* **Availability** — database connectivity, homepage HTTPS reachability.
-* **Security** — `.env` not web-accessible (HTTP) and not exposed on disk,
-  web-root stray/backup file scan, TLS certificate expiry, baseline security
-  headers, forced HTTPS, XML-RPC exposure, no default `admin` user,
-  wp-config.php permissions, user-enumeration exposure, error-display off.
+* **Availability** — database connectivity, homepage HTTPS reachability, maintenance mode not stuck.
+* **Security** — PHP runtime hardening (expose_php, high-risk disable_functions, allow_url_include),
+  `.env` not web-accessible (HTTP) and not exposed on disk, web-root stray/backup file scan,
+  TLS certificate expiry, baseline security headers, forced HTTPS, XML-RPC exposure,
+  no default `admin` user, wp-config.php permissions, user-enumeration exposure,
+  debug.log public exposure, default table prefix detection, PHP execution blocked in uploads,
+  password hashing algorithm modernization (bcrypt vs MD5).
 * **Errors** — error-log size, recent PHP fatal errors.
 * **Database** — core tables present, non-core/orphaned tables, autoloaded-options
-  size, database bloat.
-* **Files** — free disk space, uploads-directory writability, recent backup.
+  size, heavy autoloaded options (> 100 KB), core table index health (PRIMARY keys),
+  postmeta orphans, table collation, DB client charset, database bloat (revisions, trashed posts).
+* **Files** — free disk space, uploads-directory writability, recent backup recency.
 * **Email** — SPF + DMARC DNS records for the sending domain.
 * **SEO** — homepage is indexable (not noindex).
-* **Performance** — PHP memory limit, persistent object cache.
-* **Environment** — supported PHP version, WordPress core update available,
-  plugin updates pending.
+* **Performance** — PHP memory limit, persistent object cache, OPcache status and hit rate,
+  WP-Cron HTTP loopback spawn, development mode off in production, modern image format support (WebP/AVIF).
+* **Environment** — supported PHP version & micro-patch security advisories (against active critical CVEs),
+  WordPress core update available, plugin updates pending, theme updates pending,
+  inactive plugins/themes count, environment type is production.
 
 = Extend it with your own checks =
 
@@ -194,6 +201,12 @@ mounted. See `docker-compose.yml` for details.
 
 1. The admin report grouped by category with the summary box.
 2. The settings page (thresholds and alert email).
+
+= 1.5.3 =
+* New probe: PHP runtime hardening (php_hardening) — audits critical php.ini directives: expose_php version disclosure in HTTP headers, allow_url_include, and unconstrained high-risk execution functions (exec, shell_exec, system, proc_open, popen).
+* Enhancement: Evolved php_version with granular micro-patch security advisory auditing against active critical CVEs (such as PHP2Shell CVE-2026-109618 / CVE-2026-109619 CVSS 9.2 unauthenticated RCE).
+* Feature: Remote security advisory synchronization (PVSA_Security_Feed) via daily WP-Cron, caching via WordPress transients with resilient local offline fallback.
+* Milestone: Built-in proactive diagnostic probes expanded to 60.
 
 = 1.5.2 =
 * Feature: Onboarding & Quick Start card in admin dashboard for frictionless first-run experience.

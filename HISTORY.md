@@ -1,5 +1,19 @@
 # History & Changelog
 
+## 2026-10-23 (60-Probe Milestone — PHP Runtime Security & CVE Advisory Auditing)
+- **PHP Runtime Security & CVE Advisory Auditing (PHP2Shell CVE-2026-109618 / 109619 Response):**
+  - **Evolved `php_version` (Environment, Tier 3):** Upgraded from high-level branch/EOL checking to granular micro-patch vulnerability auditing. Enforces minimum secure patch versions (e.g. 8.2.35, 8.3.36, 8.4.27, 8.5.12) against active unauthenticated RCE exploits in the PHP core runtime.
+  - **New Sonda `php_hardening` (Security, Tier 3):** Audits critical php.ini runtime directives, warning on `expose_php` HTTP version leakage and unconstrained high-risk execution functions (`exec`, `shell_exec`, `system`, `proc_open`, `popen`), while immediately failing on `allow_url_include`.
+  - **Remote Security Advisory Feed Sync (`PVSA_Security_Feed`):** Built-in background sync during daily WP-Cron (`pvsa_daily_check`), caching advisories via WordPress transients (24h TTL) with bundled fallback in `data/php-advisories.json`. Zero overhead on user-facing requests or REST queries.
+  - **Multi-Version Docker Testing & Verification:**
+    - `wp-legacy` (WP 6.0 / PHP 7.4.32): Confirmed `FAIL` on EOL runtime and `WARN` on hardening.
+    - `wp-mid` (WP 6.4 / PHP 8.1.27): Confirmed `FAIL` on EOL runtime and `WARN` on hardening.
+    - `wp-latest` (WP 6.7.2 / PHP 8.3.33): Confirmed `FAIL` detecting unpatched micro-version below 8.3.36 (PHP2Shell vulnerable), and verified `PASS` under simulated patch conditions.
+    - `wp-71` (WP 7.1-RC3 / PHP 8.3.33): Confirmed identical `FAIL` detection and robust compatibility under WordPress 7.1 bleeding edge.
+  - **Inventory Milestone:** Total built-in proactive probes increased from 52 to **60**.
+  - **LLM Wiki Modular Ingestion:** Authored [`wiki/php-security-and-cve-auditing.md`](wiki/php-security-and-cve-auditing.md) and updated [`wiki/index.md`](wiki/index.md) and [`wiki/architecture.md`](wiki/architecture.md).
+  - **Full Standards Compliance:** 100% PHPCS WordPress-Core clean (0 errors, 0 warnings).
+
 ## 2026-10-19 (LLM Wiki Modular Ingestion — Production Deployments & Validation)
 - **Modular Knowledge Ingestion of Live Deployments:**
   - Registrados expedientes modulares de auditoría en producción para dos arquitecturas clave:

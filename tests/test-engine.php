@@ -69,8 +69,8 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$checks = $this->engine->get_checks();
 
 		$this->assertIsArray( $checks );
-		$this->assertCount( 59, $checks, 'Expected exactly 59 built-in probes.' );
-		foreach ( array( 'db_connection', 'php_version', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status', 'maintenance_mode_stuck', 'development_mode_off', 'env_type_production', 'db_prefix_customized', 'uploads_php_execution', 'password_hashes_modern', 'modern_image_formats' ) as $id ) {
+		$this->assertCount( 60, $checks, 'Expected exactly 60 built-in probes.' );
+		foreach ( array( 'db_connection', 'php_version', 'php_hardening', 'backup_recency', 'ssl_cert_expiry', 'email_dns', 'expired_transients', 'php_execution_limits', 'db_index_health', 'postmeta_orphans', 'debug_log_not_public', 'heavy_autoloaded_options', 'revision_and_trash_bloat', 'cron_loopback_health', 'opcache_status', 'maintenance_mode_stuck', 'development_mode_off', 'env_type_production', 'db_prefix_customized', 'uploads_php_execution', 'password_hashes_modern', 'modern_image_formats' ) as $id ) {
 			$this->assertArrayHasKey( $id, $checks, "Missing built-in check: {$id}" );
 		}
 	}
@@ -209,6 +209,57 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$result = $this->engine->check_php_version();
 		$this->assertContains( $result['status'], array( 'pass', 'warn', 'fail' ) );
 		$this->assertIsString( $result['detail'] );
+	}
+
+	public function test_php_version_fails_on_unpatched_micro_version() {
+		$major_minor = implode( '.', array_slice( explode( '.', PHP_VERSION ), 0, 2 ) );
+		add_filter(
+			'pvsa_php_min_secure_versions',
+			static function () use ( $major_minor ) {
+				return array( $major_minor => '99.99.99' );
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'fail', $result['status'] );
+		$this->assertStringContainsString( 'below the minimum secure patch', $result['detail'] );
+	}
+
+	public function test_php_version_passes_when_patched_and_active() {
+		$major_minor = implode( '.', array_slice( explode( '.', PHP_VERSION ), 0, 2 ) );
+		add_filter(
+			'pvsa_php_eol_dates',
+			static function () use ( $major_minor ) {
+				return array( $major_minor => '2099-01-01' );
+			}
+		);
+		add_filter(
+			'pvsa_php_min_secure_versions',
+			static function () use ( $major_minor ) {
+				return array( $major_minor => '1.0.0' );
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'pass', $result['status'] );
+		$this->assertStringContainsString( 'actively supported', $result['detail'] );
+	}
+
+	public function test_php_hardening_probe_structure() {
+		$result = $this->engine->check_php_hardening();
+		$this->assertContains( $result['status'], array( 'pass', 'warn', 'fail' ) );
+		$this->assertIsString( $result['detail'] );
+	}
+
+	public function test_php_security_advisories_offline_fallback() {
+		$defaults = array(
+			'8.2' => '8.2.35',
+			'8.3' => '8.3.36',
+		);
+		$versions = $this->engine->get_min_secure_php_versions( $defaults );
+		$this->assertIsArray( $versions );
+		$this->assertArrayHasKey( '8.3', $versions );
+		$this->assertSame( '8.3.36', $versions['8.3'] );
 	}
 
 	public function test_homepage_indexable_fails_when_blog_not_public() {

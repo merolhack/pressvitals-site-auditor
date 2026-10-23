@@ -1,0 +1,37 @@
+{
+  "updated_at": "2026-10-23T12:00:00Z",
+  "php_branches": {
+    "8.2": "8.2.35",
+    "8.3": "8.3.36",
+    "8.4": "8.4.27",
+    "8.5": "8.5.12"
+  },
+  "critical_advisories": [
+    {
+      "id": "CVE-2026-109618",
+      "name": "PHP2Shell",
+      "title": "PHP Core Unauthenticated Remote Code Execution",
+      "severity": "critical",
+      "cvss": 9.2,
+      "fixed_in": {
+        "8.2": "8.2.35",
+        "8.3": "8.3.36",
+        "8.4": "8.4.27",
+        "8.5": "8.5.12"
+      }
+    },
+    {
+      "id": "CVE-2026-109619",
+      "name": "PHP2Shell Variant",
+      "title": "PHP FastCGI/CLI SAPI Memory Corruption RCE",
+      "severity": "critical",
+      "cvss": 9.2,
+      "fixed_in": {
+        "8.2": "8.2.35",
+        "8.3": "8.3.36",
+        "8.4": "8.4.27",
+        "8.5": "8.5.12"
+      }
+    }
+  ]
+}

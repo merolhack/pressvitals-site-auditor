@@ -46,6 +46,8 @@
 /wiki
 
 AGENTS.md
++ /data/
++ /data/**
 *.json
 *Zone.Identifier*
 /.phpunit.result.cache
