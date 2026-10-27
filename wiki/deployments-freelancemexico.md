@@ -10,54 +10,42 @@
 - **Hosting Infrastructure**: Shared Web Hosting (Server hostname: `mx98.hostgator.mx`)
 - **Control Panel**: cPanel Jupiter interface (`cpsess3866292535`)
 - **Web Server**: Apache 2.4.69 / Linux x86_64
-- **Active PHP Runtime**: **PHP 8.3.35** (MultiPHP Handler)
+- **Active PHP Runtime**: **PHP 8.3.36** (MultiPHP Handler)
 - **Database Server**: MySQL 5.7.44-48-log
-- **Plugin Version Installed**: `1.5.1` (upgrade pending to `1.5.2`)
+- **Plugin Version Installed**: `1.5.4`
 
 ---
 
-## 2. Comprehensive Audit Probe Results
+## 2. Comprehensive Audit Probe Results (60 Probes Suite)
 
-Audit performed via PressVitals Site Auditor diagnostic engine (`tools.php?page=pressvitals-site-auditor`) with fresh "Run now" execution:
+Audit performed via PressVitals Site Auditor diagnostic engine (`tools.php?page=pressvitals-site-auditor`):
 
 ### Summary Breakdown
-- **Verdict**: `WARN`
-- **Passed Checks**: 51
-- **Warning Checks**: 6
-- **Failing Checks**: 0
+- **Verdict**: `FAIL` (Transient during active plugin/core update) &rarr; reverts to `WARN` once maintenance mode clears.
+- **Passed Checks**: 49
+- **Warning Checks**: 10
+- **Failing Checks**: 1 (`https_home` transiently returned HTTP 503 due to active `.maintenance` file during background update).
+- **Total Probes**: 60
+- **Duration**: ~2,800 ms
 
-### Functional Group Breakdown
+### Critical Incident Analysis & Transient State
+- `https_home`: ❌ **FAIL** (HTTP 503). At the exact moment of execution, WordPress core/plugin auto-updater wrote `.maintenance`. The probe correctly surfaced that the public site was temporarily serving HTTP 503. Once update completed, the site returned HTTP 200.
 
-#### Availability (3/3 PASS)
-- `db_connection`: ✅ PASS (Direct MySQL connection operational).
-- `https_home`: ✅ PASS (HTTPS verified).
-- `maintenance_mode_stuck`: ✅ PASS (No maintenance lock detected).
-
-#### Security (18/20 PASS, 2 WARN)
-- `env_file_exposed`: ✅ PASS (HTTP probe against `/.env` returns 403 Forbidden via Apache `.htaccess`).
-- `env_file_disk`: ⚠️ **WARN** (*A .env file exists on disk — ensure it is outside the web root and not served.* Defensive check).
-- `db_prefix_custom`: ⚠️ **WARN** (*Database is using the default "wp_" table prefix.* Recommended security hardening).
-- `password_hashes_modern`: ✅ PASS (Modern password hashing active).
-- `stray_files`: ✅ PASS (Zero exposed backup dumps).
-- `ssl_cert_expiry`: ✅ PASS (Valid SSL certificate with automatic Let's Encrypt / cPanel AutoSSL renewal).
-- `security_headers`: ✅ PASS (Standard security headers delivered).
-- `https_forced`: ✅ PASS (Automatic HTTP &rarr; HTTPS redirection).
-
-#### Errors (2/2 PASS)
-- `error_log_size`: ✅ PASS (PHP error log within threshold).
-- `recent_fatal_errors`: ✅ PASS (Zero recent PHP fatals).
-
-#### Database (10/13 PASS, 3 WARN)
-- `orphaned_tables`: ⚠️ **WARN** (*91 non-core or orphaned database tables detected.* Expected behavior: Marketplace tables from HivePress extensions, listings, orders, messages, and Action Scheduler).
-- `db_collation`: ⚠️ **WARN** (*27 tables are using legacy collations (latin1 / utf8) instead of utf8mb4.*).
-- `db_storage_engine`: ⚠️ **WARN** (*1 table is using MyISAM rather than InnoDB.*).
-- `core_tables_present`: ✅ PASS (All standard WordPress core tables verified).
-- `db_overhead`: ✅ PASS (Database fragmentation healthy).
-- `autoload_size`: ✅ PASS (Autoloaded options size within limits).
-
-#### Files (3/3 PASS)
-- `disk_free_space`: ✅ PASS (Sufficient shared storage available).
-- `uploads_writable`: ✅ PASS (Permissions verified).
+### False Positive & Warning Investigation
+1. **`orphaned_tables` (93 non-core tables)**:
+   - *Status*: ⚠️ **WARN**
+   - *Analysis*: **Manageable False Positive**. Freelance México is an active marketplace built on HivePress + WooCommerce + Action Scheduler. It legitimately creates custom database tables (`wp_hp_*`, `wp_actionscheduler_*`, `wp_woocommerce_*`).
+   - *Remediation*: Register marketplace tables in `fm-core-engine` via the `pvsa_known_tables` filter so PVSA ignores them as legitimate application schema.
+2. **`db_prefix_customized`**:
+   - *Status*: ⚠️ **WARN** (*Database is using default "wp_" table prefix*). Legitimate security finding.
+3. **`table_collation`**:
+   - *Status*: ⚠️ **WARN** (*27 tables use legacy latin1/utf8 collations*). Legitimate database finding from historical migrations.
+4. **`table_storage_engine`**:
+   - *Status*: ⚠️ **WARN** (*1 table uses MyISAM*). Legitimate engine finding.
+5. **`php_hardening`**:
+   - *Status*: ⚠️ **WARN** (*expose_php enabled, exec unconstrained*). Legitimate shared hosting finding.
+6. **`php_version`**:
+   - *Status*: ⚠️ **WARN** (*PHP 8.3.36 is nearing its end-of-life date*). Legitimate preventive notice.
 - `recent_backup`: ✅ PASS (Recent backup confirmed).
 
 #### Performance (9/9 PASS)

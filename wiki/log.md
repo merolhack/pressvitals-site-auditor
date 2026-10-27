@@ -21,7 +21,18 @@ Resolved runtime version divergence between Web/FPM servers and background CLI/W
    - Emits `warn` (instead of critical failure) when Web PHP is modern and supported but CLI is EOL, instructing the administrator to update their crontab binary path.
    - Preserves critical `fail` when Web PHP itself is EOL or when both runtimes are EOL.
 
-### Testing & Validation
-- Added 5 new unit tests in `tests/test-engine.php` (total: 61 tests, 141 assertions, 100% pass).
-- Full compliance with WordPress Coding Standards (PHPCS: 0 errors, 0 warnings).
-- Multi-container verification across WordPress 6.0 through 7.1.
+
+## 2026-10-26: Production Audit & Field Inspection (dqro.mx & freelancemexico.com.mx)
+
+### Summary
+Conducted end-to-end live field audit of PressVitals Site Auditor v1.5.4 across two distinct hosting architectures:
+1. **IONOS Cloud WAAS (`https://dqro.mx`)**:
+   - Total probes: 60 (Verdict: `WARN`, 55 PASS, 5 WARN, 0 FAIL).
+   - Validated that the runtime decoupling architecture eliminated the crontab false positive `[FAIL]`.
+   - Identified 5 legitimate operational warnings: `env_file_on_disk`, `object_cache` (no Redis/Memcached), `password_hashes_modern` (1 legacy hash), `php_hardening` (`expose_php` enabled), and `php_version` (preventive EOL notice for PHP 8.3 nearing Dec 2026).
+2. **HostGator Shared cPanel (`https://freelancemexico.com.mx`)**:
+   - Total probes: 60 (Verdict: `WARN` / transient `FAIL` during automated plugin update, 49 PASS, 10 WARN, 1 transient FAIL).
+   - Diagnosed transient `https_home` HTTP 503 caused by `.maintenance` file written during a background plugin update.
+   - Identified and analyzed the `orphaned_tables` warning (93 tables) as a manageable false positive resulting from HivePress, WooCommerce, and Action Scheduler custom schemas. Documented the `pvsa_known_tables` filter solution.
+   - Verified that other warnings (`db_prefix_customized`, `table_collation`, `table_storage_engine`, `php_hardening`) are true positives reflecting shared hosting defaults and historical migrations.
+

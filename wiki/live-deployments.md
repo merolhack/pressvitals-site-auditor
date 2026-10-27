@@ -10,25 +10,27 @@ PressVitals Site Auditor is deployed in production across heterogeneous hosting 
 
 | Site Identifier | Production URL | Hosting Provider & Infrastructure | Control Panel & Stack | Detailed Dossier |
 | :--- | :--- | :--- | :--- | :--- |
-| **dqro.mx** | `https://dqro.mx` | **IONOS** (Cloud Managed WAAS) | Cloud Panel / Nginx + PHP 8.3.35 + MariaDB | [**deployments-dqro.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/deployments-dqro.md) |
-| **Freelance México** | `https://freelancemexico.com.mx` | **Hostgator** (Shared Web Hosting) | cPanel Jupiter (`mx98`) / Apache 2.4.69 + PHP 8.3.35 + MySQL 5.7 | [**deployments-freelancemexico.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/deployments-freelancemexico.md) |
+| **dqro.mx** | `https://dqro.mx` | **IONOS** (Cloud Managed WAAS) | Cloud Panel / Nginx + Apache + PHP 8.3.36 + MariaDB 10.11 | [**deployments-dqro.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/deployments-dqro.md) |
+| **Freelance México** | `https://freelancemexico.com.mx` | **Hostgator** (Shared Web Hosting) | cPanel Jupiter (`mx98`) / Apache 2.4.69 + PHP 8.3.36 + MySQL 5.7 | [**deployments-freelancemexico.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/deployments-freelancemexico.md) |
 
 ---
 
-## 2. Cross-Environment Comparison Matrix
+## 2. Cross-Environment Comparison Matrix (60 Probes Suite)
 
-Field diagnostic comparison between IONOS Cloud and Hostgator Shared architectures:
+Field diagnostic comparison between IONOS Cloud WAAS and Hostgator Shared architectures:
 
 | Diagnostic Dimension | dqro.mx (IONOS) | Freelance México (Hostgator) | Analytical Insight |
 | :--- | :--- | :--- | :--- |
-| **Installed Plugin Version** | 1.5.1 (Upgradable to 1.5.2) | 1.5.1 (Upgradable to 1.5.2) | Both sites have v1.5.1 installed; v1.5.2 is tagged on WordPress.org. |
-| **Web Server** | Nginx (Reverse Proxy / WAAS) | Apache 2.4.69 | Both environments enforce standard security rules and 403s on dot-files. |
-| **Active PHP Version** | **PHP 8.3.35** | **PHP 8.3.35** | Both hosts operate on the latest micro-release of PHP 8.3. |
+| **Installed Plugin Version** | 1.5.4 | 1.5.4 | Both sites run v1.5.4 with decoupled CLI/Web runtime diagnosis. |
+| **Total Probes / Verdict** | 60 Probes / ⚠️ `WARN` (55 P / 5 W / 0 F) | 60 Probes / ⚠️ `WARN` (49 P / 10 W / 1 F*) | *Hostgator F was transient HTTP 503 during active plugin update. |
+| **Web Server** | Nginx Proxy / Apache 2.4 (WAAS) | Apache 2.4.69 | Both environments enforce standard security rules and 403s on dot-files. |
+| **Active PHP Version** | **PHP 8.3.36** | **PHP 8.3.36** | Both hosts operate on latest micro-release of PHP 8.3. |
+| **PHP Runtime Decoupling** | Handled (`warn` on CLI EOL) | Handled (`warn` on CLI EOL) | Differential diagnosis eliminates false positive fail on crontabs. |
 | **PHP EOL Horizon Status** | ⚠️ `WARN` (EOL 2026-12-31) | ⚠️ `WARN` (EOL 2026-12-31) | Valid preventive alert: PHP 8.3 reaches EOL in < 2.5 months (Q4 2026). |
 | **Zend OPcache** | ⚠️ `WARN` (Disabled / Not loaded) | ✅ `PASS` (Active, 98.5% Hit Rate) | Hostgator provides active bytecode cache; IONOS requires manual `php.ini` config. |
 | **Object Cache** | ⚠️ `WARN` (No persistent cache) | ✅ `PASS` (Persistent Cache Roundtrip OK) | Hostgator site uses APCu / Redis cache; IONOS relies on default WP transient DB store. |
-| **Database Table Prefix** | ✅ `PASS` (Customized secure prefix) | ⚠️ `WARN` (Standard `wp_` prefix) | dqro.mx hardened; Freelance México retains default prefix from initial install. |
-| **Non-Core DB Tables** | ✅ `PASS` (Clean schema) | ⚠️ `WARN` (91 non-core tables) | Freelance México runs HivePress marketplace engine with multi-table extensions. |
+| **Database Table Prefix** | ✅ `PASS` (`dqro_` custom prefix) | ⚠️ `WARN` (Standard `wp_` prefix) | dqro.mx hardened; Freelance México retains default prefix from initial install. |
+| **Non-Core DB Tables** | ✅ `PASS` (Clean schema) | ⚠️ `WARN` (93 non-core tables) | Freelance México runs HivePress marketplace engine (filter via `pvsa_known_tables`). |
 | **Database Collation** | ✅ `PASS` (100% utf8mb4) | ⚠️ `WARN` (27 tables non-utf8mb4) | Freelance México has legacy plugin tables requiring charset modernization. |
 | **Secret File Protection** | ✅ `PASS` (HTTP 403 on `.env`) | ✅ `PASS` (HTTP 403 on `.env`) | Web exposure blocked; disk presence flagged as defensive warning. |
 

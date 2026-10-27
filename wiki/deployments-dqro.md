@@ -10,21 +10,23 @@
 - **Hosting Platform**: Managed WordPress on WAAS (Web Application as a Service)
 - **Control Panel**: IONOS Cloud Panel (`my.ionos.mx`)
 - **Web Server**: Nginx Reverse Proxy / FastCGI
-- **Active PHP Runtime**: **PHP 8.3.35** (configured with automatic security minor updates in IONOS)
-- **Database Server**: MariaDB / MySQL (UTF-8 mb4 standard, customized secure table prefix)
-- **Plugin Version Installed**: `1.5.1` (upgrade pending to `1.5.2`)
+- **Active PHP Runtime**: **PHP 8.3.36** (configured with automatic security minor updates in IONOS)
+- **Database Server**: MariaDB / MySQL (UTF-8 mb4 standard, customized secure table prefix `dqro_`)
+- **Plugin Version Installed**: `1.5.4` (with differential Web vs CLI runtime detection)
 
 ---
 
-## 2. Comprehensive Audit Probe Results
+## 2. Comprehensive Audit Probe Results (60 Probes Suite)
 
 Audit performed via PressVitals Site Auditor diagnostic engine (`tools.php?page=pressvitals-site-auditor`):
 
 ### Summary Breakdown
 - **Verdict**: `WARN`
-- **Passed Checks**: 52
+- **Passed Checks**: 55
 - **Warning Checks**: 5
 - **Failing Checks**: 0
+- **Total Probes**: 60
+- **Duration**: ~2,400 ms
 
 ### Functional Group Breakdown
 
