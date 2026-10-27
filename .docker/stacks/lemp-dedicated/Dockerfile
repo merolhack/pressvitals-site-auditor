@@ -24,8 +24,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         zip \
         opcache \
         exif \
-        bcmath \
-        sockets
+        bcmath
 
 # Download WordPress
 ENV WORDPRESS_VERSION=6.6.2

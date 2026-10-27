@@ -25,8 +25,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         zip \
         opcache \
         exif \
-        bcmath \
-        sockets
+        bcmath
 
 # Enable Apache modules
 RUN a2enmod rewrite headers expires remoteip
