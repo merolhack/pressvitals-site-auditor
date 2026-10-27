@@ -50,3 +50,4 @@ This LLM Wiki is structured according to the [Karpathy LLM Wiki Architecture](ht
   - `wp-latest`: `http://localhost:8083` (WordPress Latest Stable)
   - `wp-mid`: `http://localhost:8081` (WordPress Intermediate)
   - `wp-legacy`: `http://localhost:8074` (WordPress 6.3 Minimum Supported)
+  - `wp-ionos`: `http://localhost:8084` (IONOS WAAS Emulation: Web PHP 8.3 + CLI PHP 8.0)

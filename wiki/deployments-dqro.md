@@ -101,5 +101,26 @@ Simultaneously, the IONOS Cloud Panel explicitly reported PHP version **8.3**.
    - Enable `opcache.enable=1` and set `opcache.memory_consumption=128`. This resolves the performance audit warning and reduces server response times.
 2. **Rehash Legacy Admin Password**:
    - Have the legacy administrator log in to `dqro.mx` to trigger automatic rehashing to modern bcrypt / WP 6.8+ standards.
-3. **Upgrade Plugin to v1.5.2**:
-   - Run WordPress update check to pull the latest 1.5.2 release.
+3. **Upgrade Plugin to v1.5.4**:
+   - Run WordPress update check to pull the latest 1.5.4 release featuring differential runtime diagnosis.
+
+---
+
+## 5. Local Docker Emulation Environment (`wp-ionos`)
+
+To faithfully reproduce the IONOS WAAS production environment locally, a dedicated container service `wp-ionos` is defined in `docker-compose.yml`:
+
+- **Service Name**: `wp-ionos` (`http://localhost:8084`)
+- **Base Architecture**: Ubuntu 22.04 with dual PHP installations:
+  - **Web Runtime**: Apache 2.4 + PHP 8.3.36 FPM (`proxy_fcgi`). Emits `X-Powered-By: PHP/8.3.36`.
+  - **CLI Runtime**: PHP 8.0.30 via `update-alternatives --set php /usr/bin/php8.0` (matching the default OS binary in IONOS crontab).
+  - **Selective CLI**: `/usr/bin/php8.3` available when explicitly invoked.
+- **PHP Configuration**:
+  - `memory_limit = 512M`
+  - `upload_max_filesize = 64M`, `post_max_size = 64M`, `max_execution_time = 300`
+  - `opcache.enable = 1`, `opcache.memory_consumption = 64`
+- **Database**: Dedicated MariaDB database `wp_ionos` with table prefix `dqro_`.
+- **Validation**:
+  - `curl -sI http://localhost:8084/` verifies Web PHP 8.3.36.
+  - `docker compose exec wp-ionos php -v` verifies CLI PHP 8.0.30.
+  - `docker compose exec wp-ionos wp eval "print_r((new PVSA_Engine())->check_php_version());" --allow-root` verifies the differential `warn` diagnostic.
