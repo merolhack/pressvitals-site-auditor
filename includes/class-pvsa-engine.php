@@ -610,17 +610,36 @@ class PVSA_Engine {
 		}
 
 		$code = (int) wp_remote_retrieve_response_code( $response );
-		return ( 200 === $code )
-			? array(
+		if ( 200 === $code ) {
+			return array(
 				'status' => 'pass',
 				'detail' => __( 'Homepage returns HTTP 200 over HTTPS.', 'pressvitals-site-auditor' ),
-			)
-			: array(
-				'status' => 'fail',
-				// translators: %d: HTTP status code
-				// translators: 1: dynamic value
-				'detail' => sprintf( __( 'Homepage returned HTTP %d.', 'pressvitals-site-auditor' ), $code ),
 			);
+		}
+
+		$in_maintenance = function_exists( 'wp_is_maintenance_mode' ) ? wp_is_maintenance_mode() : false;
+		if ( ! $in_maintenance && defined( 'ABSPATH' ) && file_exists( ABSPATH . '.maintenance' ) ) {
+			$in_maintenance = true;
+		}
+		/**
+		 * Filter whether the site is currently in scheduled maintenance mode.
+		 *
+		 * @param bool $in_maintenance Whether WordPress maintenance mode is active.
+		 */
+		$in_maintenance = (bool) apply_filters( 'pvsa_is_maintenance_mode', $in_maintenance );
+
+		if ( 503 === $code && $in_maintenance ) {
+			return array(
+				'status' => 'warn',
+				'detail' => __( 'Homepage returned HTTP 503 — site is temporarily in scheduled maintenance mode (.maintenance file present).', 'pressvitals-site-auditor' ),
+			);
+		}
+
+		return array(
+			'status' => 'fail',
+			// translators: 1: dynamic value
+			'detail' => sprintf( __( 'Homepage returned HTTP %d.', 'pressvitals-site-auditor' ), $code ),
+		);
 	}
 
 	/**
@@ -1947,10 +1966,72 @@ class PVSA_Engine {
 	}
 
 	/**
-	 * Non-core tables for this prefix — surfaces leftovers from removed plugins.
+	 * Detect active plugin table prefixes from common ecosystem plugins.
+	 *
+	 * @return string[] Unprefixed table prefixes (e.g. 'actionscheduler_', 'hp_').
+	 */
+	public function get_active_plugin_table_prefixes() {
+		$prefixes = array();
+
+		// Action Scheduler (WooCommerce, HivePress, WPForms, etc.).
+		if ( class_exists( 'ActionScheduler' ) || did_action( 'action_scheduler_init' ) ) {
+			$prefixes[] = 'actionscheduler_';
+		}
+
+		// WooCommerce.
+		if ( class_exists( 'WooCommerce' ) ) {
+			$prefixes[] = 'woocommerce_';
+			$prefixes[] = 'wc_';
+		}
+
+		// HivePress marketplace.
+		if ( class_exists( 'HivePress' ) ) {
+			$prefixes[] = 'hp_';
+		}
+
+		// Yoast SEO.
+		if ( defined( 'WPSEO_VERSION' ) ) {
+			$prefixes[] = 'yoast_';
+		}
+
+		// Rank Math SEO.
+		if ( defined( 'RANK_MATH_VERSION' ) ) {
+			$prefixes[] = 'rank_math_';
+		}
+
+		// Wordfence Security.
+		if ( defined( 'WORDFENCE_VERSION' ) ) {
+			$prefixes[] = 'wf';
+		}
+
+		// Redirection.
+		if ( defined( 'REDIRECTION_VERSION' ) ) {
+			$prefixes[] = 'redirection_';
+		}
+
+		// WPForms.
+		if ( function_exists( 'wpforms' ) ) {
+			$prefixes[] = 'wpforms_';
+		}
+
+		// Elementor.
+		if ( defined( 'ELEMENTOR_VERSION' ) ) {
+			$prefixes[] = 'e_';
+		}
+
+		/**
+		 * Filter table prefixes belonging to active plugins or known application schemas.
+		 *
+		 * @param string[] $prefixes Prefixes without the $wpdb->prefix (e.g., 'hp_', 'myplugin_').
+		 */
+		return (array) apply_filters( 'pvsa_known_table_prefixes', array_unique( $prefixes ) );
+	}
+
+	/**
+	 * Check for orphaned or unexpected database tables sharing the site prefix.
 	 * Low-noise: informational (pass) up to a filterable threshold; excludes
-	 * other-blog tables on multisite and anything allow-listed via
-	 * `pvsa_known_tables`.
+	 * other-blog tables on multisite, active plugin schemas, and anything allow-listed via
+	 * `pvsa_known_tables` or `pvsa_known_table_prefixes`.
 	 *
 	 * @return array
 	 */
@@ -1987,12 +2068,15 @@ class PVSA_Engine {
 				}
 			}
 		}
+
 		/**
-		 * Filter full table names to treat as expected (e.g. active-plugin tables).
+		 * Filter full or partial table names/patterns to treat as expected (e.g. active-plugin tables).
+		 * Supports full names, base names without prefix, or wildcard patterns (e.g. 'hp_*').
 		 *
-		 * @param string[] $known Full table names to exclude from the orphan list.
+		 * @param string[] $known Full or wildcard table names to exclude from the orphan list.
 		 */
-		$expected = array_merge( $expected, (array) apply_filters( 'pvsa_known_tables', array() ) );
+		$custom_known   = (array) apply_filters( 'pvsa_known_tables', array() );
+		$known_prefixes = $this->get_active_plugin_table_prefixes();
 
 		$orphans = array();
 		foreach ( $all as $table ) {
@@ -2003,6 +2087,42 @@ class PVSA_Engine {
 			if ( is_multisite() && preg_match( '/^' . preg_quote( $prefix, '/' ) . '\d+_/', $table ) ) {
 				continue;
 			}
+
+			$table_base = substr( $table, strlen( $prefix ) );
+
+			// Check against custom allow-list (exact or wildcard pattern).
+			$is_matched = false;
+			foreach ( $custom_known as $pattern ) {
+				if ( ! is_string( $pattern ) || '' === $pattern ) {
+					continue;
+				}
+				if ( $table === $pattern || $table_base === $pattern ) {
+					$is_matched = true;
+					break;
+				}
+				if ( false !== strpos( $pattern, '*' ) ) {
+					$regex = '/^' . str_replace( '\*', '.*', preg_quote( $pattern, '/' ) ) . '$/i';
+					if ( preg_match( $regex, $table ) || preg_match( $regex, $table_base ) ) {
+						$is_matched = true;
+						break;
+					}
+				}
+			}
+			if ( $is_matched ) {
+				continue;
+			}
+
+			// Check against active plugin table prefixes.
+			foreach ( $known_prefixes as $kp ) {
+				if ( is_string( $kp ) && '' !== $kp && 0 === strpos( $table_base, $kp ) ) {
+					$is_matched = true;
+					break;
+				}
+			}
+			if ( $is_matched ) {
+				continue;
+			}
+
 			$orphans[] = $table;
 		}
 
@@ -2021,7 +2141,7 @@ class PVSA_Engine {
 			return array(
 				'status' => 'warn',
 				// translators: 1: dynamic value
-				'detail' => sprintf( __( '%1$d non-core tables (sample: %2$s) — review for leftovers from removed plugins; allow-list expected ones via the pvsa_known_tables filter.', 'pressvitals-site-auditor' ), $count, $sample ),
+				'detail' => sprintf( __( '%1$d non-core tables (sample: %2$s) — review for leftovers from removed plugins; allow-list expected ones via the pvsa_known_tables or pvsa_known_table_prefixes filters.', 'pressvitals-site-auditor' ), $count, $sample ),
 			);
 		}
 		// translators: 1: count, 2: sample table names

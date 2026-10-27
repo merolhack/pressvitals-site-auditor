@@ -29,13 +29,14 @@ Audit performed via PressVitals Site Auditor diagnostic engine (`tools.php?page=
 - **Duration**: ~2,800 ms
 
 ### Critical Incident Analysis & Transient State
-- `https_home`: ❌ **FAIL** (HTTP 503). At the exact moment of execution, WordPress core/plugin auto-updater wrote `.maintenance`. The probe correctly surfaced that the public site was temporarily serving HTTP 503. Once update completed, the site returned HTTP 200.
+- `https_home`: ❌ **FAIL** (HTTP 503). At the exact moment of execution, WordPress core/plugin auto-updater wrote `.maintenance`. The probe surfaced that the public site was temporarily serving HTTP 503.
+  - *Remediation Applied in Core*: `check_https_home()` now detects `wp_is_maintenance_mode()` and `.maintenance` files during HTTP 503, converting the false alarm failure into an informative `[WARN]`.
 
 ### False Positive & Warning Investigation
 1. **`orphaned_tables` (93 non-core tables)**:
    - *Status*: ⚠️ **WARN**
-   - *Analysis*: **Manageable False Positive**. Freelance México is an active marketplace built on HivePress + WooCommerce + Action Scheduler. It legitimately creates custom database tables (`wp_hp_*`, `wp_actionscheduler_*`, `wp_woocommerce_*`).
-   - *Remediation*: Register marketplace tables in `fm-core-engine` via the `pvsa_known_tables` filter so PVSA ignores them as legitimate application schema.
+   - *Analysis*: **False Positive of Application Architecture**. Freelance México is an active marketplace built on HivePress + WooCommerce + Action Scheduler, creating custom database tables (`wp_hp_*`, `wp_actionscheduler_*`, `wp_woocommerce_*`).
+   - *Remediation Applied in Core*: `check_orphaned_tables()` now automatically recognizes active plugin table prefixes (HivePress `hp_`, WooCommerce `woocommerce_`/`wc_`, Action Scheduler `actionscheduler_`, Wordfence `wf`, Yoast `yoast_`, Rank Math `rank_math_`, WPForms `wpforms_`, Elementor `e_`). Furthermore, `pvsa_known_tables` supports wildcard patterns (e.g., `'hp_*'`) and `pvsa_known_table_prefixes` allows registering custom prefixes without enumerating every table.
 2. **`db_prefix_customized`**:
    - *Status*: ⚠️ **WARN** (*Database is using default "wp_" table prefix*). Legitimate security finding.
 3. **`table_collation`**:

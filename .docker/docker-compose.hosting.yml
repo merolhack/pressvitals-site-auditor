@@ -1,0 +1,276 @@
+# ==============================================================================
+# PressVitals Site Auditor — Multi-Hosting Architecture Test Matrix
+# ==============================================================================
+# Comprehensive testing suite covering Shared, Dedicated, and Community Docker
+# environments representing top hosting providers (Hostinger, SiteGround,
+# HostGator, DreamHost, Liquid Web, TMDHosting, WP Engine, cPanel, etc.).
+#
+# Profiles available:
+#   --profile shared      : cPanel classic, High-Perf LEMP FPM, OpenLiteSpeed
+#   --profile dedicated   : LAMP Dedicated, LEMP Dedicated (MariaDB 11), WP Redis
+#   --profile community   : vagkaefer/cpanel, wellwelwel/shared
+#
+# Usage:
+#   docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared up -d
+#   docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile dedicated up -d
+#   docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile community up -d
+
+services:
+  # ----------------------------------------------------------------------------
+  # Database & Cache Infrastructure
+  # ----------------------------------------------------------------------------
+  db-mysql8:
+    image: mysql:${MYSQL_VERSION:-8.0}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: wp_shared
+    volumes:
+      - mysql8_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-mariadb10:
+    image: mariadb:${MARIADB_VERSION:-10.11}
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - mariadb10_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-mariadb11:
+    image: mariadb:${MARIADB11_VERSION:-11.4}
+    profiles: ["dedicated"]
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - mariadb11_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-cache:
+    image: redis:7.2-alpine
+    profiles: ["dedicated"]
+    ports:
+      - "6379:6379"
+
+  # ----------------------------------------------------------------------------
+  # Group A: Shared Hosting Environments (--profile shared)
+  # ----------------------------------------------------------------------------
+  # 1. cPanel Classic (Apache 2.4 + PHP 8.2 + MySQL 8.0)
+  cpanel-classic:
+    build:
+      context: ./stacks/cpanel-classic
+    profiles: ["shared"]
+    depends_on:
+      db-mysql8:
+        condition: service_healthy
+    ports:
+      - "${PORT_CPANEL:-8090}:80"
+    environment:
+      WORDPRESS_DB_HOST: db-mysql8
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      WORDPRESS_DB_NAME: wp_cpanel
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - cpanel_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  # 2. High-Performance LEMP (Nginx + PHP-FPM 8.2 + MariaDB 10.11)
+  shared-lemp-fpm:
+    build:
+      context: ./stacks/shared-lemp-fpm
+    profiles: ["shared"]
+    depends_on:
+      db-mariadb10:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db-mariadb10
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      WORDPRESS_DB_NAME: wp_lemp_shared
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - lemp_shared_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  shared-lemp-nginx:
+    image: nginx:alpine
+    profiles: ["shared"]
+    depends_on:
+      - shared-lemp-fpm
+    ports:
+      - "${PORT_LEMP_SHARED:-8091}:80"
+    volumes:
+      - lemp_shared_wp_data:/var/www/html:ro
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+      - ./stacks/shared-lemp-fpm/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # 3. LiteSpeed / OpenLiteSpeed (LSPHP 8.1 + MariaDB 10.6)
+  litespeed:
+    build:
+      context: ./stacks/litespeed
+    profiles: ["shared"]
+    depends_on:
+      db-mariadb10:
+        condition: service_healthy
+    ports:
+      - "${PORT_LITESPEED:-8092}:80"
+      - "7080:7080"
+    environment:
+      WORDPRESS_DB_HOST: db-mariadb10
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      WORDPRESS_DB_NAME: wp_litespeed
+    volumes:
+      - litespeed_wp_data:/var/www/vhosts/localhost/html
+      - ../:/var/www/vhosts/localhost/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  # ----------------------------------------------------------------------------
+  # Group B: Dedicated Server Environments (--profile dedicated)
+  # ----------------------------------------------------------------------------
+  # 4. Dedicated LAMP (Apache 2.4 + PHP 8.3 + MySQL 8.0)
+  lamp-dedicated:
+    build:
+      context: ./stacks/lamp-dedicated
+    profiles: ["dedicated"]
+    depends_on:
+      db-mysql8:
+        condition: service_healthy
+    ports:
+      - "${PORT_LAMP_DEDICATED:-8093}:80"
+    environment:
+      WORDPRESS_DB_HOST: db-mysql8
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      WORDPRESS_DB_NAME: wp_lamp_dedicated
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - lamp_dedicated_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  # 5. Dedicated LEMP (Nginx + PHP-FPM 8.3 + MariaDB 11.4)
+  lemp-dedicated-fpm:
+    build:
+      context: ./stacks/lemp-dedicated
+    profiles: ["dedicated"]
+    depends_on:
+      db-mariadb11:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db-mariadb11
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      WORDPRESS_DB_NAME: wp_lemp_dedicated
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - lemp_dedicated_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  lemp-dedicated-nginx:
+    image: nginx:alpine
+    profiles: ["dedicated"]
+    depends_on:
+      - lemp-dedicated-fpm
+    ports:
+      - "${PORT_LEMP_DEDICATED:-8094}:80"
+    volumes:
+      - lemp_dedicated_wp_data:/var/www/html:ro
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+      - ./stacks/lemp-dedicated/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # 6. WordPress Optimized (Nginx + PHP-FPM 8.2 + MariaDB 10.11 + Redis Cache)
+  wp-redis-fpm:
+    build:
+      context: ./stacks/wp-redis-optimized
+    profiles: ["dedicated"]
+    depends_on:
+      db-mariadb10:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+    environment:
+      WORDPRESS_DB_HOST: db-mariadb10
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      WORDPRESS_DB_NAME: wp_redis
+      WP_REDIS_HOST: redis-cache
+      WP_REDIS_PORT: "6379"
+      WORDPRESS_DEBUG: "1"
+    volumes:
+      - wp_redis_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  wp-redis-nginx:
+    image: nginx:alpine
+    profiles: ["dedicated"]
+    depends_on:
+      - wp-redis-fpm
+    ports:
+      - "${PORT_WP_REDIS:-8095}:80"
+    volumes:
+      - wp_redis_wp_data:/var/www/html:ro
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+      - ./stacks/wp-redis-optimized/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # ----------------------------------------------------------------------------
+  # Group C: Community Hosting Images (--profile community)
+  # ----------------------------------------------------------------------------
+  # 7. vagkaefer/php-to-cpanel-website (cPanel file/permission emulation)
+  cpanel-vagkaefer:
+    image: vagkaefer/php-to-cpanel-website:${VAGKAEFER_TAG:-8.3}
+    profiles: ["community"]
+    depends_on:
+      db-mysql8:
+        condition: service_healthy
+    ports:
+      - "${PORT_VAGKAEFER:-8096}:80"
+    environment:
+      DB_HOST: db-mysql8
+      DB_USER: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      DB_NAME: wp_vagkaefer
+    volumes:
+      - vagkaefer_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+  # 8. wellwelwel/php:8-shared-based (Shared hosting realistic restrictions)
+  shared-wellwelwel:
+    image: wellwelwel/php:8-shared-based
+    profiles: ["community"]
+    depends_on:
+      db-mysql8:
+        condition: service_healthy
+    ports:
+      - "${PORT_WELLWELWEL:-8097}:80"
+    environment:
+      DB_HOST: db-mysql8
+      DB_USER: root
+      DB_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      DB_NAME: wp_wellwelwel
+    volumes:
+      - wellwelwel_wp_data:/var/www/html
+      - ../:/var/www/html/wp-content/plugins/pressvitals-site-auditor:ro
+
+volumes:
+  mysql8_data:
+  mariadb10_data:
+  mariadb11_data:
+  cpanel_wp_data:
+  lemp_shared_wp_data:
+  litespeed_wp_data:
+  lamp_dedicated_wp_data:
+  lemp_dedicated_wp_data:
+  wp_redis_wp_data:
+  vagkaefer_wp_data:
+  wellwelwel_wp_data:

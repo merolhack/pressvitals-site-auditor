@@ -18,3 +18,5 @@
 .phpunit.result.cache
 test*.php
 report_*.txt
+.docker/.env.hosting
+

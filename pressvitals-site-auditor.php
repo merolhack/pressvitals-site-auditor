@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       PressVitals Site Auditor
  * Plugin URI:        https://wordpress.org/plugins/pressvitals-site-auditor/
- * Description:       A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health — extensible via REST API and custom filters.
+ * Description:       A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health — battle-tested on IONOS and HostGator. Extensible via REST API and filters.
  * Version:           1.5.4
  * Requires at least: 6.0
  * Tested up to:      7.1

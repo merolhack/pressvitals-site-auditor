@@ -8,7 +8,7 @@ Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health. Extensible via REST API and filters.
+A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health — battle-tested on IONOS and HostGator. Extensible via REST API and filters.
 
 == Description ==
 
@@ -18,6 +18,11 @@ database health, assigns each a severity tier, rolls them up into a worst-of
 verdict, and exposes the result where automation can actually consume it: a
 token-gated REST report, a daily cron with email alerts, and a categorized admin
 dashboard.
+
+**Battle-Tested in Production**:
+Verified and continuously tested across real-world hosting architectures, including
+managed cloud platforms (**IONOS Cloud WAAS**) and traditional shared hosting (**HostGator cPanel**),
+guaranteeing accurate diagnostics without false alarms across decoupled PHP runtimes (Web/FPM vs. CLI/Cron).
 
 It is **dependency-free** — no WooCommerce, no page builder, no other plugin
 required — and **pluggable**: every probe is registered through a filter, so the

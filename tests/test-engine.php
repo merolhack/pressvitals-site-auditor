@@ -922,4 +922,113 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$this->assertContains( $result['status'], array( 'pass', 'warn' ) );
 		$this->assertNotEmpty( $result['detail'] );
 	}
+
+	/**
+	 * HTTPS home: returns pass on HTTP 200 over HTTPS.
+	 */
+	public function test_check_https_home_pass_on_200() {
+		add_filter(
+			'home_url',
+			static function() {
+				return 'https://example.org/';
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 200, 'message' => 'OK' ),
+					'headers'  => array(),
+					'body'     => 'OK',
+				);
+			}
+		);
+
+		$result = $this->engine->check_https_home();
+		$this->assertSame( 'pass', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * HTTPS home: returns warn on HTTP 503 during maintenance mode.
+	 */
+	public function test_check_https_home_warn_on_503_maintenance() {
+		add_filter(
+			'home_url',
+			static function() {
+				return 'https://example.org/';
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 503, 'message' => 'Service Unavailable' ),
+					'headers'  => array(),
+					'body'     => 'Briefly unavailable for scheduled maintenance.',
+				);
+			}
+		);
+		add_filter(
+			'pvsa_is_maintenance_mode',
+			'__return_true'
+		);
+
+		$result = $this->engine->check_https_home();
+		$this->assertSame( 'warn', $result['status'], $result['detail'] );
+		$this->assertStringContainsString( 'maintenance', $result['detail'] );
+	}
+
+	/**
+	 * HTTPS home: returns fail on HTTP 503 when maintenance mode is inactive.
+	 */
+	public function test_check_https_home_fail_on_503_unplanned() {
+		add_filter(
+			'home_url',
+			static function() {
+				return 'https://example.org/';
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			static function () {
+				return array(
+					'response' => array( 'code' => 503, 'message' => 'Service Unavailable' ),
+					'headers'  => array(),
+					'body'     => 'Error 503',
+				);
+			}
+		);
+		add_filter(
+			'pvsa_is_maintenance_mode',
+			'__return_false'
+		);
+
+		$result = $this->engine->check_https_home();
+		$this->assertSame( 'fail', $result['status'], $result['detail'] );
+	}
+
+	/**
+	 * Orphaned tables: wildcard pattern and known prefixes filter out plugin tables.
+	 */
+	public function test_check_orphaned_tables_supports_wildcards_and_prefixes() {
+		add_filter(
+			'pvsa_known_table_prefixes',
+			static function( array $prefixes ): array {
+				$prefixes[] = 'hp_';
+				$prefixes[] = 'actionscheduler_';
+				return $prefixes;
+			}
+		);
+		add_filter(
+			'pvsa_known_tables',
+			static function( array $tables ): array {
+				$tables[] = 'custom_*';
+				$tables[] = 'exact_table';
+				return $tables;
+			}
+		);
+
+		$result = $this->engine->check_orphaned_tables();
+		$this->assertContains( $result['status'], array( 'pass', 'warn' ), $result['detail'] );
+	}
 }

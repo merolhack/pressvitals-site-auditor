@@ -36,3 +36,29 @@ Conducted end-to-end live field audit of PressVitals Site Auditor v1.5.4 across 
    - Identified and analyzed the `orphaned_tables` warning (93 tables) as a manageable false positive resulting from HivePress, WooCommerce, and Action Scheduler custom schemas. Documented the `pvsa_known_tables` filter solution.
    - Verified that other warnings (`db_prefix_customized`, `table_collation`, `table_storage_engine`, `php_hardening`) are true positives reflecting shared hosting defaults and historical migrations.
 
+
+## 2026-10-26: False-Positive Remediation & Multi-Hosting DevOps Test Matrix
+
+### Summary
+Engineered core fixes for field false positives identified during production audits on IONOS and HostGator, and established an extensive multi-hosting Docker matrix testing environment simulating top shared and dedicated hosting providers.
+
+### False-Positive Fixes Applied to `PVSA_Engine`
+1. **Scheduled Maintenance Detection in `check_https_home()`**:
+   - Detects `wp_is_maintenance_mode()` and `.maintenance` files during HTTP 503 responses.
+   - Automatically converts transient update-window errors from `fail` to `warn`, avoiding false downtime alarms.
+   - Filterable via `pvsa_is_maintenance_mode`.
+2. **Active Plugin Schema Auto-Discovery in `check_orphaned_tables()`**:
+   - Implemented `get_active_plugin_table_prefixes()` detecting 9 major plugin ecosystems: Action Scheduler (`actionscheduler_`), WooCommerce (`woocommerce_`, `wc_`), HivePress (`hp_`), Yoast SEO (`yoast_`), Rank Math (`rank_math_`), Wordfence (`wf`), Redirection (`redirection_`), WPForms (`wpforms_`), and Elementor (`e_`).
+   - Extended `pvsa_known_tables` to support wildcard patterns (`*`), base names without prefix, and added `pvsa_known_table_prefixes` filter.
+   - Eliminates false warnings on sites running standard multi-table plugins.
+3. **Plugin Description & Readme Update**:
+   - Updated plugin metadata in `pressvitals-site-auditor.php` and `readme.txt` to highlight battle-tested verification across IONOS Cloud (WAAS) and HostGator (cPanel).
+
+### Multi-Hosting Docker Matrix (`.docker/docker-compose.hosting.yml`)
+Generated complete infrastructure configurations covering:
+- **Shared Stacks**: cPanel Classic (`Apache 2.4 + PHP 8.2 + MySQL 8.0`), High-Performance LEMP (`Nginx + PHP-FPM 8.2 + MariaDB 10.11`), and OpenLiteSpeed (`LSPHP 8.1 + MariaDB 10.6`).
+- **Dedicated Stacks**: LAMP Dedicated (`Apache 2.4 + PHP 8.3 + MySQL 8.0`), LEMP Dedicated (`Nginx + PHP-FPM 8.3 + MariaDB 11.4`), and WordPress Optimized (`Nginx + PHP-FPM 8.2 + MariaDB 10.11 + Redis 7.2`).
+- **Community Stacks**: `vagkaefer/php-to-cpanel-website` and `wellwelwel/php:8-shared-based`.
+- **Test Suite Results**: PHPUnit expanded to 65 tests (146 assertions, 100% pass) and PHPCS 100% clean.
+
+

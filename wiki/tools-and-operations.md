@@ -39,6 +39,23 @@ docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor
 docker compose exec -w /var/www/html/wp-content/plugins/pressvitals-site-auditor wp-latest vendor/bin/phpcs
 ```
 
+### Multi-Hosting Architecture Test Matrix (`.docker/docker-compose.hosting.yml`)
+To emulate and test against real-world shared, dedicated, and community hosting stacks (Hostinger, SiteGround, HostGator, DreamHost, Liquid Web, TMDHosting, etc.):
+
+```bash
+# Shared Hosting: cPanel Classic (8090), LEMP FPM (8091), OpenLiteSpeed (8092)
+docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared up -d
+
+# Dedicated Hosting: LAMP Dedicated (8093), LEMP MariaDB 11 (8094), WP Redis (8095)
+docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile dedicated up -d
+
+# Community Shared Stacks: vagkaefer/cpanel (8096), wellwelwel/shared (8097)
+docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile community up -d
+
+# Tear down all test stacks and volumes
+docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared --profile dedicated --profile community down -v
+```
+
 ### Git Push Authentication Constraint
 The local terminal environment can hang indefinitely on interactive credential prompts. Always use the explicit PAT URL when pushing to GitHub:
 ```bash
