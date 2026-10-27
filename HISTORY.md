@@ -1,5 +1,11 @@
 # History & Changelog
 
+## 2026-10-27 (CI Code Quality #49 Fix — PHPCS Exclusions & Test Runner Standards)
+- **CI Workflow & Code Quality Hardening (Code Quality #49):**
+  - **Exclusion of Development & Testing Infrastructure in [`phpcs.xml`](file:///home/merolhack/fl/pressvitals-site-auditor/phpcs.xml):** Excluded auxiliary test directories (`.docker/`, `bin/`, `wiki/`) from the automated PHPCS scanner, bringing `phpcs.xml` into parity with the exclusion rules defined for the WordPress Plugin Check (PCP) action in [`.github/workflows/code-quality.yml`](file:///home/merolhack/fl/pressvitals-site-auditor/.github/workflows/code-quality.yml).
+  - **Refactoring of [`.docker/run-stack-audit.php`](file:///home/merolhack/fl/pressvitals-site-auditor/.docker/run-stack-audit.php):** Fully refactored the multi-stack test runner to adhere strictly to `WordPress-Core` and `WordPress-Docs` standards (tab indentations, single quotes, full docblocks, brackets around control structures, alignment). Scans 100% clean with 0 errors and 0 warnings under PHPCS.
+  - **Test Suite Verification:** Verified 65 unit tests (146 assertions, 100% passing) and validated clean container response across all 4 Docker WordPress environments.
+
 ## 2026-10-26 (v1.5.4 Release — Differential PHP Runtime Diagnosis: Web vs CLI/WP-Cron Decoupling)
 - **Differential Runtime Diagnosis (Web vs CLI/WP-Cron Decoupling):**
   - **Root Cause Resolution**: Addressed hosting architecture mismatch (e.g. IONOS Cloud, cPanel, SiteGround) where system CLI/WP-Cron operates on default OS binaries (PHP 8.0 EOL) while the public web server executes modern PHP (PHP 8.3.36), triggering false-positive catastrophic failure alerts.

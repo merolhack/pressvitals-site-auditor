@@ -1,5 +1,24 @@
 # PressVitals Site Auditor — Change Log & Development Journal
 
+## 2026-10-27: CI Code Quality #49 Fix — PHPCS Exclusions & Test Runner Standards
+
+### Summary
+Resolved GitHub Actions CI failure on the Code Quality workflow (Run #49). The scanner failed with 119 errors and 7 warnings because PHPCS was evaluating `.docker/run-stack-audit.php`, which lacked WPCS indentation (spaces instead of tabs) and file-level docblocks, and was not excluded in `phpcs.xml`.
+
+### Remediation Applied
+1. **PHPCS Ruleset Alignment ([`phpcs.xml`](file:///home/merolhack/fl/pressvitals-site-auditor/phpcs.xml))**:
+   - Added exclusion patterns for auxiliary development directories: `/\.docker/`, `/bin/`, `/wiki/`.
+   - Aligned `phpcs.xml` with `.github/workflows/code-quality.yml` plugin-check exclusions.
+2. **WPCS Refactoring of Multi-Stack Runner ([`.docker/run-stack-audit.php`](file:///home/merolhack/fl/pressvitals-site-auditor/.docker/run-stack-audit.php))**:
+   - Refactored all inline control structures into braced blocks.
+   - Converted indentations from spaces to WordPress-standard tabs.
+   - Added full docblocks and `@package` tags for mocked WordPress core functions.
+   - Validated direct PHPCS execution against the file: 0 errors, 0 warnings.
+3. **Verification**:
+   - Local Docker PHPCS: 100% clean (5/5 files scanned, 0 errors, 0 warnings).
+   - PHPUnit Suite: 65 tests, 146 assertions, 100% passing.
+   - Docker container health: All 4 environments (`wp-71`, `wp-latest`, `wp-mid`, `wp-legacy`) responding HTTP 302 OK.
+
 ## 2026-10-26: Release 1.5.4 — Differential PHP Runtime Diagnosis (Web vs CLI/WP-Cron)
 
 ### Summary

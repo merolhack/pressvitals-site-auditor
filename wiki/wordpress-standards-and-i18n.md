@@ -64,3 +64,17 @@ Translation templates must be recompiled whenever new probe descriptions or user
   ```
   *(Equivalently: `wp i18n make-pot . languages/pressvitals-site-auditor.pot`)*
 - Never edit the `.pot` file manually; always generate it via the pipeline to preserve headers and line numbers.
+
+---
+
+## 5. Scope of Scanning & Auxiliary Directory Exclusions
+
+To maintain complete parity between the local `phpcs` task and the GitHub Actions CI workflows (`code-quality.yml` and `wordpress/plugin-check-action`):
+- **Excluded Directories in [`phpcs.xml`](file:///home/merolhack/fl/pressvitals-site-auditor/phpcs.xml)**:
+  - `/vendor/` and `/node_modules/` (dependencies)
+  - `/tests/` (PHPUnit test classes)
+  - `/\.docker/` (Docker compose, stack definitions, and auxiliary test scripts)
+  - `/bin/` and `/wiki/` (documentation and deployment utilities)
+- **Standards for Auxiliary & DevOps Scripts**:
+  - Standalone scripts intended for container diagnostics (such as [`.docker/run-stack-audit.php`](file:///home/merolhack/fl/pressvitals-site-auditor/.docker/run-stack-audit.php)) must adhere strictly to `WordPress-Core` and `WordPress-Docs` standards (tabs for indentation, braced control structures, full docblocks, single quotes) ensuring compatibility and zero false alarms if scanned directly.
+
