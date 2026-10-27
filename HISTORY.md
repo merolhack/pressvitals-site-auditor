@@ -1,5 +1,20 @@
 # History & Changelog
 
+## 2026-10-26 (v1.5.4 Release — Differential PHP Runtime Diagnosis: Web vs CLI/WP-Cron Decoupling)
+- **Differential Runtime Diagnosis (Web vs CLI/WP-Cron Decoupling):**
+  - **Root Cause Resolution**: Addressed hosting architecture mismatch (e.g. IONOS Cloud, cPanel, SiteGround) where system CLI/WP-Cron operates on default OS binaries (PHP 8.0 EOL) while the public web server executes modern PHP (PHP 8.3.36), triggering false-positive catastrophic failure alerts.
+  - **Context-Aware SAPI Detection**: Implemented `is_cli_or_cron()` in `PVSA_Engine` to accurately detect background executions (`php_sapi_name() === 'cli'`, `wp_doing_cron()`, `DOING_CRON`).
+  - **Web Runtime Version Tracking**: Implemented `record_web_php_version()` and `get_detected_web_php_version()` storing the web PHP version in a transient (`pvsa_web_php_version`, 7-day TTL) on web requests, with fallback to remote HTTP header inspection (`X-Powered-By`).
+  - **Intelligent Differential Logic in `check_php_version()`**:
+    - **Case 1 (Consistent / Web direct)**: Standard evaluation for single runtime environments (pass / warn / fail).
+    - **Case 2 (Web Modern vs CLI EOL)**: Returns `warn` with actionable guidance directing admins to update their crontab / hosting panel PHP binary path without flagging whole-site compromise.
+    - **Case 3 (Both EOL)**: Returns critical `fail` when both Web and CLI runtimes are unsupported.
+    - **Case 4 (Web EOL vs CLI Modern)**: Returns critical `fail` alerting to public web exposure.
+    - **Case 5 (Both Supported)**: Returns `pass` acknowledging both active versions.
+  - **Testing & Extensibility Filters**: Introduced `pvsa_detected_web_php_version`, `pvsa_current_php_version`, and `pvsa_is_cli_or_cron`.
+  - **Unit Test Suite Expansion**: Added 5 dedicated unit tests in `tests/test-engine.php` covering all differential diagnosis states, bringing test suite to 61 tests and 141 assertions.
+  - **100% Code Quality Compliance**: 0 errors, 0 warnings across WordPress-Core PHPCS and PHPUnit 9.6.
+
 ## 2026-10-23 (60-Probe Milestone — PHP Runtime Security & CVE Advisory Auditing)
 - **CI & PHPUnit Matrix Compatibility Fix:**
   - Fixed `test_php_version_fails_on_unpatched_micro_version` in `tests/test-engine.php` by filtering `pvsa_php_eol_dates` to a future date (`2099-01-01`), isolating micro-patch CVE assertions from the EOL check when executing PHPUnit under legacy runtimes (PHP 7.4 and PHP 8.0).

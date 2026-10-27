@@ -4,7 +4,7 @@ Tags: audit, performance, security, monitoring, site health
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,6 +201,13 @@ mounted. See `docker-compose.yml` for details.
 
 1. The admin report grouped by category with the summary box.
 2. The settings page (thresholds and alert email).
+
+== Changelog ==
+
+= 1.5.4 =
+* Fix: Differential runtime diagnosis for decoupled Web (Apache/FPM) vs CLI/WP-Cron environments. Distinguishes between web-facing PHP and system crontab/CLI binaries, preventing false positive EOL alerts when hosting defaults to legacy system CLI while running modern Web PHP.
+* Enhancement: Added automatic web runtime PHP version detection and caching via transients (`pvsa_web_php_version`) with fallback HTTP header inspection (`X-Powered-By`).
+* Developer: Added `pvsa_detected_web_php_version`, `pvsa_current_php_version`, and `pvsa_is_cli_or_cron` filters for granular diagnostic and testing overrides.
 
 = 1.5.3 =
 * New probe: PHP runtime hardening (php_hardening) — audits critical php.ini directives: expose_php version disclosure in HTTP headers, allow_url_include, and unconstrained high-risk execution functions (exec, shell_exec, system, proc_open, popen).

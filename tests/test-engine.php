@@ -25,6 +25,12 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		remove_all_filters( 'pvsa_registered_checks' );
 		remove_all_filters( 'pvsa_last_backup_timestamp' );
 		remove_all_filters( 'pre_http_request' );
+		remove_all_filters( 'pvsa_php_eol_dates' );
+		remove_all_filters( 'pvsa_php_min_secure_versions' );
+		remove_all_filters( 'pvsa_current_php_version' );
+		remove_all_filters( 'pvsa_detected_web_php_version' );
+		remove_all_filters( 'pvsa_is_cli_or_cron' );
+		delete_transient( 'pvsa_web_php_version' );
 		delete_site_transient( 'update_core' );
 		delete_site_transient( 'update_plugins' );
 		parent::tear_down();
@@ -263,6 +269,164 @@ class Test_PVSA_Engine extends WP_UnitTestCase {
 		$result = $this->engine->check_php_version();
 		$this->assertSame( 'pass', $result['status'] );
 		$this->assertStringContainsString( 'actively supported', $result['detail'] );
+	}
+
+	public function test_php_version_mismatch_warns_when_web_supported_and_cli_eol() {
+		add_filter(
+			'pvsa_is_cli_or_cron',
+			'__return_true'
+		);
+		add_filter(
+			'pvsa_current_php_version',
+			static function () {
+				return '8.0.30';
+			}
+		);
+		add_filter(
+			'pvsa_detected_web_php_version',
+			static function () {
+				return '8.3.36';
+			}
+		);
+		add_filter(
+			'pvsa_php_eol_dates',
+			static function () {
+				return array(
+					'8.0' => '2023-11-26',
+					'8.3' => '2099-01-01',
+				);
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'warn', $result['status'] );
+		$this->assertStringContainsString( 'Web server operates on PHP 8.3.36 (supported)', $result['detail'] );
+		$this->assertStringContainsString( 'executed with PHP 8.0.30 (end-of-life)', $result['detail'] );
+		$this->assertStringContainsString( 'crontab or hosting panel to PHP 8.3', $result['detail'] );
+	}
+
+	public function test_php_version_mismatch_fails_when_both_web_and_cli_eol() {
+		add_filter(
+			'pvsa_is_cli_or_cron',
+			'__return_true'
+		);
+		add_filter(
+			'pvsa_current_php_version',
+			static function () {
+				return '8.0.30';
+			}
+		);
+		add_filter(
+			'pvsa_detected_web_php_version',
+			static function () {
+				return '7.4.33';
+			}
+		);
+		add_filter(
+			'pvsa_php_eol_dates',
+			static function () {
+				return array(
+					'7.4' => '2022-11-28',
+					'8.0' => '2023-11-26',
+				);
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'fail', $result['status'] );
+		$this->assertStringContainsString( 'Both Web server (PHP 7.4.33) and WP-Cron/CLI runtime (PHP 8.0.30) are end-of-life', $result['detail'] );
+	}
+
+	public function test_php_version_mismatch_fails_when_web_is_eol_and_cli_is_modern() {
+		add_filter(
+			'pvsa_is_cli_or_cron',
+			'__return_true'
+		);
+		add_filter(
+			'pvsa_current_php_version',
+			static function () {
+				return '8.3.36';
+			}
+		);
+		add_filter(
+			'pvsa_detected_web_php_version',
+			static function () {
+				return '7.4.33';
+			}
+		);
+		add_filter(
+			'pvsa_php_eol_dates',
+			static function () {
+				return array(
+					'7.4' => '2022-11-28',
+					'8.3' => '2099-01-01',
+				);
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'fail', $result['status'] );
+		$this->assertStringContainsString( 'Web server runs PHP 7.4.33 which is end-of-life and vulnerable', $result['detail'] );
+	}
+
+	public function test_php_version_mismatch_passes_when_both_are_supported() {
+		add_filter(
+			'pvsa_is_cli_or_cron',
+			'__return_true'
+		);
+		add_filter(
+			'pvsa_current_php_version',
+			static function () {
+				return '8.2.20';
+			}
+		);
+		add_filter(
+			'pvsa_detected_web_php_version',
+			static function () {
+				return '8.3.10';
+			}
+		);
+		add_filter(
+			'pvsa_php_eol_dates',
+			static function () {
+				return array(
+					'8.2' => '2099-01-01',
+					'8.3' => '2099-01-01',
+				);
+			}
+		);
+		add_filter(
+			'pvsa_php_min_secure_versions',
+			static function () {
+				return array(
+					'8.2' => '1.0.0',
+					'8.3' => '1.0.0',
+				);
+			}
+		);
+
+		$result = $this->engine->check_php_version();
+		$this->assertSame( 'pass', $result['status'] );
+		$this->assertStringContainsString( 'PHP runtimes are actively supported (Web: PHP 8.3.10, WP-Cron/CLI: PHP 8.2.20)', $result['detail'] );
+	}
+
+	public function test_record_and_get_detected_web_php_version() {
+		delete_transient( 'pvsa_web_php_version' );
+
+		// When not in background, record_web_php_version should write to transient.
+		add_filter( 'pvsa_is_cli_or_cron', '__return_false' );
+		$this->engine->record_web_php_version();
+		$this->assertSame( PHP_VERSION, get_transient( 'pvsa_web_php_version' ) );
+
+		// In background, record_web_php_version should NOT overwrite transient.
+		remove_all_filters( 'pvsa_is_cli_or_cron' );
+		add_filter( 'pvsa_is_cli_or_cron', '__return_true' );
+		set_transient( 'pvsa_web_php_version', '8.4.1', 3600 );
+		$this->engine->record_web_php_version();
+		$this->assertSame( '8.4.1', get_transient( 'pvsa_web_php_version' ) );
+
+		// get_detected_web_php_version should return the recorded version.
+		$this->assertSame( '8.4.1', $this->engine->get_detected_web_php_version() );
 	}
 
 	public function test_php_hardening_probe_structure() {

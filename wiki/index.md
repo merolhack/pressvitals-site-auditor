@@ -33,7 +33,7 @@ This LLM Wiki is structured according to the [Karpathy LLM Wiki Architecture](ht
 - **Scheduled Alerts (WP-Cron)**: [`includes/class-pvsa-cron.php`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/includes/class-pvsa-cron.php)
 - **REST API Endpoints**: [`includes/class-pvsa-rest.php`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/includes/class-pvsa-rest.php)
 - **Agent Behavioral Schema**: [`AGENTS.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/AGENTS.md)
-- **Changelog & Ingestion History**: [`HISTORY.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/HISTORY.md)
+- **Changelog & Ingestion History**: [`HISTORY.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/HISTORY.md) and [`wiki/log.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/log.md)
 - **Human-Facing Documentation**: [`README.md`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/README.md) and [`readme.txt`](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/readme.txt)
 
 ---
@@ -41,7 +41,7 @@ This LLM Wiki is structured according to the [Karpathy LLM Wiki Architecture](ht
 ## 3. Quick Repository Metadata
 
 - **Plugin Slug**: `pressvitals-site-auditor`
-- **Current Version**: `1.5.3`
+- **Current Version**: `1.5.4`
 - **WordPress.org Directory URL**: [https://wordpress.org/plugins/pressvitals-site-auditor](https://wordpress.org/plugins/pressvitals-site-auditor)
 - **SVN Repository URL**: `https://plugins.svn.wordpress.org/pressvitals-site-auditor`
 - **Codebase Memory Graph**: `home-merolhack-fl-pressvitals-site-auditor`

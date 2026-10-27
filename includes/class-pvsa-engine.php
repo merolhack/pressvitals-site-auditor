@@ -31,6 +31,7 @@ class PVSA_Engine {
 	 */
 	public function init() {
 		add_filter( 'pvsa_registered_checks', array( $this, 'register_core_checks' ) );
+		$this->record_web_php_version();
 	}
 
 	/**
@@ -925,12 +926,81 @@ class PVSA_Engine {
 	}
 
 	/**
+	 * Determine whether the current process is running in CLI or WP-Cron background context.
+	 *
+	 * @return bool
+	 */
+	public function is_cli_or_cron() {
+		$is_background = ( 'cli' === php_sapi_name() )
+			|| ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() )
+			|| ( defined( 'DOING_CRON' ) && DOING_CRON );
+
+		/**
+		 * Filter whether execution is in CLI or background cron context.
+		 *
+		 * @param bool $is_background True if CLI or cron.
+		 */
+		return (bool) apply_filters( 'pvsa_is_cli_or_cron', $is_background );
+	}
+
+	/**
+	 * Record web runtime PHP version in a transient when running in web context.
+	 *
+	 * @return void
+	 */
+	public function record_web_php_version() {
+		if ( $this->is_cli_or_cron() ) {
+			return;
+		}
+
+		$recorded = get_transient( 'pvsa_web_php_version' );
+		if ( false === $recorded || PHP_VERSION !== $recorded ) {
+			set_transient( 'pvsa_web_php_version', PHP_VERSION, 7 * DAY_IN_SECONDS );
+		}
+	}
+
+	/**
+	 * Retrieve detected Web runtime PHP version, falling back to HTTP inspection if running under CLI/Cron.
+	 *
+	 * @return string|false
+	 */
+	public function get_detected_web_php_version() {
+		$web_version = get_transient( 'pvsa_web_php_version' );
+
+		if ( empty( $web_version ) && $this->is_cli_or_cron() && function_exists( 'wp_remote_head' ) && function_exists( 'home_url' ) ) {
+			$response = wp_remote_head(
+				home_url( '/' ),
+				array(
+					'timeout'    => 3,
+					'sslverify'  => false,
+					'user-agent' => 'PressVitals-Auditor/' . ( defined( 'PVSA_VERSION' ) ? PVSA_VERSION : '1.0' ),
+				)
+			);
+
+			if ( ! is_wp_error( $response ) ) {
+				$powered_by = wp_remote_retrieve_header( $response, 'x-powered-by' );
+				if ( ! empty( $powered_by ) && preg_match( '/PHP\/([0-9]+\.[0-9]+(?:\.[0-9]+)?)/i', $powered_by, $matches ) ) {
+					$web_version = $matches[1];
+					set_transient( 'pvsa_web_php_version', $web_version, 7 * DAY_IN_SECONDS );
+				}
+			}
+		}
+
+		/**
+		 * Filter the detected web runtime PHP version.
+		 *
+		 * @param string|false $web_version Detected web PHP version or false.
+		 */
+		return apply_filters( 'pvsa_detected_web_php_version', $web_version ? (string) $web_version : false );
+	}
+
+	/**
 	 * PHP version is within a security-supported range and patched against known critical CVEs.
 	 *
 	 * @return array{status:string,detail:string}
 	 */
 	public function check_php_version() {
-		$version     = PHP_VERSION;
+		$version     = (string) apply_filters( 'pvsa_current_php_version', PHP_VERSION );
 		$major_minor = implode( '.', array_slice( explode( '.', $version ), 0, 2 ) );
 
 		// Official PHP End-Of-Life dates (YYYY-MM-DD).
@@ -956,6 +1026,93 @@ class PVSA_Engine {
 		 * @param int $months Number of months. Default 6.
 		 */
 		$horizon_months = (int) apply_filters( 'pvsa_php_eol_horizon_months', 6 );
+
+		// Micro-patch security validation against active critical CVEs (e.g. PHP2Shell CVE-2026-109618 / 109619).
+		$clean_version      = preg_replace( '/^([0-9]+\.[0-9]+\.[0-9]+).*/', '$1', $version );
+		$default_min_secure = array(
+			'8.2' => '8.2.35',
+			'8.3' => '8.3.36',
+			'8.4' => '8.4.27',
+			'8.5' => '8.5.12',
+		);
+
+		/**
+		 * Filter the minimum secure PHP patch versions per branch.
+		 *
+		 * @param array $min_secure Map of 'major.minor' => 'major.minor.patch'.
+		 */
+		$min_secure_patches = (array) apply_filters( 'pvsa_php_min_secure_versions', $this->get_min_secure_php_versions( $default_min_secure ) );
+
+		// Differential Runtime Diagnosis (Web vs CLI/WP-Cron decoupling).
+		$is_background = $this->is_cli_or_cron();
+		$web_version   = $is_background ? $this->get_detected_web_php_version() : false;
+
+		if ( $is_background && ! empty( $web_version ) && $web_version !== $version ) {
+			$web_major_minor = implode( '.', array_slice( explode( '.', $web_version ), 0, 2 ) );
+			$web_clean       = preg_replace( '/^([0-9]+\.[0-9]+\.[0-9]+).*/', '$1', $web_version );
+
+			$web_is_eol = ! isset( $eol_dates[ $web_major_minor ] )
+				? version_compare( $web_version, '7.4', '<' )
+				: ( time() > strtotime( $eol_dates[ $web_major_minor ] ) );
+
+			$cli_is_eol = ! isset( $eol_dates[ $major_minor ] )
+				? version_compare( $version, '7.4', '<' )
+				: ( time() > strtotime( $eol_dates[ $major_minor ] ) );
+
+			$web_is_vulnerable = ( ! $web_is_eol && isset( $min_secure_patches[ $web_major_minor ] ) && version_compare( $web_clean, $min_secure_patches[ $web_major_minor ], '<' ) );
+			$cli_is_vulnerable = ( ! $cli_is_eol && isset( $min_secure_patches[ $major_minor ] ) && version_compare( $clean_version, $min_secure_patches[ $major_minor ], '<' ) );
+
+			// Case 3: Both Web and CLI runtimes are EOL.
+			if ( $web_is_eol && $cli_is_eol ) {
+				return array(
+					'status' => 'fail',
+					// translators: 1: Web PHP version, 2: CLI PHP version
+					// translators: 1: dynamic value, 2: dynamic value
+					'detail' => sprintf( __( 'Both Web server (PHP %1$s) and WP-Cron/CLI runtime (PHP %2$s) are end-of-life and require immediate upgrade.', 'pressvitals-site-auditor' ), $web_version, $version ),
+				);
+			}
+
+			// Subcase: Web is EOL (critical web-facing exposure).
+			if ( $web_is_eol ) {
+				return array(
+					'status' => 'fail',
+					// translators: 1: Web PHP version, 2: CLI PHP version
+					// translators: 1: dynamic value, 2: dynamic value
+					'detail' => sprintf( __( 'Web server runs PHP %1$s which is end-of-life and vulnerable, although WP-Cron/CLI runs PHP %2$s — upgrade your web hosting PHP version immediately.', 'pressvitals-site-auditor' ), $web_version, $version ),
+				);
+			}
+
+			// Case 2: Web server is supported, but CLI / WP-Cron is EOL.
+			if ( ! $web_is_eol && $cli_is_eol ) {
+				return array(
+					'status' => 'warn',
+					// translators: 1: Web PHP version, 2: CLI PHP version, 3: Recommended PHP version
+					// translators: 1: dynamic value, 2: dynamic value, 3: dynamic value
+					'detail' => sprintf( __( 'Web server operates on PHP %1$s (supported), but the current WP-Cron/CLI process was executed with PHP %2$s (end-of-life). Update the PHP binary path in your crontab or hosting panel to PHP %3$s.', 'pressvitals-site-auditor' ), $web_version, $version, $web_major_minor ),
+				);
+			}
+
+			// Subcase: Web is secure, but CLI is vulnerable to unpatched CVE.
+			if ( ! $web_is_vulnerable && $cli_is_vulnerable ) {
+				$min_patch = $min_secure_patches[ $major_minor ];
+				return array(
+					'status' => 'warn',
+					// translators: 1: Web PHP version, 2: CLI PHP version, 3: minimum secure patch
+					// translators: 1: dynamic value, 2: dynamic value, 3: dynamic value
+					'detail' => sprintf( __( 'Web server operates on secure PHP %1$s, but the current WP-Cron/CLI process was executed with PHP %2$s (below minimum secure patch %3$s). Update the CLI PHP binary path to match the web runtime.', 'pressvitals-site-auditor' ), $web_version, $version, $min_patch ),
+				);
+			}
+
+			// Subcase: Both runtimes are supported and not vulnerable.
+			if ( ! $web_is_eol && ! $cli_is_eol && ! $web_is_vulnerable && ! $cli_is_vulnerable ) {
+				return array(
+					'status' => 'pass',
+					// translators: 1: Web PHP version, 2: CLI PHP version
+					// translators: 1: dynamic value, 2: dynamic value
+					'detail' => sprintf( __( 'PHP runtimes are actively supported (Web: PHP %1$s, WP-Cron/CLI: PHP %2$s).', 'pressvitals-site-auditor' ), $web_version, $version ),
+				);
+			}
+		}
 
 		if ( ! isset( $eol_dates[ $major_minor ] ) ) {
 			if ( version_compare( $version, '7.4', '<' ) ) {
@@ -986,22 +1143,6 @@ class PVSA_Engine {
 				'detail' => sprintf( __( 'PHP %s is end-of-life and no longer receives security updates — upgrade.', 'pressvitals-site-auditor' ), $version ),
 			);
 		}
-
-		// Micro-patch security validation against active critical CVEs (e.g. PHP2Shell CVE-2026-109618 / 109619).
-		$clean_version      = preg_replace( '/^([0-9]+\.[0-9]+\.[0-9]+).*/', '$1', $version );
-		$default_min_secure = array(
-			'8.2' => '8.2.35',
-			'8.3' => '8.3.36',
-			'8.4' => '8.4.27',
-			'8.5' => '8.5.12',
-		);
-
-		/**
-		 * Filter the minimum secure PHP patch versions per branch.
-		 *
-		 * @param array $min_secure Map of 'major.minor' => 'major.minor.patch'.
-		 */
-		$min_secure_patches = (array) apply_filters( 'pvsa_php_min_secure_versions', $this->get_min_secure_php_versions( $default_min_secure ) );
 
 		if ( isset( $min_secure_patches[ $major_minor ] ) ) {
 			$min_patch = $min_secure_patches[ $major_minor ];
