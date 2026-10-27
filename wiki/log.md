@@ -61,4 +61,11 @@ Generated complete infrastructure configurations covering:
 - **Community Stacks**: `vagkaefer/php-to-cpanel-website` and `wellwelwel/php:8-shared-based`.
 - **Test Suite Results**: PHPUnit expanded to 65 tests (146 assertions, 100% pass) and PHPCS 100% clean.
 
+### Strict Post-Release Docker Cleanup Policy
+- Formatted and enforced Step 10 in the official release workflow:
+  1. `docker compose down -v` across all shared/dedicated/community profiles.
+  2. Total disk space reclamation: `docker rmi` of ephemeral stack images, `docker container prune -f`, `docker image prune -f`, and `docker builder prune -a -f`.
+- Integrated strict requirement into `AGENTS.md` and `wiki/wordpress-org-and-releases.md`.
+
+
 

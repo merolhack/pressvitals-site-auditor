@@ -18,7 +18,13 @@ This document defines the schema and operating rules for any LLM agent interacti
 > 8. **Verify Both WordPress.org APIs:**
 >    - **Plugin Information API**: `https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=pressvitals-site-auditor` (confirm latest version, published version list, and download zip).
 >    - **Core Update-Check API**: `https://api.wordpress.org/plugins/update-check/1.1/` (verify broadcast status and index cache state).
-> **NEVER leave code modifications or version bumps unpushed, unreleased, or unverified on GitHub / SVN.**
+> 9. **MANDATORY POST-RELEASE DOCKER CLEANUP & DISK RECLAMATION:**
+>    Immediately upon completing the release commit, push, and verification of a new version, the agent **MUST** execute:
+>    - **Limpieza de Servicios y Volúmenes de Compose**:
+>      `docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared --profile dedicated --profile community down -v`
+>    - **Liberación Total de Espacio en Docker Desktop (Bajo Demanda)**:
+>      `docker rmi -f docker-cpanel-classic docker-shared-lemp-fpm docker-litespeed docker-lamp-dedicated docker-lemp-dedicated-fpm docker-wp-redis-fpm litespeedtech/openlitespeed:1.8.2-lsphp81 wellwelwel/php:8-shared-based vagkaefer/php-to-cpanel-website:8.3 2>/dev/null; docker container prune -f && docker image prune -f && docker builder prune -a -f`
+> **NEVER leave code modifications or version bumps unpushed, unreleased, or unverified on GitHub / SVN, and NEVER leave test containers, database volumes, or build caches occupying host disk space.**
 
 ---
 

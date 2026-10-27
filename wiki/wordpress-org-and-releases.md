@@ -25,13 +25,13 @@
 
 ---
 
-## 2. Mandatory Release Policy & 9-Step Workflow
+## 2. Mandatory Release Policy & 10-Step Workflow
 
 > [!CAUTION]
 > **CRITICAL RELEASE POLICY:**
-> Any change of code and version **MUST** be deployed to WordPress.org Plugins via GitHub Actions and SVN. Never leave code changes unreleased or unverified.
+> Any change of code and version **MUST** be deployed to WordPress.org Plugins via GitHub Actions and SVN, followed by full Docker cleanup. Never leave code changes unreleased or host storage cluttered.
 
-Follow these 9 steps sequentially whenever a release is prepared:
+Follow these 10 steps sequentially whenever a release is prepared:
 
 ### Step 1: Version Synchronization
 Synchronize versions identically in:
@@ -91,3 +91,19 @@ This triggers the `deploy` job in `.github/workflows/deploy.yml` (`10up/action-w
    Confirm `version` equals `<version>`, `download_link` serves the `<version>.zip`, and `versions` includes the tag.
 3. **WordPress Core Update-Check API**:
    Test payload to `https://api.wordpress.org/plugins/update-check/1.1/` to observe broadcast state.
+
+### Step 10: Mandatory Docker Services Cleanup & Complete Disk Reclamation
+Upon concluding the release commit, push, and verification of a new version, the agent **MUST** execute the cleanup and space reclamation protocols:
+1. **Limpieza de Servicios y Volúmenes de Compose**:
+   ```bash
+   docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared --profile dedicated --profile community down -v
+   ```
+2. **Liberación Total de Espacio en Docker Desktop (Bajo Demanda)**:
+   ```bash
+   docker rmi -f docker-cpanel-classic docker-shared-lemp-fpm docker-litespeed docker-lamp-dedicated docker-lemp-dedicated-fpm docker-wp-redis-fpm litespeedtech/openlitespeed:1.8.2-lsphp81 wellwelwel/php:8-shared-based vagkaefer/php-to-cpanel-website:8.3 2>/dev/null
+   docker container prune -f
+   docker image prune -f
+   docker builder prune -a -f
+   ```
+*Requirement: Zero running test containers, zero orphaned volumes, and zero stale build layers consuming host disk space.*
+

@@ -56,6 +56,22 @@ docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hos
 docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared --profile dedicated --profile community down -v
 ```
 
+### Mandatory Post-Release Docker Cleanup Protocol [STRICT]
+Immediately upon completing the release commit, push, and verification of a new version, agents **MUST** execute:
+1. **Limpieza de Servicios y Volúmenes de Compose**:
+   ```bash
+   docker compose -f .docker/docker-compose.hosting.yml --env-file .docker/.env.hosting --profile shared --profile dedicated --profile community down -v
+   ```
+2. **Liberación Total de Espacio en Docker Desktop (Bajo Demanda)**:
+   ```bash
+   docker rmi -f docker-cpanel-classic docker-shared-lemp-fpm docker-litespeed docker-lamp-dedicated docker-lemp-dedicated-fpm docker-wp-redis-fpm litespeedtech/openlitespeed:1.8.2-lsphp81 wellwelwel/php:8-shared-based vagkaefer/php-to-cpanel-website:8.3 2>/dev/null
+   docker container prune -f
+   docker image prune -f
+   docker builder prune -a -f
+   ```
+This prevents disk saturation on Windows / WSL2 host environments while guaranteeing test idempotency.
+
+
 ### Git Push Authentication Constraint
 The local terminal environment can hang indefinitely on interactive credential prompts. Always use the explicit PAT URL when pushing to GitHub:
 ```bash
