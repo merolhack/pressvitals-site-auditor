@@ -47,7 +47,15 @@ This document defines the schema and operating rules for any LLM agent interacti
 4. **Post-Task Sync:**
    - After completing edits, run `detect_changes` to ensure the codebase graph reflects all newly created or modified functions/routes.
 
-5. **Mandatory Secondary Model Delegation (Ollama: `gemma4:cloud` &rarr; `qwen3:8b-8k` via `consultar_modelo_local`) [MUST]:**
+5. **Mandatory Unattended Zero-Hang Protocol [STRICT]:**
+   - NEVER execute `sudo` in any command or script. If root permissions are required for files mounted from Docker, execute inside the container using `docker compose exec -T -u 0 <container> chown/chmod`.
+   - ALWAYS decouple `stdin` and disable pseudo-TTY using `-T` and `< /dev/null` on background/unattended Docker commands: `docker compose exec -T <container> <cmd> < /dev/null`.
+   - ALWAYS wrap commands prone to hanging (PHPUnit, PHPCS, multi-container audits) in GNU coreutils `timeout` (e.g. `timeout 180s ...`).
+   - ALWAYS supply non-interactive flags (`-f` in `docker prune`, `-c core.askPass=true` and explicit PAT in `git push`, non-interactive arguments in `gh release`).
+   - ALWAYS configure `--connect-timeout 10 --max-time 30` on any `curl` calls targeting WordPress.org APIs or SVN.
+   - See detailed documentation in [`wiki/operations/preventing-unattended-hangs-and-process-timeouts.md`](wiki/operations/preventing-unattended-hangs-and-process-timeouts.md).
+
+6. **Mandatory Secondary Model Delegation (Ollama: `gemma4:cloud` &rarr; `qwen3:8b-8k` via `consultar_modelo_local`) [MUST]:**
    - Whenever a task is mechanical, repetitive, or of low complexity (generating docstrings, simple formatting, repetitive boilerplate, isolated summaries, basic regex/cleaning, or direct Q&A without multi-file context), agents **MUST** delegate execution to secondary models via `call_mcp_tool` on `ollama-local` &rarr; `consultar_modelo_local`.
    - **Model Priority:** ALWAYS use **`gemma4:cloud`** first whenever sufficient weekly usage quota is available (< 90%); subsequently fall back to **`qwen3:8b-8k`** (local model) when quota is depleted or cloud calls fail.
    - **DO NOT** consume cloud LLM context or high-level reasoning for low-risk, isolated tasks.
@@ -87,8 +95,9 @@ When answering questions, building features, or fixing bugs, agents MUST follow 
 1.  **Consult the LLM Wiki:** Review [`wiki/index.md`](wiki/index.md) and its specialized modules for architectural constraints (e.g., how the 4 Docker environments function, WP.org translation rules, direct access protection, probe structure).
 2.  **Query Codebase Memory First:** Before reading large files or grepping across the repository, use `codebase-memory` MCP tools (`search_graph`, `trace_path`, `get_code_snippet`, `query_graph`) to inspect the knowledge graph.
 3.  **Analyze the Log:** Check [HISTORY.md](HISTORY.md) to see recent changes and ensure you don't overwrite past bugfixes or architectural improvements.
-4.  **Execute Safely:**
-    *   Do not test changes by running `composer` in raw WSL environment; use Docker containers (`docker compose exec wp-71 vendor/bin/phpunit` or `wp-latest` and `vendor/bin/phpcs`).
+4.  **Execute Safely & Zero-Hang Compliance:**
+    *   Do not test changes by running `composer` in raw WSL environment; use Docker containers with non-interactive flags and timeouts (`timeout 180s docker compose exec -T wp-71 vendor/bin/phpunit < /dev/null` or `timeout 120s docker compose exec -T wp-latest vendor/bin/phpcs < /dev/null`).
+    *   NEVER use `sudo` for file permissions; adjust permissions using container root: `docker compose exec -T -u 0 wp-latest chown/chmod`.
     *   Be aware of `chmod` and file permission differences between WSL and Docker volume mounts.
 5.  **Update the Wiki & History:** After solving a problem or making a significant code change, append a record of the change to `HISTORY.md`. If a new architectural rule is discovered, integrate it into the relevant module under `wiki/`.
 6.  **Publish Release to WordPress.org via GitHub Actions & SVN:** 

@@ -1,5 +1,15 @@
 # History & Changelog
 
+## 2026-11-07 (Zero-Hang Protocol Integration — Unattended Automation & Timeout Hardening)
+- **Zero-Hang Protocol & Unattended Execution Standards**:
+  - **Dossier & Knowledge Base Creation**: Documented [`wiki/operations/preventing-unattended-hangs-and-process-timeouts.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/operations/preventing-unattended-hangs-and-process-timeouts.md) establishing 5 immutable rules to eliminate unattended hangs, infinite loops, and `stdin` blocking.
+  - **Agent Schema Hardening ([`AGENTS.md`](file:///home/merolhack/fl/pressvitals-site-auditor/AGENTS.md))**:
+    - Enforced absolute prohibition of `sudo` on host; delegating root adjustments to Docker container execution (`docker compose exec -T -u 0`).
+    - Mandated pseudo-TTY detachment and `stdin` closure (`-T` and `< /dev/null`) for background commands.
+    - Mandated GNU coreutils `timeout` wrappers (180s for PHPUnit, 120s for PHPCS, 30s `--max-time` for cURL).
+    - Enforced non-interactive flags across Docker (`-f` in prune), Git (`-c core.askPass=true` + explicit PAT URL), and GitHub CLI.
+  - **Wiki Catalog Sync ([`wiki/index.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/index.md))**: Added the Zero-Hang operations module to the navigation matrix.
+
 ## 2026-10-27 (CI Code Quality #49 Fix — PHPCS Exclusions & Test Runner Standards)
 - **CI Workflow & Code Quality Hardening (Code Quality #49):**
   - **Exclusion of Development & Testing Infrastructure in [`phpcs.xml`](file:///home/merolhack/fl/pressvitals-site-auditor/phpcs.xml):** Excluded auxiliary test directories (`.docker/`, `bin/`, `wiki/`) from the automated PHPCS scanner, bringing `phpcs.xml` into parity with the exclusion rules defined for the WordPress Plugin Check (PCP) action in [`.github/workflows/code-quality.yml`](file:///home/merolhack/fl/pressvitals-site-auditor/.github/workflows/code-quality.yml).
