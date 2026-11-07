@@ -5,7 +5,6 @@
  * Description:       A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health — battle-tested on IONOS and HostGator. Extensible via REST API and filters.
  * Version:           1.5.4
  * Requires at least: 6.0
- * Tested up to:      7.1
  * Requires PHP:      7.4
  * Author:            merolhack
  * Author URI:        https://merolhack.github.io/
