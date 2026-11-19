@@ -20,13 +20,17 @@ WordPress core's **Tools → Site Health** is an *on-demand, admin-only* status 
 plus a static debug dump. PressVitals is built for **continuous, automated,
 machine-readable monitoring and auditing**:
 
-- **Headless / API-first** — a no-auth `/ping` liveness probe and a token-gated
-  `/report` JSON endpoint (HTTP `503` with the full JSON body on a failing verdict) for
-  uptime monitors / CI. Responses include `X-PVSA-Verdict`, `X-PVSA-Fail-Count` and
-  `X-PVSA-Warn-Count` headers. CI/CD clients can add `?always_200=1` to always receive
-  HTTP `200` and evaluate `verdict` from the JSON:
+- **Headless / API-first** — three purpose-built REST endpoints under `/wp-json/pressvitals/v1`:
+  - `GET /ping` — no-auth liveness probe (always HTTP `200`).
+  - `GET /health?token=TOKEN[&fail_on=fail|warn]` — token-gated uptime-monitor endpoint (UptimeRobot, BetterStack, load balancers). Compact JSON payload; HTTP `200` when healthy, HTTP `503` when the verdict reaches `fail_on` (default: `fail`).
+  - `GET /report?token=TOKEN[&always_200=1]` — token-gated full diagnostic JSON report for CI/CD and dashboards. For backward compatibility it still returns HTTP `503` (with the complete JSON body) on a `fail` verdict, along with `X-PVSA-Deprecation`. **Deprecated behaviour:** uptime monitors should migrate to `/health`, and CI/CD pipelines should pass `?always_200=1`; a future `2.0.0` major release will make `/report` return HTTP `200` by default.
+  - Both `/health` and `/report` emit `X-PVSA-Verdict`, `X-PVSA-Fail-Count`, `X-PVSA-Warn-Count`, and `Cache-Control: no-store`. Status codes can be overridden via the `pvsa_report_http_status` filter.
 
   ```bash
+  # Uptime monitor (HTTP 503 on fail; add &fail_on=warn to alert on warnings too)
+  curl -sI "https://example.com/wp-json/pressvitals/v1/health?token=TOKEN"
+
+  # CI/CD full audit (always HTTP 200; inspect verdict/checks in JSON)
   curl -s "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN&always_200=1"
   ```
 

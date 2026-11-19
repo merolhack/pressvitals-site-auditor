@@ -6,7 +6,7 @@
 
 PressVitals Site Auditor is designed with three core architectural pillars:
 
-- **Headless-First**: The plugin focuses on headless, scheduled execution via `wp-cron`. It generates a JSON report that can be exported or queried remotely via a token-gated REST API endpoint (`/wp-json/pressvitals/v1/report`).
+- **Headless-First**: The plugin focuses on headless, scheduled execution via `wp-cron`. It exposes three REST endpoints under `/wp-json/pressvitals/v1`: public `/ping` (liveness), token-gated `/health` (uptime monitors, HTTP 200/503 with `?fail_on=fail|warn`), and token-gated `/report` (full diagnostic JSON for CI/CD). See [`rest-api-and-monitoring.md`](rest-api-and-monitoring.md) for the complete API contract, headers, and `pvsa_report_http_status` filter.
 - **Probe Registry**: Probes are defined in `includes/class-pvsa-engine.php` and managed via a registry hook (`pvsa_registered_checks`). Custom probes or external integrations register callbacks through this filter.
 - **Check Anatomy**: Each probe callback returns an associative array with:
   - `status`: `'pass'`, `'warn'`, or `'fail'`

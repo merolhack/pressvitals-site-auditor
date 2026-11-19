@@ -88,3 +88,11 @@ Generated complete infrastructure configurations covering:
 
 
 
+
+---
+
+## [2026-11-18] Ingestion | REST API Separation (`/health`), `pvsa_report_http_status` Filter & Deprecation Roadmap (v1.6.0)
+- **Trigger:** RFC 9110 REST best-practices review following production `dqro.mx` HTTP 503 handling on `/report`.
+- **New Modular Wiki Page:** Created [`wiki/rest-api-and-monitoring.md`](rest-api-and-monitoring.md) documenting `/ping`, `/health?fail_on=fail|warn`, `/report?always_200=1`, diagnostic headers (`X-PVSA-*`, `X-PVSA-Deprecation`, `Cache-Control: no-store`), `pvsa_report_http_status` filter, and the 1.6.0 → 2.0.0 migration roadmap.
+- **Cross-References Updated:** Linked from `wiki/index.md`, `wiki/architecture.md`, and `wiki/wordpress-org-and-releases.md`.
+- **Code & Tests:** Implemented `/health`, `pvsa_report_http_status`, `Cache-Control: no-store`, and `X-PVSA-Deprecation` in `includes/class-pvsa-rest.php`; expanded `tests/test-rest.php` and synchronized `README.md` + `readme.txt` for v1.6.0.

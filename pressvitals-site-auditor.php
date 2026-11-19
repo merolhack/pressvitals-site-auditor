@@ -3,7 +3,7 @@
  * Plugin Name:       PressVitals Site Auditor
  * Plugin URI:        https://wordpress.org/plugins/pressvitals-site-auditor/
  * Description:       A headless-first diagnostic engine featuring 60+ proactive probes for performance, security, and DB health — battle-tested on IONOS and HostGator. Extensible via REST API and filters.
- * Version:           1.5.5
+ * Version:           1.6.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            merolhack
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PVSA_VERSION', '1.5.5' );
+define( 'PVSA_VERSION', '1.6.0' );
 define( 'PVSA_PLUGIN_FILE', __FILE__ );
 define( 'PVSA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PVSA_CRON_HOOK', 'pvsa_daily_check' );

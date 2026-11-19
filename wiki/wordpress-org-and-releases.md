@@ -17,6 +17,8 @@
   - `tags/1.5.2/` (Onboarding quick-start, background monitoring status, review prompt, ASO tags)
   - `tags/1.5.3/` (60 probes milestone, PHP runtime hardening, micro-patch CVE auditing against PHP2Shell)
   - `tags/1.5.4/` (Differential runtime diagnosis: decoupled Web vs CLI/WP-Cron environments)
+  - `tags/1.5.5/` (CI/CD-friendly `/report`: `X-PVSA-*` diagnostic headers and optional `always_200=1`)
+  - `tags/1.6.0/` (Dedicated `/health` uptime-monitor endpoint with `fail_on=fail|warn`, `pvsa_report_http_status` filter, `Cache-Control: no-store`, and `/report` 503 deprecation notice)
 
 ### Directory Assets & Caching Delays
 - **Directory Assets (`.wordpress-org/`)**: Banner and icon images have a **~72-hour CDN propagation delay** on `ps.w.org`.

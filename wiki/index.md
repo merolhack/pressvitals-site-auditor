@@ -11,7 +11,8 @@ This LLM Wiki is structured according to the [Karpathy LLM Wiki Architecture](ht
 
 | Document | Purpose & Key Topics |
 | :--- | :--- |
-| [**architecture.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/architecture.md) | Headless-first diagnostic philosophy, scheduled WP-Cron alerting mechanism, token-gated REST API endpoints (`/ping`, `/report`), check anatomy (`duration_ms`, `tier`), and full catalog of the 60 built-in probes across 8 functional groups. |
+| [**architecture.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/architecture.md) | Headless-first diagnostic philosophy, scheduled WP-Cron alerting mechanism, token-gated REST API endpoints (`/ping`, `/health`, `/report`), check anatomy (`duration_ms`, `tier`), and full catalog of the 60 built-in probes across 8 functional groups. |
+| [**rest-api-and-monitoring.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/rest-api-and-monitoring.md) | REST API contract (`/ping`, `/health?fail_on=fail\|warn`, `/report?always_200=1`), RFC 9110 HTTP status semantics, `X-PVSA-*` diagnostic headers, `Cache-Control: no-store`, `pvsa_report_http_status` filter, CI/CD & uptime monitor integration patterns, and the 1.6.0 → 2.0.0 deprecation roadmap. |
 | [**php-security-and-cve-auditing.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/php-security-and-cve-auditing.md) | PHP2Shell (CVE-2026-109618/109619) incident dossier, micro-patch version enforcement, PHP runtime hardening probe (`php_hardening`), remote security advisory synchronization (`PVSA_Security_Feed`), and Docker validation evidence across PHP 7.4 through 8.4. |
 | [**wordpress-standards-and-i18n.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/wordpress-standards-and-i18n.md) | Strict WordPress.org Plugin Check (PCP) & PHPCS compliance rules: translation functions (`__()`, `esc_html__()`), mandatory `/* translators: ... */` comments on preceding lines, associative array alignment standards, prepared SQL placeholder ignore patterns, and POT file generation. |
 | [**wordpress-compatibility.md**](file:///ubuntu-20.04/home/merolhack/fl/pressvitals-site-auditor/wiki/wordpress-compatibility.md) | Comprehensive compatibility audit against WordPress 7.1.2 Field Guide: bcrypt password hashing (WP 6.8+), modern image formats (AVIF/WebP), zero post editor iframe impact, zero Gutenberg dependencies, client-side media isolation, vanilla JS admin architecture without jQuery UI, and multi-container Docker test matrix. |
@@ -42,7 +43,7 @@ This LLM Wiki is structured according to the [Karpathy LLM Wiki Architecture](ht
 ## 3. Quick Repository Metadata
 
 - **Plugin Slug**: `pressvitals-site-auditor`
-- **Current Version**: `1.5.4`
+- **Current Version**: `1.6.0`
 - **WordPress.org Directory URL**: [https://wordpress.org/plugins/pressvitals-site-auditor](https://wordpress.org/plugins/pressvitals-site-auditor)
 - **SVN Repository URL**: `https://plugins.svn.wordpress.org/pressvitals-site-auditor`
 - **Codebase Memory Graph**: `home-merolhack-fl-pressvitals-site-auditor`

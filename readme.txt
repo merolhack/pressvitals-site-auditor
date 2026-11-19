@@ -4,7 +4,7 @@ Tags: audit, performance, security, monitoring, site health
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.5
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -126,6 +126,7 @@ A callback returns `array( 'status' => 'pass'|'warn'|'fail', 'detail' => '…' )
   non-core/orphaned-tables probe for legitimate plugin tables).
 * `pvsa_orphan_tables_warn` — non-core table count above which the probe warns.
 * `pvsa_sending_domain` — domain used for the SPF/DMARC lookup.
+* `pvsa_report_http_status` — filter the HTTP status code (200 or 503) returned by `/report` and `/health`.
 
 = Compatibility =
 
@@ -167,17 +168,19 @@ No. It runs on any standard WordPress install with no dependencies.
 with `hash_equals()`. Rotate the token any time from the settings page. `/ping`
 returns only a tiny liveness payload with no sensitive data.
 
-= How do I use /report from CI/CD (GitHub Actions)? =
+= How do I use /health and /report from uptime monitors or CI/CD? =
 
-`GET /wp-json/pressvitals/v1/report?token=<TOKEN>` returns the full JSON report. When
-the verdict is `fail` it responds with `HTTP 503` **and the complete JSON body**, so
-uptime monitors (UptimeRobot, BetterStack) can alert. Many HTTP clients (`curl -f`,
-`urllib`) treat 503 as an outage and discard the body. For pipelines, either add
-`&always_200=1` (always HTTP 200; read `verdict` from the JSON) or read the body on
-errors. Every response carries `X-PVSA-Verdict` (pass|warn|fail), `X-PVSA-Fail-Count`
-and `X-PVSA-Warn-Count` headers.
+PressVitals exposes three REST routes under `/wp-json/pressvitals/v1`:
 
-curl: `curl -s "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN&always_200=1"`
+* `GET /ping` — public liveness probe (always HTTP 200).
+* `GET /health?token=<TOKEN>[&fail_on=fail|warn]` — dedicated endpoint for uptime monitors (UptimeRobot, BetterStack, load balancers). Returns compact JSON with HTTP 200 when healthy and HTTP 503 when the verdict reaches `fail_on` (default: `fail`).
+* `GET /report?token=<TOKEN>[&always_200=1]` — full diagnostic JSON report for CI/CD and dashboards. For backward compatibility it still returns HTTP 503 (with the complete JSON body and an `X-PVSA-Deprecation` header) when `verdict` is `fail`. **Deprecation notice:** uptime monitors should migrate to `/health`, and CI/CD pipelines should pass `&always_200=1`. In `2.0.0`, `/report` will return HTTP 200 by default.
+
+Both `/health` and `/report` emit `X-PVSA-Verdict` (`pass|warn|fail`), `X-PVSA-Fail-Count`, `X-PVSA-Warn-Count`, and `Cache-Control: no-store`. You can customize HTTP status codes via the `pvsa_report_http_status` filter.
+
+Uptime monitor (curl): `curl -sI "https://example.com/wp-json/pressvitals/v1/health?token=TOKEN"`
+
+CI/CD full report (curl): `curl -s "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN&always_200=1"`
 
 Python (reads the body even on HTTP 503):
 
@@ -232,6 +235,12 @@ mounted. See `docker-compose.yml` for details.
 2. The settings page (thresholds and alert email).
 
 == Changelog ==
+
+= 1.6.0 =
+* Feature: Added dedicated `GET /wp-json/pressvitals/v1/health` token-gated endpoint for uptime monitors (compact JSON payload, `ok`, `verdict`, `fail_on`, `fail_count`, `warn_count`, `failing`, `time`). Returns HTTP 200 when healthy and HTTP 503 when the verdict reaches `fail_on` (`fail` by default, or `warn` via `?fail_on=warn`).
+* Developer: Added `pvsa_report_http_status` filter (`$status`, `$report`, `$request`, `$endpoint`) allowing custom HTTP status mapping for both `/report` and `/health`.
+* Enhancement: Added `Cache-Control: no-store` header to `/health` and `/report` responses to prevent proxy/CDN caching of live diagnostic data.
+* Deprecation: Returning HTTP 503 on `fail` from `/report` is now deprecated and emits `X-PVSA-Deprecation`. Uptime monitors should migrate to `/health`, while CI/CD pipelines should use `?always_200=1`. Version 2.0.0 will make `/report` return HTTP 200 by default.
 
 = 1.5.5 =
 * Enhancement: `/report` now always sends diagnostic headers `X-PVSA-Verdict`, `X-PVSA-Fail-Count` and `X-PVSA-Warn-Count`.
@@ -322,6 +331,9 @@ mounted. See `docker-compose.yml` for details.
   `/report` REST endpoints.
 
 == Upgrade Notice ==
+
+= 1.6.0 =
+Adds the dedicated /health uptime-monitor endpoint (?fail_on=fail|warn) and pvsa_report_http_status filter. Uptime monitors using /report should migrate to /health before 2.0.0.
 
 = 1.2.0 =
 Adds update/version, user-enumeration, and orphaned-table probes (29 total).

@@ -27,6 +27,7 @@ class Test_PVSA_REST extends WP_UnitTestCase {
 		global $wp_rest_server;
 		$wp_rest_server = null;
 		remove_all_filters( 'pvsa_registered_checks' );
+		remove_all_filters( 'pvsa_report_http_status' );
 		delete_option( PVSA_OPTION_TOKEN );
 		wp_set_current_user( 0 );
 		parent::tear_down();
@@ -122,6 +123,8 @@ class Test_PVSA_REST extends WP_UnitTestCase {
 		$this->assertSame( 'fail', $headers['X-PVSA-Verdict'] );
 		$this->assertSame( '1', $headers['X-PVSA-Fail-Count'] );
 		$this->assertSame( '0', $headers['X-PVSA-Warn-Count'] );
+		$this->assertSame( 'no-store', $headers['Cache-Control'] );
+		$this->assertArrayHasKey( 'X-PVSA-Deprecation', $headers );
 	}
 
 	public function test_report_returns_200_with_always_200_on_fail_verdict() {
@@ -139,6 +142,7 @@ class Test_PVSA_REST extends WP_UnitTestCase {
 		$headers = $response->get_headers();
 		$this->assertSame( 'fail', $headers['X-PVSA-Verdict'] );
 		$this->assertSame( '1', $headers['X-PVSA-Fail-Count'] );
+		$this->assertArrayNotHasKey( 'X-PVSA-Deprecation', $headers );
 	}
 
 	public function test_report_headers_on_warn_verdict() {
@@ -153,5 +157,105 @@ class Test_PVSA_REST extends WP_UnitTestCase {
 		$this->assertSame( 'warn', $headers['X-PVSA-Verdict'] );
 		$this->assertSame( '0', $headers['X-PVSA-Fail-Count'] );
 		$this->assertSame( '1', $headers['X-PVSA-Warn-Count'] );
+		$this->assertSame( 'no-store', $headers['Cache-Control'] );
+	}
+
+	public function test_health_requires_authentication() {
+		wp_set_current_user( 0 );
+		update_option( PVSA_OPTION_TOKEN, 'secret-token' );
+
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/health' ) );
+		$this->assertSame( 401, $response->get_status() );
+	}
+
+	public function test_health_returns_200_on_pass_and_warn_by_default() {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$this->force_single_check( 'pass' );
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/health' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertTrue( $data['ok'] );
+		$this->assertSame( 'pass', $data['verdict'] );
+		$this->assertSame( 'fail', $data['fail_on'] );
+		$this->assertSame( 0, $data['fail_count'] );
+		$this->assertSame( 0, $data['warn_count'] );
+		$this->assertSame( array(), $data['failing'] );
+
+		$this->force_single_check( 'warn' );
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/health' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertTrue( $data['ok'] );
+		$this->assertSame( 'warn', $data['verdict'] );
+		$this->assertSame( 1, $data['warn_count'] );
+		$this->assertSame( array(), $data['failing'] );
+	}
+
+	public function test_health_returns_503_on_fail_verdict() {
+		$this->force_single_check( 'fail' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/health' ) );
+		$this->assertSame( 503, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertFalse( $data['ok'] );
+		$this->assertSame( 'fail', $data['verdict'] );
+		$this->assertSame( 1, $data['fail_count'] );
+		$this->assertCount( 1, $data['failing'] );
+		$this->assertSame( 'only', $data['failing'][0]['check'] );
+
+		$headers = $response->get_headers();
+		$this->assertSame( 'fail', $headers['X-PVSA-Verdict'] );
+		$this->assertSame( '1', $headers['X-PVSA-Fail-Count'] );
+		$this->assertSame( 'no-store', $headers['Cache-Control'] );
+		$this->assertArrayNotHasKey( 'X-PVSA-Deprecation', $headers );
+	}
+
+	public function test_health_returns_503_on_warn_when_fail_on_warn() {
+		$this->force_single_check( 'warn' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$request = new WP_REST_Request( 'GET', '/pressvitals/v1/health' );
+		$request->set_param( 'fail_on', 'warn' );
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 503, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertFalse( $data['ok'] );
+		$this->assertSame( 'warn', $data['fail_on'] );
+		$this->assertCount( 1, $data['failing'] );
+		$this->assertSame( 'warn', $data['failing'][0]['status'] );
+	}
+
+	public function test_report_http_status_filter_overrides_status() {
+		$this->force_single_check( 'fail' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$captured_endpoints = array();
+		add_filter(
+			'pvsa_report_http_status',
+			static function ( $status, $report, $request, $endpoint ) use ( &$captured_endpoints ) {
+				$captured_endpoints[] = $endpoint;
+				return 200;
+			},
+			10,
+			4
+		);
+
+		$report_response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/report' ) );
+		$health_response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/health' ) );
+
+		$this->assertSame( 200, $report_response->get_status() );
+		$this->assertSame( 200, $health_response->get_status() );
+		$this->assertSame( array( 'report', 'health' ), $captured_endpoints );
 	}
 }

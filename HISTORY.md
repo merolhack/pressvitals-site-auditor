@@ -1,5 +1,19 @@
 # History & Changelog
 
+## 2026-11-18 (v1.6.0 Release — Dedicated `/health` Uptime Endpoint, `pvsa_report_http_status` Filter & REST Deprecation Roadmap)
+- **REST API Separation of Concerns ([`includes/class-pvsa-rest.php`](file:///home/merolhack/fl/pressvitals-site-auditor/includes/class-pvsa-rest.php))**:
+  - **New `GET /wp-json/pressvitals/v1/health` Endpoint**: Token-gated, compact JSON payload (`ok`, `verdict`, `fail_on`, `fail_count`, `warn_count`, `failing`, `time`) purpose-built for uptime monitors (UptimeRobot, BetterStack, load balancers). Returns `HTTP 200` when healthy and `HTTP 503` when the verdict reaches `fail_on` (`fail` by default; `warn` via `?fail_on=warn`).
+  - **Extensibility Filter (`pvsa_report_http_status`)**: Allows custom HTTP status overrides for both `'report'` and `'health'` endpoints (`$status`, `$report`, `$request`, `$endpoint`).
+  - **Cache Prevention**: Added `Cache-Control: no-store` header to `/health` and `/report` responses.
+  - **Deprecation Signal**: `/report` keeps returning `503` on `fail` for backward compatibility, now emitting `X-PVSA-Deprecation` (`report-503-on-fail; use /health for uptime monitoring or add always_200=1`). Version `2.0.0` will default `/report` to `HTTP 200`.
+- **Modular LLM Wiki Ingestion**:
+  - Created [`wiki/rest-api-and-monitoring.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/rest-api-and-monitoring.md) documenting the REST contract, RFC 9110 rationale, headers, filter, integration examples, and 1.6.0 → 2.0.0 roadmap.
+  - Updated [`wiki/index.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/index.md), [`wiki/architecture.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/architecture.md), [`wiki/wordpress-org-and-releases.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/wordpress-org-and-releases.md), and [`wiki/log.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/log.md).
+- **Documentation & Tests**:
+  - Updated `README.md` and `readme.txt` (FAQ, Filters, Changelog, Upgrade Notice).
+  - Expanded [`tests/test-rest.php`](file:///home/merolhack/fl/pressvitals-site-auditor/tests/test-rest.php) with 5 new test cases covering `/health` auth, `pass`/`warn`/`fail` responses, `fail_on=warn`, `X-PVSA-Deprecation`, `Cache-Control: no-store`, and `pvsa_report_http_status`.
+- **Release**: Version bumped to `1.6.0` across `pressvitals-site-auditor.php` (`Version:` + `PVSA_VERSION`) and `readme.txt` (`Stable tag:`).
+
 ## 2026-11-18 (v1.5.5 Release — CI/CD-Friendly `/report`: Diagnostic Headers & `always_200`)
 - **REST `/report` improvements ([`includes/class-pvsa-rest.php`](file:///home/merolhack/fl/pressvitals-site-auditor/includes/class-pvsa-rest.php))**:
   - **Problem:** In production (`dqro.mx`) a single `fail` check (`core_update_available`) made `/report` return `HTTP 503`; CI clients (`urllib`, `curl -f`) treat 503 as outage and discard the JSON body.
