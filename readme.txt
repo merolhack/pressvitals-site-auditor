@@ -4,7 +4,7 @@ Tags: audit, performance, security, monitoring, site health
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -167,6 +167,30 @@ No. It runs on any standard WordPress install with no dependencies.
 with `hash_equals()`. Rotate the token any time from the settings page. `/ping`
 returns only a tiny liveness payload with no sensitive data.
 
+= How do I use /report from CI/CD (GitHub Actions)? =
+
+`GET /wp-json/pressvitals/v1/report?token=<TOKEN>` returns the full JSON report. When
+the verdict is `fail` it responds with `HTTP 503` **and the complete JSON body**, so
+uptime monitors (UptimeRobot, BetterStack) can alert. Many HTTP clients (`curl -f`,
+`urllib`) treat 503 as an outage and discard the body. For pipelines, either add
+`&always_200=1` (always HTTP 200; read `verdict` from the JSON) or read the body on
+errors. Every response carries `X-PVSA-Verdict` (pass|warn|fail), `X-PVSA-Fail-Count`
+and `X-PVSA-Warn-Count` headers.
+
+curl: `curl -s "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN&always_200=1"`
+
+Python (reads the body even on HTTP 503):
+
+    import json, urllib.request, urllib.error
+    url = "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN"
+    try:
+        resp = urllib.request.urlopen(url, timeout=30)
+    except urllib.error.HTTPError as e:
+        resp = e  # 503 still carries the JSON body
+    report = json.load(resp)
+    print(resp.headers.get("X-PVSA-Verdict"), report["verdict"])
+    failed = [c for c in report["checks"] if c["status"] == "fail"]
+
 = Does it write to my database or files? =
 
 The probes are read-only. The plugin stores only its own options (settings, last
@@ -208,6 +232,11 @@ mounted. See `docker-compose.yml` for details.
 2. The settings page (thresholds and alert email).
 
 == Changelog ==
+
+= 1.5.5 =
+* Enhancement: `/report` now always sends diagnostic headers `X-PVSA-Verdict`, `X-PVSA-Fail-Count` and `X-PVSA-Warn-Count`.
+* Enhancement: new optional `always_200=1` query parameter returns HTTP 200 even on a failing verdict, so CI/CD clients can read the JSON body. Default behaviour (HTTP 503 on `fail`) is unchanged for uptime monitors.
+* Docs: added CI/CD usage examples (curl / Python) for the `/report` endpoint.
 
 = 1.5.4 =
 * Fix: Differential runtime diagnosis for decoupled Web (Apache/FPM) vs CLI/WP-Cron environments. Distinguishes between web-facing PHP and system crontab/CLI binaries, preventing false positive EOL alerts when hosting defaults to legacy system CLI while running modern Web PHP.

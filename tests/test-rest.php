@@ -117,5 +117,41 @@ class Test_PVSA_REST extends WP_UnitTestCase {
 		$response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/report' ) );
 		$this->assertSame( 503, $response->get_status() );
 		$this->assertSame( 'fail', $response->get_data()['verdict'] );
+
+		$headers = $response->get_headers();
+		$this->assertSame( 'fail', $headers['X-PVSA-Verdict'] );
+		$this->assertSame( '1', $headers['X-PVSA-Fail-Count'] );
+		$this->assertSame( '0', $headers['X-PVSA-Warn-Count'] );
+	}
+
+	public function test_report_returns_200_with_always_200_on_fail_verdict() {
+		$this->force_single_check( 'fail' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$request = new WP_REST_Request( 'GET', '/pressvitals/v1/report' );
+		$request->set_param( 'always_200', '1' );
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'fail', $response->get_data()['verdict'] );
+		$headers = $response->get_headers();
+		$this->assertSame( 'fail', $headers['X-PVSA-Verdict'] );
+		$this->assertSame( '1', $headers['X-PVSA-Fail-Count'] );
+	}
+
+	public function test_report_headers_on_warn_verdict() {
+		$this->force_single_check( 'warn' );
+
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/pressvitals/v1/report' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$headers = $response->get_headers();
+		$this->assertSame( 'warn', $headers['X-PVSA-Verdict'] );
+		$this->assertSame( '0', $headers['X-PVSA-Fail-Count'] );
+		$this->assertSame( '1', $headers['X-PVSA-Warn-Count'] );
 	}
 }

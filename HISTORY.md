@@ -1,5 +1,15 @@
 # History & Changelog
 
+## 2026-11-18 (v1.5.5 Release — CI/CD-Friendly `/report`: Diagnostic Headers & `always_200`)
+- **REST `/report` improvements ([`includes/class-pvsa-rest.php`](file:///home/merolhack/fl/pressvitals-site-auditor/includes/class-pvsa-rest.php))**:
+  - **Problem:** In production (`dqro.mx`) a single `fail` check (`core_update_available`) made `/report` return `HTTP 503`; CI clients (`urllib`, `curl -f`) treat 503 as outage and discard the JSON body.
+  - `handle_report( WP_REST_Request $request )` keeps `503` on `fail` by default (uptime monitors unaffected).
+  - New optional boolean query param `always_200=1` forces `HTTP 200` so pipelines can evaluate `verdict` from the JSON.
+  - Every response now carries `X-PVSA-Verdict` (pass|warn|fail), `X-PVSA-Fail-Count`, `X-PVSA-Warn-Count`.
+- **Docs:** `README.md` and `readme.txt` (FAQ + changelog) document the 503 behaviour, `always_200=1`, and curl/Python snippets.
+- **Tests:** `tests/test-rest.php` covers default 503 + headers, `always_200=1` → 200, and warn-verdict headers (67 tests, 157 assertions, 100% passing; PHPCS 0 errors/0 warnings).
+- **Release:** version bumped to 1.5.5 (header, `PVSA_VERSION`, `Stable tag`).
+
 ## 2026-11-07 (Zero-Hang Protocol Integration — Unattended Automation & Timeout Hardening)
 - **Zero-Hang Protocol & Unattended Execution Standards**:
   - **Dossier & Knowledge Base Creation**: Documented [`wiki/operations/preventing-unattended-hangs-and-process-timeouts.md`](file:///home/merolhack/fl/pressvitals-site-auditor/wiki/operations/preventing-unattended-hangs-and-process-timeouts.md) establishing 5 immutable rules to eliminate unattended hangs, infinite loops, and `stdin` blocking.

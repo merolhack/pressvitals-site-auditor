@@ -9,7 +9,9 @@
  *     - Token-gated (constant-time hash_equals) OR a logged-in admin.
  *     - Token may instead be sent in the `X-OHSA-Token` header.
  *     - Runs the engine and returns the full report. HTTP 503 when the
- *       verdict is "fail" so external/CI monitors can alert on it.
+ *       verdict is "fail" so external monitors can alert on it (the JSON body
+ *       is always included). Add `always_200=1` to always get HTTP 200 (CI/CD).
+ *     - Always sends X-PVSA-Verdict, X-PVSA-Fail-Count, X-PVSA-Warn-Count headers.
  *
  * @package PressVitalsSiteAuditor
  */
@@ -63,10 +65,15 @@ class PVSA_REST {
 				'callback'            => array( $this, 'handle_report' ),
 				'permission_callback' => array( $this, 'authorize_report' ),
 				'args'                => array(
-					'token' => array(
+					'token'      => array(
 						'type'              => 'string',
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'always_200' => array(
+						'type'     => 'boolean',
+						'required' => false,
+						'default'  => false,
 					),
 				),
 			)
@@ -118,14 +125,42 @@ class PVSA_REST {
 	}
 
 	/**
-	 * Run the checks and return the report (503 on a failing verdict).
+	 * Run the checks and return the report.
 	 *
+	 * Returns HTTP 503 (with the full JSON body) on a failing verdict so uptime
+	 * monitors can alert. CI/CD clients may pass `always_200=1` to always receive
+	 * HTTP 200 and evaluate `verdict` from the JSON instead. Diagnostic headers
+	 * `X-PVSA-Verdict`, `X-PVSA-Fail-Count` and `X-PVSA-Warn-Count` are always sent.
+	 *
+	 * @param WP_REST_Request $request Request.
 	 * @return WP_REST_Response
 	 */
-	public function handle_report() {
-		$report = $this->engine->run();
-		$status = ( isset( $report['verdict'] ) && 'fail' === $report['verdict'] ) ? 503 : 200;
+	public function handle_report( WP_REST_Request $request ) {
+		$report  = $this->engine->run();
+		$verdict = isset( $report['verdict'] ) ? (string) $report['verdict'] : 'pass';
+		$is_fail = ( 'fail' === $verdict );
 
-		return new WP_REST_Response( $report, $status );
+		$always_200 = rest_sanitize_boolean( $request->get_param( 'always_200' ) );
+		$status     = ( $is_fail && ! $always_200 ) ? 503 : 200;
+
+		$fail_count = 0;
+		$warn_count = 0;
+		if ( isset( $report['checks'] ) && is_array( $report['checks'] ) ) {
+			foreach ( $report['checks'] as $check ) {
+				$check_status = isset( $check['status'] ) ? $check['status'] : '';
+				if ( 'fail' === $check_status ) {
+					++$fail_count;
+				} elseif ( 'warn' === $check_status ) {
+					++$warn_count;
+				}
+			}
+		}
+
+		$response = new WP_REST_Response( $report, $status );
+		$response->header( 'X-PVSA-Verdict', $verdict );
+		$response->header( 'X-PVSA-Fail-Count', (string) $fail_count );
+		$response->header( 'X-PVSA-Warn-Count', (string) $warn_count );
+
+		return $response;
 	}
 }

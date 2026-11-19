@@ -21,7 +21,25 @@ plus a static debug dump. PressVitals is built for **continuous, automated,
 machine-readable monitoring and auditing**:
 
 - **Headless / API-first** — a no-auth `/ping` liveness probe and a token-gated
-  `/report` JSON endpoint (HTTP `503` on a failing verdict) for uptime monitors / CI.
+  `/report` JSON endpoint (HTTP `503` with the full JSON body on a failing verdict) for
+  uptime monitors / CI. Responses include `X-PVSA-Verdict`, `X-PVSA-Fail-Count` and
+  `X-PVSA-Warn-Count` headers. CI/CD clients can add `?always_200=1` to always receive
+  HTTP `200` and evaluate `verdict` from the JSON:
+
+  ```bash
+  curl -s "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN&always_200=1"
+  ```
+
+  ```python
+  import json, urllib.request, urllib.error
+  url = "https://example.com/wp-json/pressvitals/v1/report?token=TOKEN"
+  try:
+      resp = urllib.request.urlopen(url, timeout=30)
+  except urllib.error.HTTPError as e:
+      resp = e  # 503 still carries the JSON body
+  report = json.load(resp)
+  failed = [c for c in report["checks"] if c["status"] == "fail"]
+  ```
 - **Scheduled + alerting** — daily WP-Cron run that emails the admin on a fail verdict.
 - **Severity tiers + worst-of verdict** — a single green/red signal.
 - **Probes core does not run** — TLS certificate-expiry countdown, PHP micro-patch
